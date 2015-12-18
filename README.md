@@ -11,6 +11,11 @@
 
 [2016 Course Plan](syllabus-1.Rmd)
 
+***
+
+[Readings](https://www.zotero.org/groups/epid_722_2016)
+
+
 
 
 
