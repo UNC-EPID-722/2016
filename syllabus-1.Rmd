@@ -42,5 +42,4 @@ EPID 722 Course plan:
 
 <sup>1</sup> Open sessions will be used to cover advanced topics<sup>2</sup>, and accommodate snow days if needed.
 
-<sup>2</sup> List of advanced topics include: Cox MSM by g-formula, Bayesian methods, competing risks, covariate/model choice, double-robust methods, generalizability, instrumental variables, measurement error, structural nested models, time-varying treatments.
-
+<sup>2</sup> List of advanced topics include: covariate/model choice, generalizability, instrumental variables, measurement error, structural nested models.
