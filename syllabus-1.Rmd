@@ -8,20 +8,20 @@ EPID 722 Course plan:
 
 | Date          | Topic (readings)                    |                   |
 |---------------|-------------------------------------|-------------------|
-| Tuesday 1/12  | Course preview                      | Brookhart/Cole    |
-| Thursday 1/14 | Simulation                          | Brookhart         |
-| Tuesday 1/19  | Counterfactuals and confounding     | Brookhart         |
-| Thursday 1/21 | IP-weighting and propensity scores  | Brookhart         |
-| Tuesday  1/26 | The g formula                       | Brookhart         |
+| Tuesday 1/12  | Course preview and Risk (1)         | Brookhart/Cole    |
+| Thursday 1/14 | Counterfactuals, design and confounding | Brookhart         |
+| Tuesday 1/19  | IP-weighting and propensity scores    | Brookhart         |
+| Thursday 1/21 | The g formula  | Brookhart         |
+| Tuesday  1/26 | Simulation                       | Brookhart         |
 | Thursday 1/28 | Bootstrap                           | Brookhart         |
-| Tuesday 2/2   | Risk functions with censoring       | Cole              |
-| Thursday 2/4  | Risk functions by IP-weighting      | Cole              |
-| Tuesday 2/9   | Risk functions by g-formula         | Cole              |
-| Thursday 2/11 | Smoothing and splines               | Brookhart         |
-| Tuesday 2/16  | The Cox model                       | Cole              |
-| Thursday 2/18 | Cox MSM by IP-weighting             | Cole              |
-| Tuesday 2/23  | Missing data by IP-weighting        | Cole              |
-| Thursday 2/25 | Missing data by multiple imputation | Cole              |
+| Tuesday 2/2   | Maximum likelihood (2)       | Cole              |
+| Thursday 2/4  | Bayesian inference (3)      | Cole              |
+| Tuesday 2/9   | Survival functions (4)         | Cole              |
+| Thursday 2/11 | IP-weighted survival functions (5)  | Cole         |
+| Tuesday 2/16  | IP-weighted Cox models (6)                       | Cole              |
+| Thursday 2/18 | Generalizability (7)             | Cole              |
+| Tuesday 2/23  | Missing data (8)        | Cole              |
+| Thursday 2/25 | Smoothing and splines | Brookhart              |
 | Tuesday 3/1   | Open session<sup>1</sup>                       | TBN               |
 | Thursday 3/3  | Exam preview                        | Brookhart/Cole    |
 | Tuesday 3/8   | Exam                                |                   |
@@ -29,13 +29,13 @@ EPID 722 Course plan:
 | SPRING        |                                     |                   |
 | BREAK         |                                     |                   |
 | Tuesday 3/22  | Project                             |                   |
-| Thursday 3/24 | Open session<sup>1</sup>                       | TBN               |
+| Thursday 3/24 | Double-robust                      | Jonsson-Funk               |
 | Tuesday 3/29  | Project                             |                   |
-| Thursday 3/31 | Open session<sup>1</sup>                       | TBN, Table 1 due  |
+| Thursday 3/31 | Competing risks                       | Edwards, Table 1 due  |
 | Tuesday 4/5   | Project                             |                   |
-| Thursday 4/7  | Open session<sup>1</sup>                       | TBN, Table 2 due  |
+| Thursday 4/7  | G formula with time-varying treatments                       | Keil, Table 2 due  |
 | Tuesday 4/12  | Project                             |                   |
-| Thursday 4/14 | Open session<sup>1</sup>                       | TBN, Figure 1 due |
+| Thursday 4/14 | Open session<sup>1</sup>                       | Westreich, Figure 1 due |
 | Tuesday 4/19  | Project                             |                   |
 | Thursday 4/21 | Open session<sup>1</sup>                       | TBN, Abstract due |
 | Tuesday 4/26  | Course review                       |                   |
