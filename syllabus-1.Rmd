@@ -48,41 +48,33 @@ EPID 722 Course plan:
 ***
 
 
-[1] S. R. Cole, M. G. Hudgens, M. A. Brookhart, and D. Westreich. \Risk".
+[1] S. R. Cole, M. G. Hudgens, M. A. Brookhart, and D. Westreich. Risk".
 In: American Journal of Epidemiology 181.4 (Feb. 15, 2015), pp. 246{250.
 doi: 10.1093/aje/kwv001.
 
-[2] S. R. Cole, H. Chu, and S. Greenland. \Maximum Likelihood, Prole Like-
-lihood, and Penalized Likelihood: A Primer". In: American Journal of Epi-
-demiology 179.2 (Jan. 15, 2014), pp. 252{260. doi: 10.1093/aje/kwt245.
+[2] S. R. Cole, H. Chu, and S. Greenland. \Maximum Likelihood, Profile Likelihood, and Penalized Likelihood: A Primer". In: American Journal of Epidemiology 179.2 (Jan. 15, 2014), pp. 252{260. doi: 10.1093/aje/kwt245.
 
 [3] S. R. Cole, H. Chu, S. Greenland, G. Hamra, and D. B. Richardson.
-\Bayesian Posterior Distributions Without Markov Chains". In: Ameri-
-can Journal of Epidemiology 175.5 (Mar. 1, 2012), pp. 368{375. doi: 10.
-1093/aje/kwr433.
+Bayesian Posterior Distributions Without Markov Chains". In: American Journal of Epidemiology 175.5 (Mar. 1, 2012), pp. 368-375. doi: 10.1093/aje/kwr433.
 
-[4] S. R. Cole and M. G. Hudgens. \Survival analysis in infectious disease
-research: describing events in time:" in: AIDS 24.16 (Oct. 2010), pp. 2423{
+[4] S. R. Cole and M. G. Hudgens. Survival analysis in infectious disease
+research: describing events in time:" in: AIDS 24.16 (Oct. 2010), pp. 2423
 2431. doi: 10.1097/QAD.0b013e32833dd0ec.
 
-[5] S. R. Cole and M. A. Hernan. \Adjusted survival curves with inverse prob-
-ability weights". In: Computer Methods and Programs in Biomedicine 75.1
+[5] S. R. Cole and M. A. Hernan. Adjusted survival curves with inverse probability weights". In: Computer Methods and Programs in Biomedicine 75.1
 (July 2004), pp. 45{49. doi: 10.1016/j.cmpb.2003.10.004.
 
 
 [6] A. L. Buchanan, M. G. Hudgens, S. R. Cole, B. Lau, A. A. Adimora,
-and for the Women's Interagency HIV Study. \Worth the Weight: Using
+and for the Women's Interagency HIV Study. Worth the Weight: Using
 Inverse Probability Weighted Cox Models in AIDS Research". In: AIDS
-Research and Human Retroviruses 30.12 (Dec. 2014), pp. 1170{1177. doi:
-10.1089/aid.2014.0037.
+Research and Human Retroviruses 30.12 (Dec. 2014), pp. 1170{1177. doi: 10.1089/aid.2014.0037.
 
 [7] S. R. Cole and E. A. Stuart. \Generalizing Evidence From Randomized
 Clinical Trials to Target Populations: The ACTG 320 Trial". In: American
-Journal of Epidemiology 172.1 (July 1, 2010), pp. 107{115. doi: 10.1093/
-aje/kwq084.
+Journal of Epidemiology 172.1 (July 1, 2010), pp. 107-115. doi: 10.1093/aje/kwq084.
 
 [8] S. Greenland and W. D. Finkle. \A critical look at methods for han-
 dling missing covariates in epidemiologic regression analyses". In: Amer-
-ican Journal of Epidemiology 142.12 (Dec. 15, 1995), pp. 1255{1264. pmid:
-7503045.
+ican Journal of Epidemiology 142.12 (Dec. 15, 1995), pp. 1255-1264. pmid: 7503045.
 
