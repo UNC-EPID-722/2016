@@ -45,6 +45,7 @@ EPID 722 Course plan:
 <sup>2</sup> List of advanced topics include: covariate/model choice, generalizability, instrumental variables, measurement error, structural nested models.
 
 Readings
+
 [1] S. R. Cole, M. G. Hudgens, M. A. Brookhart, and D. Westreich. \Risk".
 In: American Journal of Epidemiology 181.4 (Feb. 15, 2015), pp. 246{250.
 doi: 10.1093/aje/kwv001.
