@@ -44,34 +44,15 @@ EPID 722 Course plan:
 
 <sup>2</sup> List of advanced topics include: covariate/model choice, generalizability, instrumental variables, measurement error, structural nested models.
 
+---
+
 **Readings**
-***
 
-
-[1] S. R. Cole, M. G. Hudgens, M. A. Brookhart, and D. Westreich. Risk".
-In: American Journal of Epidemiology 181.4 (Feb. 15, 2015), pp. 246-250.
-doi: 10.1093/aje/kwv001.
-
-[2] S. R. Cole, H. Chu, and S. Greenland. \Maximum Likelihood, Profile Likelihood, and Penalized Likelihood: A Primer". In: American Journal of Epidemiology 179.2 (Jan. 15, 2014), pp. 252-260. doi: 10.1093/aje/kwt245.
-
-[3] S. R. Cole, H. Chu, S. Greenland, G. Hamra, and D. B. Richardson.
-Bayesian Posterior Distributions Without Markov Chains". In: American Journal of Epidemiology 175.5 (Mar. 1, 2012), pp. 368-375. doi: 10.1093/aje/kwr433.
-
-[4] S. R. Cole and M. G. Hudgens. Survival analysis in infectious disease
-research: describing events in time:" in: AIDS 24.16 (Oct. 2010), pp. 2423-2431. doi: 10.1097/QAD.0b013e32833dd0ec.
-
-[5] S. R. Cole and M. A. Hernan. Adjusted survival curves with inverse probability weights". In: Computer Methods and Programs in Biomedicine 75.1
-(July 2004), pp. 45-49. doi: 10.1016/j.cmpb.2003.10.004.
-
-[6] A. L. Buchanan, M. G. Hudgens, S. R. Cole, B. Lau, A. A. Adimora,
-and for the Women's Interagency HIV Study. Worth the Weight: Using
-Inverse Probability Weighted Cox Models in AIDS Research". In: AIDS
-Research and Human Retroviruses 30.12 (Dec. 2014), pp. 1170{1177. doi: 10.1089/aid.2014.0037.
-
-[7] S. R. Cole and E. A. Stuart. \Generalizing Evidence From Randomized
-Clinical Trials to Target Populations: The ACTG 320 Trial". In: American
-Journal of Epidemiology 172.1 (July 1, 2010), pp. 107-115. doi: 10.1093/aje/kwq084.
-
-[8] S. Greenland and W. D. Finkle. \A critical look at methods for han-
-dling missing covariates in epidemiologic regression analyses". In: American Journal of Epidemiology 142.12 (Dec. 15, 1995), pp. 1255-1264. pmid: 7503045.
-
+    Cole SR, Hudgens MG, Brookhart MA, et al. Risk. Am. J. Epidemiol. [electronic article]. 2015;181(4):246–250. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwv001).
+    Cole SR, Chu H, Greenland S. Maximum Likelihood, Profile Likelihood, and Penalized Likelihood: A Primer. Am. J. Epidemiol. [electronic article]. 2014;179(2):252–260. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwt245).
+    Cole SR, Chu H, Greenland S, et al. Bayesian Posterior Distributions Without Markov Chains. Am. J. Epidemiol. [electronic article]. 2012;175(5):368–375. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwr433).
+    Cole SR, Stuart EA. Generalizing Evidence From Randomized Clinical Trials to Target Populations: The ACTG 320 Trial. Am. J. Epidemiol. [electronic article]. 2010;172(1):107–115. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwq084).
+    Cole SR, Hernán MA. Adjusted survival curves with inverse probability weights. Comput. Methods Programs Biomed. [electronic article]. 2004;75(1):45–49. (http://linkinghub.elsevier.com/retrieve/pii/S0169260703001378).
+    Buchanan AL, Hudgens MG, Cole SR, et al. Worth the Weight: Using Inverse Probability Weighted Cox Models in AIDS Research. AIDS Res. Hum. Retroviruses [electronic article]. 2014;30(12):1170–1177. (http://online.liebertpub.com/doi/abs/10.1089/aid.2014.0037).
+    Cole SR, Hudgens MG. Survival analysis in infectious disease research: Describing events in time: AIDS [electronic article]. 2010;24(16):2423–2431. (http://content.wkhealth.com/linkback/openurl?sid=WKPTLP:landingpage&an=00002030-201010230-00001).
+    Greenland S, Finkle WD. A critical look at methods for handling missing covariates in epidemiologic regression analyses. Am. J. Epidemiol. 1995;142(12):1255–1264.
