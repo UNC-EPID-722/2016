@@ -48,18 +48,18 @@ EPID 722 Course plan:
 
 **Readings***
 
-Cole SR, Hudgens MG, Brookhart MA, et al. Risk. Am. J. Epidemiol. [electronic article]. 2015;181(4):246–250. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwv001).
+1. Cole SR, Hudgens MG, Brookhart MA, et al. Risk. Am. J. Epidemiol. [electronic article]. 2015;181(4):246–250. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwv001).
     
-    Cole SR, Chu H, Greenland S. Maximum Likelihood, Profile Likelihood, and Penalized Likelihood: A Primer. Am. J. Epidemiol. [electronic article]. 2014;179(2):252–260. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwt245).
+2. Cole SR, Chu H, Greenland S. Maximum Likelihood, Profile Likelihood, and Penalized Likelihood: A Primer. Am. J. Epidemiol. [electronic article]. 2014;179(2):252–260. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwt245).
     
-    Cole SR, Chu H, Greenland S, et al. Bayesian Posterior Distributions Without Markov Chains. Am. J. Epidemiol. [electronic article]. 2012;175(5):368–375. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwr433).
+3. Cole SR, Chu H, Greenland S, et al. Bayesian Posterior Distributions Without Markov Chains. Am. J. Epidemiol. [electronic article]. 2012;175(5):368–375. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwr433).
     
-    Cole SR, Stuart EA. Generalizing Evidence From Randomized Clinical Trials to Target Populations: The ACTG 320 Trial. Am. J. Epidemiol. [electronic article]. 2010;172(1):107–115. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwq084).
+4. Cole SR, Stuart EA. Generalizing Evidence From Randomized Clinical Trials to Target Populations: The ACTG 320 Trial. Am. J. Epidemiol. [electronic article]. 2010;172(1):107–115. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwq084).
     
-    Cole SR, Hernán MA. Adjusted survival curves with inverse probability weights. Comput. Methods Programs Biomed. [electronic article]. 2004;75(1):45–49. (http://linkinghub.elsevier.com/retrieve/pii/S0169260703001378).
+5. Cole SR, Hernán MA. Adjusted survival curves with inverse probability weights. Comput. Methods Programs Biomed. [electronic article]. 2004;75(1):45–49. (http://linkinghub.elsevier.com/retrieve/pii/S0169260703001378).
     
-    Buchanan AL, Hudgens MG, Cole SR, et al. Worth the Weight: Using Inverse Probability Weighted Cox Models in AIDS Research. AIDS Res. Hum. Retroviruses [electronic article]. 2014;30(12):1170–1177. (http://online.liebertpub.com/doi/abs/10.1089/aid.2014.0037).
+6. Buchanan AL, Hudgens MG, Cole SR, et al. Worth the Weight: Using Inverse Probability Weighted Cox Models in AIDS Research. AIDS Res. Hum. Retroviruses [electronic article]. 2014;30(12):1170–1177. (http://online.liebertpub.com/doi/abs/10.1089/aid.2014.0037).
     
-    Cole SR, Hudgens MG. Survival analysis in infectious disease research: Describing events in time: AIDS [electronic article]. 2010;24(16):2423–2431. (http://content.wkhealth.com/linkback/openurl?sid=WKPTLP:landingpage&an=00002030-201010230-00001).
+7. Cole SR, Hudgens MG. Survival analysis in infectious disease research: Describing events in time: AIDS [electronic article]. 2010;24(16):2423–2431. (http://content.wkhealth.com/linkback/openurl?sid=WKPTLP:landingpage&an=00002030-201010230-00001).
     
-    Greenland S, Finkle WD. A critical look at methods for handling missing covariates in epidemiologic regression analyses. Am. J. Epidemiol. 1995;142(12):1255–1264.
+8. Greenland S, Finkle WD. A critical look at methods for handling missing covariates in epidemiologic regression analyses. Am. J. Epidemiol. 1995;142(12):1255–1264.
