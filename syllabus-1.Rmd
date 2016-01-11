@@ -46,7 +46,7 @@ EPID 722 Course plan:
 
 ---
 
-**Readings***
+***Readings***
 
 1. Cole SR, Hudgens MG, Brookhart MA, et al. Risk. Am. J. Epidemiol. [electronic article]. 2015;181(4):246–250. (http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwv001).
     
