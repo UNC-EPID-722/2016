@@ -13,7 +13,7 @@
 
 ***
 
-[Readings](https://www.zotero.org/groups/epid_722_2016)
+[Readings](https://www.zotero.org/groups/epid_722_2016/items/)
 
 
 
