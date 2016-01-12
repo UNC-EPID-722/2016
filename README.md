@@ -9,7 +9,7 @@
 
 [2016 Syllabus](syllabus-2.Rmd)
 
-[2016 Course Plan](syllabus-1.Rmd)
+[2016 Course Plan](http://htmlpreview.github.com/?https://github.com/UNC-EPID-722/2016/blob/master/syllabus-1.html)
 
 ***
 
