@@ -9,11 +9,9 @@
 
 [2016 Syllabus](syllabus-2.Rmd)
 
-[2016 Course Plan](http://htmlpreview.github.com/?https://github.com/UNC-EPID-722/2016/blob/master/syllabus-1.html)
+[2016 Course Plan](http://unc-epid-722.github.io/2016/syllabus-1.html)
 
-***
-
-[Readings](https://www.zotero.org/groups/epid_722_2016/items/)
+---
 
 
 
