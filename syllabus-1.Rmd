@@ -6,7 +6,6 @@ bibliography: bib1.bib
 ---
 
 
-
 | Date          | Topic (readings --refer to list at bottom of page)                    | Professor                  | 
 |---------------|-------------------------------------|-------------------|
 | Tuesday 1/12  | Course preview and Risk [@cole_risk_2015]         | Brookhart/Cole    |
