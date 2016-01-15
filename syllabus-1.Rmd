@@ -1,11 +1,10 @@
 ---
-title: "EPID 722 Course plan"
+title: "2016 EPID 722 Course plan"
 output: html_document
 csl: american-journal-of-epidemiology.csl
 bibliography: bib1.bib
 ---
 
-EPID 722 Course plan:
 
 
 | Date          | Topic (readings --refer to list at bottom of page)                    | Professor                  | 
