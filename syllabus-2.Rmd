@@ -23,4 +23,4 @@ Ann Von Holle (vonholle@email.unc.edu)
 
 **Prerequisites**:	Prior knowledge of epidemiologic and statistical methods (e.g., successful completion of EPID 718), as well as a working knowledge of SAS or R.
 
-**Grading**:	The course grade is based 40% on a midterm examination and 60% on a project, split equally across 4 deliverables (see course plan). The scale is H > 90, P = 70 - 90, L = 60 - 69, and F < 60. Your full participation and observance of the UNC-Chapel Hill honor code is expected (see www.honor.unc.edu).
+**Grading**:	The course grade is based 40% on a midterm examination and 60% on a project, split equally across 4 deliverables (see course plan). The scale is H > 90, P = 70 - 90, L = 60 - 69, and F < 60. Your full participation and observance of the UNC-Chapel Hill honor code is expected [Honor system](https://studentconduct.unc.edu/honor-system).
