@@ -9,18 +9,18 @@ bibliography: bib1.bib
 | Date          | Topic (readings -- refer to list at bottom of page)                    | Professor                  | 
 |---------------|-------------------------------------|-------------------|
 | Tuesday 1/12  | Course preview and Risk [@cole_risk_2015]         | Brookhart/Cole    |
-| Thursday 1/14 | Counterfactuals, design and confounding [@brookhart_confounding_2010;@brookhart_counterpoint:_2015;@ray_evaluating_2003] | Brookhart         |
-| Tuesday 1/19  | IP-weighting and propensity scores [@westreich_invited_2010;@lunceford_stratification_2004;@kurth_results_2005;@funk_doubly_2011]     | Brookhart         |
-| Thursday 1/21 | The g formula [@snowden_implementation_2011] | Brookhart         |
+| Thursday 1/14 | Counterfactuals, design and confounding [@brookhart_confounding_2010;@brookhart_counterpoint_2015;@ray_evaluating_2003] | Brookhart         |
+| Tuesday 1/19  | The g formula [@snowden_implementation_2011; @petersen_assessing_2006; @rose_rose_2011; @vansteelandt_invited_2011]    | Brookhart         |
+| Thursday 1/21 | IP-weighting and propensity scores [@westreich_invited_2010;@lunceford_stratification_2004;@kurth_results_2005;@funk_doubly_2011]  | Brookhart         |
 | Tuesday  1/26 | Simulation                       | Brookhart         |
 | Thursday 1/28 | Bootstrap                           | Brookhart         |
 | Tuesday 2/2   | Maximum likelihood [@cole_maximum_2014]       | Cole              |
 | Thursday 2/4  | Bayesian inference [@cole_bayesian_2012]      | Cole              |
 | Tuesday 2/9   | Survival functions [@cole_survival_2010]         | Cole              |
-| Thursday 2/11 | IP-weighted survival functions [@cole_adjusted_2004-1]  | Cole         |
+| Thursday 2/11 | IP-weighted survival functions [@cole_adjusted_2004]  | Cole         |
 | Tuesday 2/16  | IP-weighted Cox models [@buchanan_worth_2014]                       | Cole              |
 | Thursday 2/18 | Generalizability [@cole_generalizing_2010]             | Cole              |
-| Tuesday 2/23  | Missing data [@greenland_critical_1995-1]        | Cole              |
+| Tuesday 2/23  | Missing data [@greenland_critical_1995]        | Cole              |
 | Thursday 2/25 | Smoothing and splines | Brookhart              |
 | Tuesday 3/1   | Open session<sup>1</sup>                       | TBN               |
 | Thursday 3/3  | Exam preview                        | Brookhart/Cole    |
