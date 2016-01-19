@@ -13,7 +13,7 @@
 
 ---
 
-**Lecture code**
+**Lecture code (in html)**
 
 [Lecture 3: G-computation with NAMCS data](http://unc-epid-722.github.io/2016/L03-gcomp.html)
 
