@@ -97,8 +97,16 @@ mean(pbleed.1)-mean(pbleed.0)
 
 ### Estimate E[Y(1)]-E[Y(0)] with MLE?
 
+Estimate coefficients
+
 ```{r}
 glm.out=glm(bleed~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth+newcox2,family=binomial,data=ns)
+
+coef(glm.out)
+```
+
+
+```{r}
 ns.temp=ns
 ns.temp$newcox2=0
 pbleed.0=predict(glm.out,newdata=ns.temp,type="response")
