@@ -72,10 +72,8 @@ img {
 <h3>Specify packages</h3>
 <pre class="r"><code>#install.packages(c(&quot;foreign&quot;, &quot;foreach&quot;))
 library(knitr)
-library(foreign)</code></pre>
-<pre><code>## Warning: package 'foreign' was built under R version 3.2.3</code></pre>
-<pre class="r"><code>library(foreach)</code></pre>
-<pre><code>## Warning: package 'foreach' was built under R version 3.2.3</code></pre>
+library(foreign)
+library(foreach)</code></pre>
 </div>
 <div id="read-in-namcs-data-will-need-to-correct-the-path" class="section level3">
 <h3>Read in NAMCS data – will need to correct the path</h3>
@@ -155,15 +153,22 @@ mean(pbleed.1)-mean(pbleed.0)</code></pre>
 </div>
 <div id="estimate-ey1-ey0-with-mle" class="section level3">
 <h3>Estimate E[Y(1)]-E[Y(0)] with MLE?</h3>
+<p>Estimate coefficients</p>
 <pre class="r"><code>glm.out=glm(bleed~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth+newcox2,family=binomial,data=ns)
-ns.temp=ns
+
+coef(glm.out)</code></pre>
+<pre><code>##  (Intercept) contanticoag  tobacco_imp contsteroids  contaspirin 
+## -7.458072855 -0.950216537  1.256570242 -0.721120835  0.480315236 
+##     arthrtis          age         male   raceblkoth      newcox2 
+##  0.596236750  0.080666046  0.325886494  0.148162234  0.007863507</code></pre>
+<pre class="r"><code>ns.temp=ns
 ns.temp$newcox2=0
 pbleed.0=predict(glm.out,newdata=ns.temp,type=&quot;response&quot;)
 ns.temp$newcox2=1
 pbleed.1=predict(glm.out,newdata=ns.temp,type=&quot;response&quot;)
 
 mean(pbleed.1)-mean(pbleed.0)</code></pre>
-<pre><code>## [1] -0.002356622</code></pre>
+<pre><code>## [1] 0.0005534956</code></pre>
 </div>
 
 
