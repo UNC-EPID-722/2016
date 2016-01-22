@@ -249,8 +249,8 @@ RUN; quit;</code></pre>
 ##             Data Set Name        EXAMPLE.EXDAT                 Observations          50
 ##             Member Type          DATA                          Variables             6 
 ##             Engine               V9                            Indexes               0 
-##             Created              01/22/2016 15:42:56           Observation Length    48
-##             Last Modified        01/22/2016 15:42:56           Deleted Observations  0 
+##             Created              01/22/2016 16:38:00           Observation Length    48
+##             Last Modified        01/22/2016 16:38:00           Deleted Observations  0 
 ##             Protection                                         Compressed            NO
 ##             Data Set Type                                      Sorted                NO
 ##             Label                                                                      
@@ -473,20 +473,20 @@ mytable1 &lt;- table(exdat$var1, exdat$var2); mytable1 # 2-way frequency table</
 ##   0        17   14    1
 ##   1         9    9    0
 ##   &lt;NA&gt;      0    0    0</code></pre>
-<pre class="r"><code>(mytable2 &lt;- table(exdat$var1, exdat$var2, exdat$var3)) # 3-way frequency table</code></pre>
+<pre class="r"><code>(mytable2 &lt;- table(exdat$var2,exdat$var3, exdat$var1)) # 3-way frequency table</code></pre>
 <pre><code>## , ,  = 0
 ## 
-##    
-##     female male
-##   0      0   14
-##   1      0    9
+##         
+##           0  1
+##   female  0 17
+##   male   14  0
 ## 
 ## , ,  = 1
 ## 
-##    
-##     female male
-##   0     17    0
-##   1      9    0</code></pre>
+##         
+##           0  1
+##   female  0  9
+##   male    9  0</code></pre>
 </div>
 </div>
 <div id="example-recoding-a-categorical-variable-to-another-categorical-variable" class="section level2">
