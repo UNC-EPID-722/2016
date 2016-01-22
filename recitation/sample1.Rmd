@@ -12,7 +12,7 @@ output:
 
 **NOTE: ALL SAS and R code below copied from EPID 700 Fall 2015 class by Xiaojuan Li (L25_R Data management.pdf)**
 
-```{r, echo=F, message=FALSE}
+```{r, echo=T, message=FALSE, warning=FALSE}
 require(knitr)
 require(foreign)
 #install.packages("sandwich")
@@ -23,7 +23,8 @@ set.seed(123) # set seed so you get same results each time you run.
 <!-- # Read in SAS code to insert later in this document. Note: this won't work if there are any errors in the SAS code.-->
 
 ```{r, echo=F, cache=FALSE}
-read_chunk('C:\\Users\\chelo\\Dropbox\\unc.grad.school.2016.spring\\epid.722\\2016\\recitation\\sample-intro.sas')
+#read_chunk('C:\\Users\\chelo\\Dropbox\\unc.grad.school.2016.spring\\epid.722\\2016\\recitation\\sample-intro.sas')
+read_chunk('C:\\Users\\vonholle\\Dropbox\\unc.grad.school.2016.spring\\epid.722\\2016\\recitation\\sample-intro.sas')
 ```
 
 ## Simulate data object in R, exdat, and export to .csv file
@@ -49,9 +50,21 @@ write.dbf(exdat, "c:/temp/exdat.dbf") # note: skipped .csv export because of mis
 
 ## Reading and printing
 
-### SAS code
+### original SAS code
 
-```{r sasread1, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=T, warning=FALSE, eval=T}
+```{r, echo=FALSE}
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp' -print 'c:\\temp' -ls 75"
+```
+
+```{r read1, engine='sas', engine.path=saspath, results='markup', echo=TRUE, cache=T, message=F, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+filename dat1  "c:\temp\exdat.dbf";
+
+proc import datafile=dat1 out=example.exdat dbms=dbf replace; run;
+
+PROC PRINT DATA = example.exdat (OBS=10);
+RUN; quit;
 ```
 
 ### R code
@@ -66,19 +79,25 @@ exdat # print all
 ## Understanding a data structure
 
 ### SAS code
-```{r section1, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=T, message=F, warning=FALSE, eval=T}
+<!-- # Note that libname statement has to be here or this section won't recognize the SAS data set.-->
+```{r ex1, engine='sas', engine.path=saspath,results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+PROC CONTENTS DATA = example.exdat;
+RUN; quit;
 ```
-
 
 ### R code
 ```{r}
-str(exdat) # find out information about an object or data structure
+str(exdat) # Find out information about an object or data structure
 ```
 
 ## Example: adding or deleting a column
 
 ### SAS code
-```{r section2, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=F}
+```{r ex2, engine='sas', engine.path=saspath,results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+data exdata1; set example.exdat(drop=var1);*Could also use KEEP;
+RUN;
 ```
 
 ### R code
@@ -97,7 +116,12 @@ exdat <-subset(exdat, select= c(-newcol, -newcol1))
 ## Example: subsetting data
 
 ### SAS code
-```{r section3, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=FALSE}
+```{r ex3, engine='sas', engine.path=saspath,results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+DATA exdata1;
+SET example.exdat;
+WHERE var1 >=10; *IF var1 >=10;
+RUN;
 ```
 
 ### R code
@@ -113,7 +137,12 @@ exdat2 <- subset(exdat, var1 >=10 & var2 == "female", select=c(var1, var2, var3)
 ## Example: reordering columns
 
 ### SAS code
-```{r section4, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=FALSE}
+```{r ex4, engine='sas', engine.path=saspath, results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+DATA exdata1;
+SET example.exdat;
+FORMAT var4 var1 var2 var3;
+RUN;
 ```
 
 ### R code
@@ -122,11 +151,16 @@ exdat <- exdat[c("var4", "var1", "var2", "var3")] # reorder by column name
 exdat <- exdat[c(4, 1, 2, 3)] # reorder by numeric position
 ```
 
-
 ## Example: creating a frequency table
 
 ### SAS code
-```{r section5, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=FALSE}
+```{r ex5, engine='sas', engine.path=saspath, results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+PROC FREQ DATA = example.exdat;
+TABLES var1;
+TABLES var1*var2;
+TABLES var1*var2*var3;
+RUN;
 ```
 
 ### R code
@@ -142,7 +176,13 @@ margin.table(mytable1, 2) # col freq
 ## Example: recoding a categorical variable to another categorical variable
 
 ### SAS code
-```{r section6, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=FALSE}
+```{r ex6, engine='sas', engine.path=saspath, results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+DATA exdat2;
+SET example.exdat;
+IF var2 = "female" THEN var2n= "yes";
+ELSE IF var2 = "male" THEN var2n= "no";
+RUN;
 ```
 
 ### R code
@@ -158,7 +198,15 @@ exdat1$female[exdat$var2 =='male'] <- 'no'
 ## Example: recoding a continuous variable to a categorical variable
 
 ### SAS code
-```{r section7, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=FALSE}
+```{r ex7, engine='sas', engine.path=saspath, results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+DATA exdat2;
+SET example.exdat;
+IF 0<var3 <=5 THEN var3class=1;
+ELSE IF 5<var3 <=6 THEN var3class=2;
+ELSE IF 6<var3 THEN var3class=3;
+RUN;
+
 ```
 
 ### R code
@@ -172,7 +220,13 @@ exdat2$var3cat <- cut(exdat$var3, breaks = c(0, 0.5, 0.6,Inf),
 ## Example: logistic regression
 
 ### SAS code
-```{r section8, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=FALSE}
+```{r ex8, engine='sas', engine.path=saspath, results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+PROC GENMOD DATA=example.exdat DESCENDING;
+class var2;
+MODEL var1=var2 var3/DIST=bin LINK=logit;
+*ESTIMATE 'var2 label' var2 1/EXP;
+RUN;
 ```
 
 ### R code
@@ -184,7 +238,15 @@ glm(var1 ~ var2 + var3, data=exdat, family=binomial(link="logit"))
 ## Example: Poisson regression with robust standard errors
 
 ### SAS code
-```{r section9, engine='sas', engine.path='C:\\Program Files\\SASHome\\SASFoundation\\9.4\\sas.exe', results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=F}
+```{r ex9, engine='sas', engine.path=saspath, results='markup', echo=TRUE, cache=FALSE, warning=FALSE, eval=T}
+LIBNAME example "C:/temp";
+data example.exdat; set example.exdat; id=_n_; run;
+PROC GENMOD DATA=example.exdat;
+CLASS id var2;
+MODEL var1=var2 var3/DIST=poisson LINK=log;
+REPEATED SUBJECT=id/TYPE=ind;
+*ESTIMATE 'var2 label' var2 1 /EXP;
+RUN; quit;
 ```
 
 ### R code

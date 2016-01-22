@@ -9,8 +9,9 @@
 ******************************************************************************************; 
 
 *
-##@knitr sasread1
+## @knitr sasread1
 ;
+
 LIBNAME example "C:/temp";
 filename dat1  "c:\temp\exdat.dbf";
 
@@ -21,7 +22,7 @@ RUN; quit;
 
 
 *
-##@knitr section1
+## @knitr section1
 ;
 PROC CONTENTS DATA = example.exdat;
 RUN; quit;
