@@ -170,7 +170,7 @@ mytable1 <- table(exdat$var1, exdat$var2); mytable1 # 2-way frequency table
 margin.table(mytable1, 1) # row freq
 margin.table(mytable1, 2) # col freq
 (mytable1 <- table(exdat$var1, exdat$var2, exclude=NULL)) # include NA as a category
-(mytable2 <- table(exdat$var1, exdat$var2, exdat$var3)) # 3-way frequency table
+(mytable2 <- table(exdat$var2,exdat$var3, exdat$var1)) # 3-way frequency table
 ```
 
 ## Example: recoding a categorical variable to another categorical variable
