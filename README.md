@@ -17,6 +17,13 @@
 
 [Lecture 3: G-computation with NAMCS data](http://unc-epid-722.github.io/2016/L03-gcomp.html) -- [.Rmd file](lectures/L03-gcomp/L03-gcomp.Rmd)
 
+---
+
+**Recitation**
+
+[Day 1 (2016-01-24): R intro sample code](http://unc-epid-722.github.io/2016/sample1.html) -- [.Rmd file producing code](recitation/sample1.Rmd) -- [.sas file with SAS code](recitation/sample-intro.sas)
+
+
 
 
 
