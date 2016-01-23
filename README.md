@@ -21,7 +21,7 @@
 
 **Recitation**
 
-[Day 1 (2016-01-24): R intro sample code](http://unc-epid-722.github.io/2016/sample1.html) -- [.Rmd file producing code](recitation/sample1.Rmd) -- [.sas file with SAS code](recitation/sample-intro.sas)
+[Day 1 (2016-01-25): R intro sample code](http://unc-epid-722.github.io/2016/sample1.html) -- [.Rmd file producing code](recitation/sample1.Rmd) -- [.sas file with SAS code](recitation/sample-intro.sas)
 
 
 
