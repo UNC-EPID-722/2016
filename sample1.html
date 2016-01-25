@@ -69,17 +69,19 @@ img {
 
 <div id="TOC">
 <ul>
-<li><a href="#simulate-data-object-in-r-exdat-and-export-to-.csv-file"><span class="toc-section-number">0.1</span> Simulate data object in R, exdat, and export to .csv file</a></li>
-<li><a href="#reading-and-printing"><span class="toc-section-number">0.2</span> Reading and printing</a></li>
-<li><a href="#understanding-a-data-structure"><span class="toc-section-number">0.3</span> Understanding a data structure</a></li>
-<li><a href="#example-adding-or-deleting-a-column"><span class="toc-section-number">0.4</span> Example: adding or deleting a column</a></li>
-<li><a href="#example-subsetting-data"><span class="toc-section-number">0.5</span> Example: subsetting data</a></li>
-<li><a href="#example-reordering-columns"><span class="toc-section-number">0.6</span> Example: reordering columns</a></li>
-<li><a href="#example-creating-a-frequency-table"><span class="toc-section-number">0.7</span> Example: creating a frequency table</a></li>
-<li><a href="#example-recoding-a-categorical-variable-to-another-categorical-variable"><span class="toc-section-number">0.8</span> Example: recoding a categorical variable to another categorical variable</a></li>
-<li><a href="#example-recoding-a-continuous-variable-to-a-categorical-variable"><span class="toc-section-number">0.9</span> Example: recoding a continuous variable to a categorical variable</a></li>
-<li><a href="#example-logistic-regression"><span class="toc-section-number">0.10</span> Example: logistic regression</a></li>
-<li><a href="#example-poisson-regression-with-robust-standard-errors"><span class="toc-section-number">0.11</span> Example: Poisson regression with robust standard errors</a></li>
+<li><a href="#part-1"><span class="toc-section-number">1</span> Part 1</a><ul>
+<li><a href="#simulate-data-object-in-r-exdat-and-export-to-.csv-file"><span class="toc-section-number">1.1</span> Simulate data object in R, exdat, and export to .csv file</a></li>
+<li><a href="#reading-and-printing"><span class="toc-section-number">1.2</span> Reading and printing</a></li>
+<li><a href="#understanding-a-data-structure"><span class="toc-section-number">1.3</span> Understanding a data structure</a></li>
+<li><a href="#example-adding-or-deleting-a-column"><span class="toc-section-number">1.4</span> Example: adding or deleting a column</a></li>
+<li><a href="#example-subsetting-data"><span class="toc-section-number">1.5</span> Example: subsetting data</a></li>
+<li><a href="#example-reordering-columns"><span class="toc-section-number">1.6</span> Example: reordering columns</a></li>
+<li><a href="#example-creating-a-frequency-table"><span class="toc-section-number">1.7</span> Example: creating a frequency table</a></li>
+<li><a href="#example-recoding-a-categorical-variable-to-another-categorical-variable"><span class="toc-section-number">1.8</span> Example: recoding a categorical variable to another categorical variable</a></li>
+<li><a href="#example-recoding-a-continuous-variable-to-a-categorical-variable"><span class="toc-section-number">1.9</span> Example: recoding a continuous variable to a categorical variable</a></li>
+<li><a href="#example-logistic-regression"><span class="toc-section-number">1.10</span> Example: logistic regression</a></li>
+<li><a href="#example-poisson-regression-with-robust-standard-errors"><span class="toc-section-number">1.11</span> Example: Poisson regression with robust standard errors</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -90,8 +92,11 @@ require(foreign)
 require(sandwich)
 set.seed(123) # set seed so you get same results each time you run.</code></pre>
 <!-- # Read in SAS code to insert later in this document. Note: this won't work if there are any errors in the SAS code.-->
+<div id="part-1" class="section level1">
+<h1><span class="header-section-number">1</span> Part 1</h1>
+<hr />
 <div id="simulate-data-object-in-r-exdat-and-export-to-.csv-file" class="section level2">
-<h2><span class="header-section-number">0.1</span> Simulate data object in R, exdat, and export to .csv file</h2>
+<h2><span class="header-section-number">1.1</span> Simulate data object in R, exdat, and export to .csv file</h2>
 <pre class="r"><code>N &lt;-50 
 var4 &lt;-rnorm(n=N, mean=0, sd=1)
 var5 &lt;-rnorm(N, 1.2*var4+1, 2)
@@ -126,9 +131,9 @@ summary(exdat)</code></pre>
 write.dbf(exdat, &quot;c:/temp/exdat.dbf&quot;) # note: skipped .csv export because of missing values</code></pre>
 </div>
 <div id="reading-and-printing" class="section level2">
-<h2><span class="header-section-number">0.2</span> Reading and printing</h2>
+<h2><span class="header-section-number">1.2</span> Reading and printing</h2>
 <div id="original-sas-code" class="section level3">
-<h3><span class="header-section-number">0.2.1</span> original SAS code</h3>
+<h3><span class="header-section-number">1.2.1</span> original SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 filename dat1  &quot;c:\temp\exdat.dbf&quot;;
 
@@ -150,7 +155,7 @@ RUN; quit;</code></pre>
 ##              10       0    male         0     -0.445661970099950      0.897088773367990</code></pre>
 </div>
 <div id="r-code" class="section level3">
-<h3><span class="header-section-number">0.2.2</span> R code</h3>
+<h3><span class="header-section-number">1.2.2</span> R code</h3>
 <pre class="r"><code>exdat[1:10,] # R is object based, uses matrix notation</code></pre>
 <pre><code>##    var1   var2 var3        var4       var5
 ## 1     0   male    0 -0.56047565  0.8340663
@@ -237,54 +242,54 @@ RUN; quit;</code></pre>
 </div>
 </div>
 <div id="understanding-a-data-structure" class="section level2">
-<h2><span class="header-section-number">0.3</span> Understanding a data structure</h2>
+<h2><span class="header-section-number">1.3</span> Understanding a data structure</h2>
 <div id="sas-code" class="section level3">
-<h3><span class="header-section-number">0.3.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.3.1</span> SAS code</h3>
 <!-- # Note that libname statement has to be here or this section won't recognize the SAS data set.-->
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 PROC CONTENTS DATA = example.exdat;
 RUN; quit;</code></pre>
-<pre><code>##                                        The CONTENTS Procedure
+<pre><code>##                                       The CONTENTS Procedure
 ## 
-##             Data Set Name        EXAMPLE.EXDAT                 Observations          50
-##             Member Type          DATA                          Variables             6 
-##             Engine               V9                            Indexes               0 
-##             Created              01/22/2016 16:38:00           Observation Length    48
-##             Last Modified        01/22/2016 16:38:00           Deleted Observations  0 
-##             Protection                                         Compressed            NO
-##             Data Set Type                                      Sorted                NO
-##             Label                                                                      
-##             Data Representation  WINDOWS_64                                            
-##             Encoding             wlatin1  Western (Windows)                            
-## 
-## 
-##                                  Engine/Host Dependent Information
-## 
-##                          Data Set Page Size          65536                 
-##                          Number of Data Set Pages    1                     
-##                          First Data Page             1                     
-##                          Max Obs per Page            1361                  
-##                          Obs in First Data Page      50                    
-##                          Number of Data Set Repairs  0                     
-##                          ExtendObsCounter            YES                   
-##                          Filename                    C:\temp\exdat.sas7bdat
-##                          Release Created             9.0401M1              
-##                          Host Created                X64_8PRO              
+##            Data Set Name        EXAMPLE.EXDAT                 Observations          50
+##            Member Type          DATA                          Variables             6 
+##            Engine               V9                            Indexes               0 
+##            Created              01/25/2016 16:31:06           Observation Length    48
+##            Last Modified        01/25/2016 16:31:06           Deleted Observations  0 
+##            Protection                                         Compressed            NO
+##            Data Set Type                                      Sorted                NO
+##            Label                                                                      
+##            Data Representation  WINDOWS_64                                            
+##            Encoding             wlatin1  Western (Windows)                            
 ## 
 ## 
-##                             Alphabetic List of Variables and Attributes
+##                                 Engine/Host Dependent Information
+## 
+##                         Data Set Page Size          65536                 
+##                         Number of Data Set Pages    1                     
+##                         First Data Page             1                     
+##                         Max Obs per Page            1361                  
+##                         Obs in First Data Page      50                    
+##                         Number of Data Set Repairs  0                     
+##                         ExtendObsCounter            YES                   
+##                         Filename                    C:\temp\exdat.sas7bdat
+##                         Release Created             9.0401M1              
+##                         Host Created                X64_8PRO              
+## 
+## 
+##                            Alphabetic List of Variables and Attributes
 ##  
-##                     #    Variable    Type    Len    Format    Informat    Label
+##                    #    Variable    Type    Len    Format    Informat    Label
 ## 
-##                     6    id          Num       8                               
-##                     1    var1        Num       8    4.        4.          var1 
-##                     2    var2        Char      6    $6.       $6.         var2 
-##                     3    var3        Num       8    4.        4.          var3 
-##                     4    var4        Num       8    19.15     19.15       var4 
-##                     5    var5        Num       8    19.15     19.15       var5</code></pre>
+##                    6    id          Num       8                               
+##                    1    var1        Num       8    4.        4.          var1 
+##                    2    var2        Char      6    $6.       $6.         var2 
+##                    3    var3        Num       8    4.        4.          var3 
+##                    4    var4        Num       8    19.15     19.15       var4 
+##                    5    var5        Num       8    19.15     19.15       var5</code></pre>
 </div>
 <div id="r-code-1" class="section level3">
-<h3><span class="header-section-number">0.3.2</span> R code</h3>
+<h3><span class="header-section-number">1.3.2</span> R code</h3>
 <pre class="r"><code>str(exdat) # Find out information about an object or data structure</code></pre>
 <pre><code>## 'data.frame':    50 obs. of  5 variables:
 ##  $ var1: int  0 1 0 0 0 0 0 0 0 0 ...
@@ -295,29 +300,49 @@ RUN; quit;</code></pre>
 </div>
 </div>
 <div id="example-adding-or-deleting-a-column" class="section level2">
-<h2><span class="header-section-number">0.4</span> Example: adding or deleting a column</h2>
+<h2><span class="header-section-number">1.4</span> Example: adding or deleting a column</h2>
 <div id="sas-code-1" class="section level3">
-<h3><span class="header-section-number">0.4.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.4.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 data exdata1; set example.exdat(drop=var1);*Could also use KEEP;
 RUN;</code></pre>
 </div>
 <div id="r-code-2" class="section level3">
-<h3><span class="header-section-number">0.4.2</span> R code</h3>
+<h3><span class="header-section-number">1.4.2</span> R code</h3>
 <pre class="r"><code># adding a column to a data frame
-exdat$newcol &lt;- NA #assign a single value to the new col
-exdat$newcol1 &lt;- NA #assign a single value to the new col
-exdat$d &lt;- &quot;d&quot; #assign a new vector
-# deleting a column from a data frame
+exdat$newcol &lt;- 6 #assign a single value, 6, to the new col
+exdat$newcol1 &lt;- 7 #assign a single value, 7, to the new col
+
+d = 1:nrow(exdat) # make a vector of values from 1 to 50, number of rows in the exdat data frame
+d</code></pre>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+## [24] 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46
+## [47] 47 48 49 50</code></pre>
+<pre class="r"><code>colnames(exdat)</code></pre>
+<pre><code>## [1] &quot;var1&quot;    &quot;var2&quot;    &quot;var3&quot;    &quot;var4&quot;    &quot;var5&quot;    &quot;newcol&quot;  &quot;newcol1&quot;</code></pre>
+<pre class="r"><code>exdat$d &lt;- d #assign the vector d to a column to be labeled 'd' in the exdat data frame
+
+colnames(exdat)</code></pre>
+<pre><code>## [1] &quot;var1&quot;    &quot;var2&quot;    &quot;var3&quot;    &quot;var4&quot;    &quot;var5&quot;    &quot;newcol&quot;  &quot;newcol1&quot;
+## [8] &quot;d&quot;</code></pre>
+<pre class="r"><code>head(exdat)</code></pre>
+<pre><code>##   var1   var2 var3        var4      var5 newcol newcol1 d
+## 1    0   male    0 -0.56047565 0.8340663      6       7 1
+## 2    1   male    0 -0.23017749 0.6666935      6       7 2
+## 3    0 female    1  1.55870831 2.7847091      6       7 3
+## 4    0 female    1  0.07050839 3.8218146      6       7 4
+## 5    0 female    1  0.12928774 0.7036033      6       7 5
+## 6    0   &lt;NA&gt;   NA  1.71506499 6.0910192      6       7 6</code></pre>
+<pre class="r"><code># deleting a column from a data frame
 exdat$d &lt;- NULL
 #exdat &lt;-subset(exdat, select= -newcol)
 exdat &lt;-subset(exdat, select= c(-newcol, -newcol1))</code></pre>
 </div>
 </div>
 <div id="example-subsetting-data" class="section level2">
-<h2><span class="header-section-number">0.5</span> Example: subsetting data</h2>
+<h2><span class="header-section-number">1.5</span> Example: subsetting data</h2>
 <div id="sas-code-2" class="section level3">
-<h3><span class="header-section-number">0.5.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.5.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 DATA exdata1;
 SET example.exdat;
@@ -325,7 +350,7 @@ WHERE var1 &gt;=10; *IF var1 &gt;=10;
 RUN;</code></pre>
 </div>
 <div id="r-code-3" class="section level3">
-<h3><span class="header-section-number">0.5.2</span> R code</h3>
+<h3><span class="header-section-number">1.5.2</span> R code</h3>
 <pre class="r"><code>exdat1 &lt;- subset(exdat, var1 &gt;=10)
 exdat1 &lt;- exdat[exdat$var1 &gt;=10]
 # to add more selection criteria
@@ -333,9 +358,9 @@ exdat2 &lt;- subset(exdat, var1 &gt;=10 &amp; var2 == &quot;female&quot;, select
 </div>
 </div>
 <div id="example-reordering-columns" class="section level2">
-<h2><span class="header-section-number">0.6</span> Example: reordering columns</h2>
+<h2><span class="header-section-number">1.6</span> Example: reordering columns</h2>
 <div id="sas-code-3" class="section level3">
-<h3><span class="header-section-number">0.6.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.6.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 DATA exdata1;
 SET example.exdat;
@@ -343,116 +368,116 @@ FORMAT var4 var1 var2 var3;
 RUN;</code></pre>
 </div>
 <div id="r-code-4" class="section level3">
-<h3><span class="header-section-number">0.6.2</span> R code</h3>
+<h3><span class="header-section-number">1.6.2</span> R code</h3>
 <pre class="r"><code>exdat &lt;- exdat[c(&quot;var4&quot;, &quot;var1&quot;, &quot;var2&quot;, &quot;var3&quot;)] # reorder by column name
 exdat &lt;- exdat[c(4, 1, 2, 3)] # reorder by numeric position</code></pre>
 </div>
 </div>
 <div id="example-creating-a-frequency-table" class="section level2">
-<h2><span class="header-section-number">0.7</span> Example: creating a frequency table</h2>
+<h2><span class="header-section-number">1.7</span> Example: creating a frequency table</h2>
 <div id="sas-code-4" class="section level3">
-<h3><span class="header-section-number">0.7.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.7.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 PROC FREQ DATA = example.exdat;
 TABLES var1;
 TABLES var1*var2;
 TABLES var1*var2*var3;
 RUN;</code></pre>
-<pre><code>##                                          The FREQ Procedure
+<pre><code>##                                         The FREQ Procedure
 ## 
-##                                                 var1
+##                                                var1
 ##  
-##                                                       Cumulative    Cumulative
-##                      var1    Frequency     Percent     Frequency      Percent
-##                      ---------------------------------------------------------
-##                         0          32       64.00            32        64.00  
-##                         1          18       36.00            50       100.00  
+##                                                      Cumulative    Cumulative
+##                     var1    Frequency     Percent     Frequency      Percent
+##                     ---------------------------------------------------------
+##                        0          32       64.00            32        64.00  
+##                        1          18       36.00            50       100.00  
 ## 
 ## 
-##                                        Table of var1 by var2
+##                                       Table of var1 by var2
 ## 
-##                             var1(var1)     var2(var2)
+##                            var1(var1)     var2(var2)
 ## 
-##                             Frequency|
-##                             Percent  |
-##                             Row Pct  |
-##                             Col Pct  |
-##                             ---------+--------+--------+--------+
-##                                    0 |      1 |     17 |     14 |     32
-##                                      |   2.00 |  34.00 |  28.00 |  64.00
-##                                      |   3.13 |  53.13 |  43.75 |
-##                                      | 100.00 |  65.38 |  60.87 |
-##                             ---------+--------+--------+--------+
-##                                    1 |      0 |      9 |      9 |     18
-##                                      |   0.00 |  18.00 |  18.00 |  36.00
-##                                      |   0.00 |  50.00 |  50.00 |
-##                                      |   0.00 |  34.62 |  39.13 |
-##                             ---------+--------+--------+--------+
-##                             Total           1       26       23       50
-##                                          2.00    52.00    46.00   100.00
-## 
-## 
-##                                       Table 1 of var2 by var3
-##                                        Controlling for var1=0
-## 
-##                                 var2(var2)     var3(var3)
-## 
-##                                 Frequency|
-##                                 Percent  |
-##                                 Row Pct  |
-##                                 Col Pct  |       0|       1|  Total
-##                                 ---------+--------+--------+
-## 
-##                                          |   0.00 |   0.00 |   0.00
-##                                          |      . |      . |
-##                                          |   0.00 |   0.00 |
-##                                 ---------+--------+--------+
-##                                 female   |      0 |     17 |     17
-##                                          |   0.00 |  54.84 |  54.84
-##                                          |   0.00 | 100.00 |
-##                                          |   0.00 | 100.00 |
-##                                 ---------+--------+--------+
-##                                 male     |     14 |      0 |     14
-##                                          |  45.16 |   0.00 |  45.16
-##                                          | 100.00 |   0.00 |
-##                                          | 100.00 |   0.00 |
-##                                 ---------+--------+--------+
-##                                 Total          14       17       31
-##                                             45.16    54.84   100.00
-## 
-##                                        Frequency Missing = 1
+##                            Frequency|
+##                            Percent  |
+##                            Row Pct  |
+##                            Col Pct  |
+##                            ---------+--------+--------+--------+
+##                                   0 |      1 |     17 |     14 |     32
+##                                     |   2.00 |  34.00 |  28.00 |  64.00
+##                                     |   3.13 |  53.13 |  43.75 |
+##                                     | 100.00 |  65.38 |  60.87 |
+##                            ---------+--------+--------+--------+
+##                                   1 |      0 |      9 |      9 |     18
+##                                     |   0.00 |  18.00 |  18.00 |  36.00
+##                                     |   0.00 |  50.00 |  50.00 |
+##                                     |   0.00 |  34.62 |  39.13 |
+##                            ---------+--------+--------+--------+
+##                            Total           1       26       23       50
+##                                         2.00    52.00    46.00   100.00
 ## 
 ## 
-##                                       Table 2 of var2 by var3
-##                                        Controlling for var1=1
+##                                      Table 1 of var2 by var3
+##                                       Controlling for var1=0
 ## 
-##                                 var2(var2)     var3(var3)
+##                                var2(var2)     var3(var3)
 ## 
-##                                 Frequency|
-##                                 Percent  |
-##                                 Row Pct  |
-##                                 Col Pct  |       0|       1|  Total
-##                                 ---------+--------+--------+
+##                                Frequency|
+##                                Percent  |
+##                                Row Pct  |
+##                                Col Pct  |       0|       1|  Total
+##                                ---------+--------+--------+
 ## 
-##                                          |   0.00 |   0.00 |   0.00
-##                                          |      . |      . |
-##                                          |   0.00 |   0.00 |
-##                                 ---------+--------+--------+
-##                                 female   |      0 |      9 |      9
-##                                          |   0.00 |  50.00 |  50.00
-##                                          |   0.00 | 100.00 |
-##                                          |   0.00 | 100.00 |
-##                                 ---------+--------+--------+
-##                                 male     |      9 |      0 |      9
-##                                          |  50.00 |   0.00 |  50.00
-##                                          | 100.00 |   0.00 |
-##                                          | 100.00 |   0.00 |
-##                                 ---------+--------+--------+
-##                                 Total           9        9       18
-##                                             50.00    50.00   100.00</code></pre>
+##                                         |   0.00 |   0.00 |   0.00
+##                                         |      . |      . |
+##                                         |   0.00 |   0.00 |
+##                                ---------+--------+--------+
+##                                female   |      0 |     17 |     17
+##                                         |   0.00 |  54.84 |  54.84
+##                                         |   0.00 | 100.00 |
+##                                         |   0.00 | 100.00 |
+##                                ---------+--------+--------+
+##                                male     |     14 |      0 |     14
+##                                         |  45.16 |   0.00 |  45.16
+##                                         | 100.00 |   0.00 |
+##                                         | 100.00 |   0.00 |
+##                                ---------+--------+--------+
+##                                Total          14       17       31
+##                                            45.16    54.84   100.00
+## 
+##                                       Frequency Missing = 1
+## 
+## 
+##                                      Table 2 of var2 by var3
+##                                       Controlling for var1=1
+## 
+##                                var2(var2)     var3(var3)
+## 
+##                                Frequency|
+##                                Percent  |
+##                                Row Pct  |
+##                                Col Pct  |       0|       1|  Total
+##                                ---------+--------+--------+
+## 
+##                                         |   0.00 |   0.00 |   0.00
+##                                         |      . |      . |
+##                                         |   0.00 |   0.00 |
+##                                ---------+--------+--------+
+##                                female   |      0 |      9 |      9
+##                                         |   0.00 |  50.00 |  50.00
+##                                         |   0.00 | 100.00 |
+##                                         |   0.00 | 100.00 |
+##                                ---------+--------+--------+
+##                                male     |      9 |      0 |      9
+##                                         |  50.00 |   0.00 |  50.00
+##                                         | 100.00 |   0.00 |
+##                                         | 100.00 |   0.00 |
+##                                ---------+--------+--------+
+##                                Total           9        9       18
+##                                            50.00    50.00   100.00</code></pre>
 </div>
 <div id="r-code-5" class="section level3">
-<h3><span class="header-section-number">0.7.2</span> R code</h3>
+<h3><span class="header-section-number">1.7.2</span> R code</h3>
 <pre class="r"><code>mytable &lt;- table(exdat$var1) # 1-way frequency table
 mytable1 &lt;- table(exdat$var1, exdat$var2); mytable1 # 2-way frequency table</code></pre>
 <pre><code>##    
@@ -490,9 +515,9 @@ mytable1 &lt;- table(exdat$var1, exdat$var2); mytable1 # 2-way frequency table</
 </div>
 </div>
 <div id="example-recoding-a-categorical-variable-to-another-categorical-variable" class="section level2">
-<h2><span class="header-section-number">0.8</span> Example: recoding a categorical variable to another categorical variable</h2>
+<h2><span class="header-section-number">1.8</span> Example: recoding a categorical variable to another categorical variable</h2>
 <div id="sas-code-5" class="section level3">
-<h3><span class="header-section-number">0.8.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.8.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 DATA exdat2;
 SET example.exdat;
@@ -501,7 +526,7 @@ ELSE IF var2 = &quot;male&quot; THEN var2n= &quot;no&quot;;
 RUN;</code></pre>
 </div>
 <div id="r-code-6" class="section level3">
-<h3><span class="header-section-number">0.8.2</span> R code</h3>
+<h3><span class="header-section-number">1.8.2</span> R code</h3>
 <pre class="r"><code>oldvals &lt;- c('female', 'male')
 newvals &lt;- factor(c('yes', 'no'))
 exdat1$female &lt;- newvals[ match(exdat$var2, oldvals) ]
@@ -511,9 +536,9 @@ exdat1$female[exdat$var2 =='male'] &lt;- 'no'</code></pre>
 </div>
 </div>
 <div id="example-recoding-a-continuous-variable-to-a-categorical-variable" class="section level2">
-<h2><span class="header-section-number">0.9</span> Example: recoding a continuous variable to a categorical variable</h2>
+<h2><span class="header-section-number">1.9</span> Example: recoding a continuous variable to a categorical variable</h2>
 <div id="sas-code-6" class="section level3">
-<h3><span class="header-section-number">0.9.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.9.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 DATA exdat2;
 SET example.exdat;
@@ -524,7 +549,7 @@ RUN;
 </code></pre>
 </div>
 <div id="r-code-7" class="section level3">
-<h3><span class="header-section-number">0.9.2</span> R code</h3>
+<h3><span class="header-section-number">1.9.2</span> R code</h3>
 <pre class="r"><code>summary(exdat$var3)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
 ##  0.0000  0.0000  1.0000  0.5306  1.0000  1.0000       1</code></pre>
@@ -534,79 +559,79 @@ exdat2$var3cat &lt;- cut(exdat$var3, breaks = c(0, 0.5, 0.6,Inf),
 </div>
 </div>
 <div id="example-logistic-regression" class="section level2">
-<h2><span class="header-section-number">0.10</span> Example: logistic regression</h2>
+<h2><span class="header-section-number">1.10</span> Example: logistic regression</h2>
 <div id="sas-code-7" class="section level3">
-<h3><span class="header-section-number">0.10.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.10.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 PROC GENMOD DATA=example.exdat DESCENDING;
 class var2;
 MODEL var1=var2 var3/DIST=bin LINK=logit;
 *ESTIMATE 'var2 label' var2 1/EXP;
 RUN;</code></pre>
-<pre><code>##                                         The GENMOD Procedure
+<pre><code>##                                        The GENMOD Procedure
 ## 
-##                                          Model Information
+##                                         Model Information
 ## 
-##                   Data Set              EXAMPLE.EXDAT                             
-##                   Distribution               Binomial                             
-##                   Link Function                 Logit                             
-##                   Dependent Variable             var1    var1                     
-## 
-## 
-##                               Number of Observations Read          50
-##                               Number of Observations Used          49
-##                               Number of Events                     18
-##                               Number of Trials                     49
-##                               Missing Values                        1
+##                  Data Set              EXAMPLE.EXDAT                             
+##                  Distribution               Binomial                             
+##                  Link Function                 Logit                             
+##                  Dependent Variable             var1    var1                     
 ## 
 ## 
-##                                       Class Level Information
+##                              Number of Observations Read          50
+##                              Number of Observations Used          49
+##                              Number of Events                     18
+##                              Number of Trials                     49
+##                              Missing Values                        1
+## 
+## 
+##                                      Class Level Information
 ##  
-##                                  Class      Levels    Values
+##                                 Class      Levels    Values
 ## 
-##                                  var2            2    female male 
+##                                 var2            2    female male 
 ## 
 ## 
-##                                           Response Profile
+##                                          Response Profile
 ##  
-##                                     Ordered                Total
-##                                       Value    var1    Frequency
+##                                    Ordered                Total
+##                                      Value    var1    Frequency
 ## 
-##                                           1    1              18
-##                                           2    0              31
+##                                          1    1              18
+##                                          2    0              31
 ## 
 ## PROC GENMOD is modeling the probability that var1='1'.
 ## 
 ## 
-##                                Criteria For Assessing Goodness Of Fit
+##                               Criteria For Assessing Goodness Of Fit
 ##  
-##                   Criterion                     DF           Value        Value/DF
+##                  Criterion                     DF           Value        Value/DF
 ## 
-##                   Log Likelihood                          -32.1654                
-##                   Full Log Likelihood                     -32.1654                
-##                   AIC (smaller is better)                  68.3308                
-##                   AICC (smaller is better)                 68.5917                
-##                   BIC (smaller is better)                  72.1145                
-## 
-## 
-##             Algorithm converged.                                                       
+##                  Log Likelihood                          -32.1654                
+##                  Full Log Likelihood                     -32.1654                
+##                  AIC (smaller is better)                  68.3308                
+##                  AICC (smaller is better)                 68.5917                
+##                  BIC (smaller is better)                  72.1145                
 ## 
 ## 
-##                         Analysis Of Maximum Likelihood Parameter Estimates
+##            Algorithm converged.                                                       
+## 
+## 
+##                        Analysis Of Maximum Likelihood Parameter Estimates
 ##  
-##                                         Standard   Wald 95% Confidence         Wald
-##    Parameter            DF   Estimate      Error          Limits         Chi-Square   Pr &gt; ChiSq
+##                                        Standard   Wald 95% Confidence         Wald
+##   Parameter            DF   Estimate      Error          Limits         Chi-Square   Pr &gt; ChiSq
 ## 
-##    Intercept             1    -0.4418     0.4272    -1.2792     0.3956         1.07       0.3011
-##    var2        female    1    -0.1942     0.5937    -1.3578     0.9695         0.11       0.7436
-##    var2        male      0     0.0000     0.0000     0.0000     0.0000          .          .    
-##    var3                  0     0.0000     0.0000     0.0000     0.0000          .          .    
-##    Scale                 0     1.0000     0.0000     1.0000     1.0000                          
+##   Intercept             1    -0.4418     0.4272    -1.2792     0.3956         1.07       0.3011
+##   var2        female    1    -0.1942     0.5937    -1.3578     0.9695         0.11       0.7436
+##   var2        male      0     0.0000     0.0000     0.0000     0.0000          .          .    
+##   var3                  0     0.0000     0.0000     0.0000     0.0000          .          .    
+##   Scale                 0     1.0000     0.0000     1.0000     1.0000                          
 ## 
 ## NOTE: The scale parameter was held fixed.</code></pre>
 </div>
 <div id="r-code-8" class="section level3">
-<h3><span class="header-section-number">0.10.2</span> R code</h3>
+<h3><span class="header-section-number">1.10.2</span> R code</h3>
 <pre class="r"><code>glm(var1 ~ var2 + var3, data=exdat, family=binomial(link=&quot;logit&quot;))</code></pre>
 <pre><code>## 
 ## Call:  glm(formula = var1 ~ var2 + var3, family = binomial(link = &quot;logit&quot;), 
@@ -624,9 +649,9 @@ RUN;</code></pre>
 </div>
 </div>
 <div id="example-poisson-regression-with-robust-standard-errors" class="section level2">
-<h2><span class="header-section-number">0.11</span> Example: Poisson regression with robust standard errors</h2>
+<h2><span class="header-section-number">1.11</span> Example: Poisson regression with robust standard errors</h2>
 <div id="sas-code-8" class="section level3">
-<h3><span class="header-section-number">0.11.1</span> SAS code</h3>
+<h3><span class="header-section-number">1.11.1</span> SAS code</h3>
 <pre class="sas"><code>LIBNAME example &quot;C:/temp&quot;;
 data example.exdat; set example.exdat; id=_n_; run;
 PROC GENMOD DATA=example.exdat;
@@ -635,77 +660,77 @@ MODEL var1=var2 var3/DIST=poisson LINK=log;
 REPEATED SUBJECT=id/TYPE=ind;
 *ESTIMATE 'var2 label' var2 1 /EXP;
 RUN; quit;</code></pre>
-<pre><code>##                                         The GENMOD Procedure
+<pre><code>##                                        The GENMOD Procedure
 ## 
-##                                          Model Information
+##                                         Model Information
 ## 
-##                   Data Set              EXAMPLE.EXDAT                             
-##                   Distribution                Poisson                             
-##                   Link Function                   Log                             
-##                   Dependent Variable             var1    var1                     
-## 
-## 
-##                               Number of Observations Read          50
-##                               Number of Observations Used          49
-##                               Missing Values                        1
+##                  Data Set              EXAMPLE.EXDAT                             
+##                  Distribution                Poisson                             
+##                  Link Function                   Log                             
+##                  Dependent Variable             var1    var1                     
 ## 
 ## 
-##                                       Class Level Information
+##                              Number of Observations Read          50
+##                              Number of Observations Used          49
+##                              Missing Values                        1
+## 
+## 
+##                                      Class Level Information
 ##  
-##               Class      Levels    Values
+##              Class      Levels    Values
 ## 
-##               id             49    1 2 3 4 5 7 8 9 10 11 12 13 14 15 16 17 18 19 20  
-##                                    21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
-##                                    38 39 40 41 42 43 44 45 46 47 48 49 50            
-##               var2            2    female male                                       
+##              id             49    1 2 3 4 5 7 8 9 10 11 12 13 14 15 16 17 18 19 20  
+##                                   21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
+##                                   38 39 40 41 42 43 44 45 46 47 48 49 50            
+##              var2            2    female male                                       
 ## 
 ## 
-##                                        Parameter Information
+##                                       Parameter Information
 ##  
-##                                 Parameter       Effect       var2
+##                                Parameter       Effect       var2
 ## 
-##                                 Prm1            Intercept          
-##                                 Prm2            var2         female
-##                                 Prm3            var2         male  
-##                                 Prm4            var3               
-## 
-## 
-##             Algorithm converged.                                                       
+##                                Prm1            Intercept          
+##                                Prm2            var2         female
+##                                Prm3            var2         male  
+##                                Prm4            var3               
 ## 
 ## 
-##                                        GEE Model Information
-## 
-##                            Correlation Structure              Independent
-##                            Subject Effect                  id (50 levels)
-##                            Number of Clusters                          50
-##                            Clusters With Missing Values                 1
-##                            Correlation Matrix Dimension                 1
-##                            Maximum Cluster Size                         1
-##                            Minimum Cluster Size                         0
+##            Algorithm converged.                                                       
 ## 
 ## 
-##             Algorithm converged.                                                       
+##                                       GEE Model Information
+## 
+##                           Correlation Structure              Independent
+##                           Subject Effect                  id (50 levels)
+##                           Number of Clusters                          50
+##                           Clusters With Missing Values                 1
+##                           Correlation Matrix Dimension                 1
+##                           Maximum Cluster Size                         1
+##                           Minimum Cluster Size                         0
 ## 
 ## 
-##                                          GEE Fit Criteria
-## 
-##                                        QIC          112.9662
-##                                        QICu         113.1379
+##            Algorithm converged.                                                       
 ## 
 ## 
-##                                 Analysis Of GEE Parameter Estimates
-##                                 Empirical Standard Error Estimates
+##                                         GEE Fit Criteria
+## 
+##                                       QIC          112.9662
+##                                       QICu         113.1379
+## 
+## 
+##                                Analysis Of GEE Parameter Estimates
+##                                Empirical Standard Error Estimates
 ##  
-##                                          Standard   95% Confidence
-##                Parameter        Estimate    Error       Limits            Z Pr &gt; |Z|
+##                                         Standard   95% Confidence
+##               Parameter        Estimate    Error       Limits            Z Pr &gt; |Z|
 ## 
-##                Intercept         -0.9383   0.2601  -1.4480  -0.4286   -3.61   0.0003
-##                var2      female  -0.1226   0.3745  -0.8567   0.6115   -0.33   0.7434
-##                var2      male     0.0000   0.0000   0.0000   0.0000     .      .    
-##                var3               0.0000   0.0000   0.0000   0.0000     .      .</code></pre>
+##               Intercept         -0.9383   0.2601  -1.4480  -0.4286   -3.61   0.0003
+##               var2      female  -0.1226   0.3745  -0.8567   0.6115   -0.33   0.7434
+##               var2      male     0.0000   0.0000   0.0000   0.0000     .      .    
+##               var3               0.0000   0.0000   0.0000   0.0000     .      .</code></pre>
 </div>
 <div id="r-code-9" class="section level3">
-<h3><span class="header-section-number">0.11.2</span> R code</h3>
+<h3><span class="header-section-number">1.11.2</span> R code</h3>
 <pre class="r"><code>m1 &lt;- glm(var1 ~ var2 + var3, family=&quot;poisson&quot;, data=exdat)
 library(sandwich)
 cov.m1 &lt;- vcovHC(m1, type=&quot;HC0&quot;)
@@ -729,6 +754,7 @@ UL = coef(m1) + 1.96 * std.err)</code></pre>
 ## (Intercept) -1.0608720 0.2695358 8.287803e-05 -1.5891622 -0.5325817
 ## var2male     0.1226023 0.3745430 7.434119e-01 -0.6115019  0.8567065
 ## var3                NA 0.2695358           NA         NA         NA</code></pre>
+</div>
 </div>
 </div>
 
