@@ -26,7 +26,7 @@ set.seed(101) # set seed to produce same results in simulation below
 
 # read in NAMCS data -- will need to correct the path
 
-```{r, echo=FALSE}
+```{r, results='hide'}
 getwd() # find working directory for this session
 
 ns=read.dta("../../data/nsaid008b.dta") # read in data. relative to the working directory go up 2 levels and into 'data' folder to read data. 
