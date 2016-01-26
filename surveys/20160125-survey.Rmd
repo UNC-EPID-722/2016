@@ -1,0 +1,37 @@
+---
+title: "2016-01-25 survey for recitation"
+author: "UNC EPID 722"
+date: "January 26, 2016"
+output: html_document
+---
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+# Input data
+```{r, results='hide', warning=FALSE}
+getwd() # what is my current working directory?
+dat.1 = read.csv("../surveys/20160125-recitation-rintro.csv", header=T) # relative to that working location directory go up one level then to the 'survey' folder to access data
+head(dat.1) # first 6 rows of data
+```
+
+# Data handling
+```{r}
+class(dat.1) # check what sort of object this is
+percent = 100*round(prop.table(table(dat.1[,1])),2) # get frequencies for first column of data frame named dat.1; round to the second decimal place
+
+count = round(table(dat.1[,1]),0)  # get counts of the first column of the data frame
+
+freqs = rbind(percent, count); freqs # combine the row of counts and percents into one object, now a matrix object (see below)
+class(freqs)
+```
+
+# Frequencies for question, "Was this session helpful?"
+
+```{r}
+freqs
+```
