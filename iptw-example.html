@@ -79,7 +79,10 @@ set.seed(101) # set seed to produce same results in simulation below</code></pre
 </div>
 <div id="read-in-namcs-data-will-need-to-correct-the-path" class="section level1">
 <h1>read in NAMCS data – will need to correct the path</h1>
-<pre><code>## [1] &quot;C:/Users/chelo/Dropbox/unc.grad.school.2016.spring/epid.722/2016/lectures&quot;</code></pre>
+<pre class="r"><code>getwd() # find working directory for this session
+
+ns=read.dta(&quot;../../data/nsaid008b.dta&quot;) # read in data. relative to the working directory go up 2 levels and into 'data' folder to read data. 
+# Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008b.dta</code></pre>
 </div>
 <div id="simulate-outcome-using-logistic-regression" class="section level1">
 <h1>Simulate outcome using logistic regression</h1>
