@@ -5,7 +5,7 @@ date: "February 1, 2016"
 output: 
   html_document:
    toc: true
-   toc_depth: 2
+   toc_depth: 3
    theme: united
    number_sections: true
 ---
@@ -41,7 +41,7 @@ sasopts <- "-nosplash -log 'c:\\temp'  -ls 75" # see http://bit.ly/1QB4ZTb
 ### R
 
 ```{r}
-getwd()
+#getwd() # get the working directory
 ns=read.dta("../data/nsaid008b.dta") # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
 # Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008b.dta
 class(ns) # check type of object
@@ -70,6 +70,9 @@ ns$pbleed=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$conts
                     .02*ns$raceblkoth- .3*ns$newcox2 )))
 
 ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
+
+rbind(percent=round(prop.table(table(ns$bleed)),2),
+      count=table(ns$bleed)) # quick and dirty way to get proportions
 ```
 
 ### SAS
@@ -167,7 +170,7 @@ proc print data=me_trt1;
 	title "among treated population"; run;
 ```
 
-## What is E[Y(1)|X=1]-E[Y(0)|contanticoag=1]?
+## What is E[Y(1)|contanticoag=1] - E[Y(0)|contanticoag=1]?
 
 ### R
 
