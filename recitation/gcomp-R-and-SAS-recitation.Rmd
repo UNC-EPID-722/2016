@@ -1,0 +1,308 @@
+---
+title: "EPID 722 recitation, 2016/02/01"
+author: "EPID 722 2016"
+date: "February 1, 2016"
+output: 
+  html_document:
+   toc: true
+   toc_depth: 2
+   theme: united
+   number_sections: true
+---
+
+**NOTE: ALL SAS and R code below copied from EPID 722 lecture material, 2015&2016. R code based on Alan Brookhart's program titled, "Gcomp.R", and Xiaojuan Li's 2015 SAS program titled, "g-comp.sas"**
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+## Preliminaries
+
+### Specify packages for R
+
+```{r, echo=T, message=FALSE, warning=FALSE}
+require(knitr)
+require(foreign)
+require(foreach)
+set.seed(123) # set seed so you get same results each time you run.
+```
+
+```{r, echo=FALSE}
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp'  -ls 75" # see http://bit.ly/1QB4ZTb
+```
+
+
+## Read in NAMCS data -- will need to correct the path
+
+### R
+
+```{r}
+getwd()
+ns=read.dta("../data/nsaid008b.dta") # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
+# Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008b.dta
+class(ns) # check type of object
+head(ns) # default is first six rows of data frame
+```
+
+### SAS
+
+```{r read1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname dat "c:\temp";
+filename dat1  "c:\temp\nsaid008b.dta";
+
+proc import datafile=dat1 out=dat.nsaid008b dbms=dta replace; run; 
+
+proc print data = dat.nsaid008b(obs=10);
+run; quit;
+```
+
+## Simulate outcome using logistic regression
+
+### R
+
+```{r, r-part1}
+ns$pbleed=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
+                    .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
+                    .02*ns$raceblkoth- .3*ns$newcox2 )))
+
+ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
+```
+
+### SAS
+<!-- Note: I have to put libname in each SAS chunk because this is running it in batch mode.
+No recognition of data set in prior chunk.-->
+
+```{r s-part1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname dat "c:\temp";
+DATA dat.ns;
+   SET dat.nsaid008b;
+   pbleed=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
+                    .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
+                    .02*raceblkoth- .3*newcox2 )));
+   call streaminit(1234);
+   bleed=rand("bernoulli",pbleed);   *simulate the observed outcome;
+run;
+
+proc freq data = dat.ns;
+    table bleed;
+run;
+```
+
+## What is E[Y(1)]-E[Y(0)], causal risk difference, and  E[Y(1)]/E[Y(0)], causal risk ratio.
+
+### R
+
+```{r r-part2}
+pbleed.0=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
+                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
+                       .02*ns$raceblkoth)))
+
+pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
+                      .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
+                      .02*ns$raceblkoth - 0.3)))
+
+mean(pbleed.1)-mean(pbleed.0) # causal risk difference
+
+mean(pbleed.1)/mean(pbleed.0) # causal risk ratio
+```
+
+### SAS
+
+```{r s-part2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+*Approach 2 - use the orginal dataset and add two predicted potential outcomes Y(1) and Y(2) as columns/variables;
+libname dat "c:\temp";
+
+DATA dat.nsg;
+   SET dat.ns;
+   pbleed_1=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
+                       .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
+                       .02*raceblkoth -0.3*1)));  *E[Y(1)];
+   pbleed_0=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
+                       .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
+                       .02*raceblkoth -0.3*0)));  *E[Y(0)];
+RUN;
+
+*then use proc means to get causal RD and RR;
+
+proc means data = dat.nsg;
+     var pbleed_1 pbleed_0;
+	 output out=b mean=upbleed_1 upbleed_0; run;
+
+DATA b1;
+    set b;
+	RD = upbleed_1 - upbleed_0;
+	RR = upbleed_1/upbleed_0; run;
+
+proc print data = b1; run;
+```
+
+## What is E[Y(1)|X=1]-E[Y(0)|X=1]?
+
+### R 
+
+```{r r-part3}
+mean(pbleed.1[ns$newcox2==1])-mean(pbleed.0[ns$newcox2==1])
+```
+
+```{r s-part3, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+
+*conditioning the dataset to the treated population;
+libname dat "c:\temp";
+
+proc means data = dat.nsg;
+    where newcox2=1;
+     var pbleed_1 pbleed_0;
+	 output out=me_trt mean=upbleed_1 upbleed_0;
+run;
+
+DATA me_trt1;
+    set me_trt;
+	RD = upbleed_1 - upbleed_0;
+	RR = upbleed_1/upbleed_0;
+proc print data=me_trt1;
+	title "among treated population"; run;
+```
+
+## What is E[Y(1)|X=1]-E[Y(0)|contanticoag=1]?
+
+### R
+
+```{r r-part4}
+mean(pbleed.1[ns$contanticoag==1])-mean(pbleed.0[ns$contanticoag==1])
+```
+
+### SAS 
+
+```{r s-part4, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname dat "c:\temp";
+
+proc means data = dat.nsg;
+    where contanticoag=1;
+    var pbleed_1 pbleed_0;
+	output out=me_cont mean=upbleed_1 upbleed_0;
+run;
+
+DATA me_cont1;
+    set me_cont;
+	RD = upbleed_1 - upbleed_0;
+	RR = upbleed_1/upbleed_0;
+proc print data=me_cont1;
+	title "among warfarin users"; run;
+run;
+```
+
+## What is E[Y(treat on if on warfarin)]-E[Y(0)]?
+
+### R
+
+```{r r-part5}
+newtreat=ifelse(ns$contanticoag==1,1,0)
+
+pbleed.0=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
+                      .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
+                      .02*ns$raceblkoth)))
+
+pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
+                      .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
+                      .02*ns$raceblkoth - 0.3*newtreat)))
+
+mean(pbleed.1)-mean(pbleed.0)
+```
+
+### SAS
+
+```{r s-part5, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname dat "c:\temp";
+
+DATA nsh;
+   set dat.nsg;
+   if  contanticoag=1 then treat=1;
+   else treat=0;
+   pbleed_2=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 0.2*contaspirin + .7*arthrtis + .07*age + .3*male + 0.02*raceblkoth -0.3*treat)));  *E[Y(treated if on warfarin)];
+run;
+
+proc means data = nsh;
+     var pbleed_2 pbleed_0;
+	 output out=me_war mean=upbleed_2 upbleed_0;
+run;
+
+DATA me_war1;
+    set me_war;
+	RD = upbleed_2 - upbleed_0;
+	RR = upbleed_2/upbleed_0;
+run;
+
+proc print data=me_war1;
+    title "treated if only on warfarin";
+run;
+```
+
+## Estimate E[Y(1)]-E[Y(0)] with MLE?
+
+### R
+
+**Estimate coefficients**
+
+```{r part6}
+glm.out=glm(bleed~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth+newcox2,family=binomial,data=ns)
+
+coef(glm.out) # show coefficients from fitted generalized linear model
+```
+
+**Predict outcome based on estimated coefficients from glm.out regression object**
+
+```{r}
+ns.temp=ns
+ns.temp$newcox2=0
+pbleed.0=predict(glm.out,newdata=ns.temp,type="response")
+ns.temp$newcox2=1
+pbleed.1=predict(glm.out,newdata=ns.temp,type="response")
+
+mean(pbleed.1)-mean(pbleed.0)
+```
+
+### SAS
+```{r s-part6, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+
+libname dat "c:\temp";
+
+ods select parameterestimates;
+ods output parameterestimates=betas(keep=parameter estimate);
+proc genmod data = dat.ns desc ;
+    model bleed = contanticoag tobacco_imp contsteroids contaspirin arthrtis age male raceblkoth newcox2/link=logit dist=bin;
+run;
+
+proc transpose data=betas out=betas2(drop=beta11) prefix=beta; *this makes the set of gamma horizontal;
+run;
+
+data ns_p;
+   set dat.ns;
+   if _N_=1 then set betas2;
+   pbleed_1=1/(1+exp(-(beta1 + beta2*contanticoag + beta3*tobacco_imp + beta4*contsteroids + 
+                       beta5*contaspirin + beta6*arthrtis + beta7*age + beta8*male + 
+                       beta9*raceblkoth + beta10*1)));  *E[Y(1)];
+   pbleed_0=1/(1+exp(-(beta1 + beta2*contanticoag + beta3*tobacco_imp + beta4*contsteroids + 
+                       beta5*contaspirin + beta6*arthrtis + beta7*age + beta8*male + 
+                       beta9*raceblkoth + beta10*0)));  *E[Y(0)];
+run;
+
+proc means data = ns_p;
+     var pbleed_1 pbleed_0;
+	 output out=me_mle mean=upbleed_1 upbleed_0;
+run;
+
+DATA me_mle1;
+    set me_mle;
+	RD = upbleed_1 - upbleed_0;
+	RR = upbleed_1/upbleed_0;
+run; 
+
+proc print data=me_mle1;
+   title "estimates with MLE";
+run;
+```
+
