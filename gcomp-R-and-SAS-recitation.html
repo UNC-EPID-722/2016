@@ -94,9 +94,8 @@ set.seed(123) # set seed so you get same results each time you run.</code></pre>
 <h2><span class="header-section-number">0.2</span> Read in NAMCS data – will need to correct the path</h2>
 <div id="r" class="section level3">
 <h3><span class="header-section-number">0.2.1</span> R</h3>
-<pre class="r"><code>getwd()</code></pre>
-<pre><code>## [1] &quot;C:/Users/vonholle/Dropbox/unc.grad.school.2016.spring/epid.722/2016&quot;</code></pre>
-<pre class="r"><code>ns=read.dta(&quot;../data/nsaid008b.dta&quot;) # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
+<pre class="r"><code>#getwd() # get the working directory
+ns=read.dta(&quot;../data/nsaid008b.dta&quot;) # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
 # Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008b.dta
 class(ns) # check type of object</code></pre>
 <pre><code>## [1] &quot;data.frame&quot;</code></pre>
@@ -445,16 +444,15 @@ run;</code></pre>
 <h2><span class="header-section-number">0.8</span> Estimate E[Y(1)]-E[Y(0)] with MLE?</h2>
 <div id="r-6" class="section level3">
 <h3><span class="header-section-number">0.8.1</span> R</h3>
-<p>Estimate coefficients</p>
+<p><strong>Estimate coefficients</strong></p>
 <pre class="r"><code>glm.out=glm(bleed~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth+newcox2,family=binomial,data=ns)
-class(glm.out)</code></pre>
-<pre><code>## [1] &quot;glm&quot; &quot;lm&quot;</code></pre>
-<pre class="r"><code>coef(glm.out)</code></pre>
+
+coef(glm.out) # show coefficients from fitted generalized linear model</code></pre>
 <pre><code>##  (Intercept) contanticoag  tobacco_imp contsteroids  contaspirin 
 ##  -6.86650464   1.23099748   1.03692269   0.28673489   0.37225040 
 ##     arthrtis          age         male   raceblkoth      newcox2 
 ##   0.64684675   0.07186027   0.35922778  -0.28377022  -0.13803245</code></pre>
-<p>Predict outcome based on estimated coefficients from glm.out regression object</p>
+<p><strong>Predict outcome based on estimated coefficients from glm.out regression object</strong></p>
 <pre class="r"><code>ns.temp=ns
 ns.temp$newcox2=0
 pbleed.0=predict(glm.out,newdata=ns.temp,type=&quot;response&quot;)
