@@ -71,502 +71,313 @@ img {
 <li><a href="#preliminaries"><span class="toc-section-number">0.1</span> Preliminaries</a><ul>
 <li><a href="#specify-packages-for-r"><span class="toc-section-number">0.1.1</span> Specify packages for R</a></li>
 </ul></li>
-<li><a href="#read-in-namcs-data-will-need-to-correct-the-path"><span class="toc-section-number">0.2</span> Read in NAMCS data – will need to correct the path</a><ul>
+<li><a href="#program-1-read-in-hividu.csv-data-will-need-to-correct-the-path-data-handling."><span class="toc-section-number">0.2</span> Program 1: read in hividu.csv data – will need to correct the path + data handling.</a><ul>
 <li><a href="#r"><span class="toc-section-number">0.2.1</span> R</a></li>
 <li><a href="#sas"><span class="toc-section-number">0.2.2</span> SAS</a></li>
 </ul></li>
-<li><a href="#simulate-outcome-using-logistic-regression"><span class="toc-section-number">0.3</span> Simulate outcome using logistic regression</a><ul>
-<li><a href="#r-1"><span class="toc-section-number">0.3.1</span> R</a></li>
-<li><a href="#sas-1"><span class="toc-section-number">0.3.2</span> SAS</a></li>
+<li><a href="#program-2-table-1-and-table-2"><span class="toc-section-number">0.3</span> Program 2: Table 1 and Table 2</a><ul>
+<li><a href="#r-1"><span class="toc-section-number">0.3.1</span> R</a><ul>
+<li><a href="#table-1-continuous-by-idu"><span class="toc-section-number">0.3.1.1</span> Table 1 continuous, by IDU</a></li>
+<li><a href="#table-1-continuous-overall"><span class="toc-section-number">0.3.1.2</span> Table 1 continuous, overall</a></li>
 </ul></li>
-<li><a href="#what-is-ey1-ey0-causal-risk-difference-and-ey1ey0-causal-risk-ratio."><span class="toc-section-number">0.4</span> What is E[Y(1)]-E[Y(0)], causal risk difference, and E[Y(1)]/E[Y(0)], causal risk ratio.</a><ul>
-<li><a href="#r-2"><span class="toc-section-number">0.4.1</span> R</a></li>
-<li><a href="#sas-2"><span class="toc-section-number">0.4.2</span> SAS</a></li>
+<li><a href="#sas-1"><span class="toc-section-number">0.3.2</span> SAS</a><ul>
+<li><a href="#table-1-continuous-by-idu-and-overall"><span class="toc-section-number">0.3.2.1</span> Table 1 continuous, by IDU and overall</a></li>
 </ul></li>
-<li><a href="#what-is-ey1x1-ey0x1"><span class="toc-section-number">0.5</span> What is E[Y(1)|X=1]-E[Y(0)|X=1]?</a><ul>
-<li><a href="#r-3"><span class="toc-section-number">0.5.1</span> R</a></li>
+<li><a href="#r-2"><span class="toc-section-number">0.3.3</span> R</a><ul>
+<li><a href="#table-1-categorical-by-idu"><span class="toc-section-number">0.3.3.1</span> Table 1 categorical, by IDU</a></li>
+<li><a href="#table-1-categorical-overall"><span class="toc-section-number">0.3.3.2</span> Table 1 categorical, overall</a></li>
 </ul></li>
-<li><a href="#what-is-ey1contanticoag1---ey0contanticoag1"><span class="toc-section-number">0.6</span> What is E[Y(1)|contanticoag=1] - E[Y(0)|contanticoag=1]?</a><ul>
-<li><a href="#r-4"><span class="toc-section-number">0.6.1</span> R</a></li>
-<li><a href="#sas-3"><span class="toc-section-number">0.6.2</span> SAS</a></li>
+<li><a href="#sas-2"><span class="toc-section-number">0.3.4</span> SAS</a><ul>
+<li><a href="#table-1-categorical-by-idu-and-overall"><span class="toc-section-number">0.3.4.1</span> Table 1, categorical by IDU and overall</a></li>
 </ul></li>
-<li><a href="#what-is-eytreat-on-if-on-warfarin-ey0"><span class="toc-section-number">0.7</span> What is E[Y(treat on if on warfarin)]-E[Y(0)]?</a><ul>
-<li><a href="#r-5"><span class="toc-section-number">0.7.1</span> R</a></li>
-<li><a href="#sas-4"><span class="toc-section-number">0.7.2</span> SAS</a></li>
+<li><a href="#r-3"><span class="toc-section-number">0.3.5</span> R</a><ul>
+<li><a href="#table-2-disposition"><span class="toc-section-number">0.3.5.1</span> Table 2, disposition</a></li>
 </ul></li>
-<li><a href="#estimate-ey1-ey0-with-mle"><span class="toc-section-number">0.8</span> Estimate E[Y(1)]-E[Y(0)] with MLE?</a><ul>
-<li><a href="#r-6"><span class="toc-section-number">0.8.1</span> R</a></li>
-<li><a href="#sas-5"><span class="toc-section-number">0.8.2</span> SAS</a></li>
+<li><a href="#sas-3"><span class="toc-section-number">0.3.6</span> SAS</a><ul>
+<li><a href="#table-2-disposition-1"><span class="toc-section-number">0.3.6.1</span> Table 2, disposition</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#program-3-maximum-likelihood"><span class="toc-section-number">0.4</span> Program 3: Maximum likelihood</a><ul>
+<li><a href="#injection-drug-use-by-aids-or-death"><span class="toc-section-number">0.4.1</span> Injection drug use by AIDS or death</a><ul>
+<li><a href="#r-4"><span class="toc-section-number">0.4.1.1</span> R</a></li>
+<li><a href="#sas-4"><span class="toc-section-number">0.4.1.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#ml-by-logistic"><span class="toc-section-number">0.4.2</span> ML by logistic</a><ul>
+<li><a href="#r-5"><span class="toc-section-number">0.4.2.1</span> R</a></li>
+<li><a href="#sas-5"><span class="toc-section-number">0.4.2.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#ml-by-non-linear-mixed-model"><span class="toc-section-number">0.4.3</span> ML by non-linear mixed model</a><ul>
+<li><a href="#r-6"><span class="toc-section-number">0.4.3.1</span> R</a></li>
+<li><a href="#sas-6"><span class="toc-section-number">0.4.3.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#profile-ml"><span class="toc-section-number">0.4.4</span> Profile ML</a><ul>
+<li><a href="#r-7"><span class="toc-section-number">0.4.4.1</span> R</a></li>
+<li><a href="#sas-7"><span class="toc-section-number">0.4.4.2</span> SAS</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </div>
 
-<p><strong>NOTE: ALL SAS and R code below copied from EPID 722 lecture material, 2015&amp;2016. R code based on Alan Brookhart’s program titled, “Gcomp.R”, and Xiaojuan Li’s 2015 SAS program titled, “g-comp.sas”</strong></p>
+<p><strong>NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole’s programs titled, “program1.15dec15.sas”, “program2.15dec15.sas”, and “program3.19jan16.sas”</strong></p>
 <div id="preliminaries" class="section level2">
 <h2><span class="header-section-number">0.1</span> Preliminaries</h2>
 <div id="specify-packages-for-r" class="section level3">
 <h3><span class="header-section-number">0.1.1</span> Specify packages for R</h3>
-<pre class="r"><code>require(knitr)
-require(foreign)
-require(foreach)
+<pre class="r"><code>  #install.packages(c(&quot;knitr&quot;, &quot;foreign&quot;, &quot;tableone&quot;, &quot;nlme&quot;)) #note: you only need to do this once. then only if you want updates.
+  require(knitr)
+  require(foreign)
+#  require(plyr)
+  require(tableone)
+  require(nlme)
+  require(ggplot2)
 set.seed(123) # set seed so you get same results each time you run.</code></pre>
 </div>
 </div>
-<div id="read-in-namcs-data-will-need-to-correct-the-path" class="section level2">
-<h2><span class="header-section-number">0.2</span> Read in NAMCS data – will need to correct the path</h2>
+<div id="program-1-read-in-hividu.csv-data-will-need-to-correct-the-path-data-handling." class="section level2">
+<h2><span class="header-section-number">0.2</span> Program 1: read in hividu.csv data – will need to correct the path + data handling.</h2>
 <div id="r" class="section level3">
 <h3><span class="header-section-number">0.2.1</span> R</h3>
+<p>Read the data.</p>
 <pre class="r"><code>#getwd() # get the working directory
-ns=read.dta(&quot;../data/nsaid008b.dta&quot;) # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
-# Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008b.dta
-class(ns) # check type of object</code></pre>
+a = read.csv(&quot;../../data/hividu.csv&quot;, header=T) # read in data. relative to the working directory go up however many levels and into 'data' folder to read data. 
+#a = read.csv(&quot;../data/hividu.csv&quot;, header=T) # Ignore. only for local run checking.
+
+# Instead of &quot;../../data/hividu.csv, can specify full path of data location. For example a path could be &quot;c:\temp\nsaid008b.dta&quot;
+
+class(a) # check type of object</code></pre>
 <pre><code>## [1] &quot;data.frame&quot;</code></pre>
-<pre class="r"><code>head(ns) # default is first six rows of data frame</code></pre>
-<pre><code>##   year       patcode region northeast midwest south west pcdoc medspec
-## 1 2005 2005000130008      1         1       0     0    0     1       0
-## 2 2005 2005000150004      1         1       0     0    0     1       0
-## 3 2005 2005000150014      1         1       0     0    0     1       0
-## 4 2005 2005000150020      1         1       0     0    0     1       0
-## 5 2005 2005000150033      1         1       0     0    0     1       0
-## 6 2005 2005000180011      1         1       0     0    0     1       0
-##   mddo age male raceblkoth reas1circ reas1resp reas1digest reas1musc
-## 1    1  44    1          0         0         0           0         0
-## 2    1  58    0          0         0         0           0         1
-## 3    1  78    0          0         0         0           0         1
-## 4    1  23    1          0         0         0           0         1
-## 5    1  56    1          0         0         0           0         0
-## 6    1  68    0          0         0         0           0         1
-##   reasoncirc reasonresp reasondigest reasonmusc arthrtis cancer crf copd
-## 1          0          0            0          0        0      0   0    0
-## 2          0          0            0          1        0      0   0    0
-## 3          0          0            0          1        0      0   0    0
-## 4          0          0            0          1        0      0   0    0
-## 5          0          0            0          1        1      0   0    0
-## 6          0          0            0          1        1      0   0    0
-##   deprn diabetes hyplipid htn ihd tobacco_imp bp_stage2 bp_stage1 newcox2
-## 1     0        0        0   0   0           0         0         0       0
-## 2     0        0        0   0   0           0         0         0       1
-## 3     0        0        0   0   0           0         0         0       0
-## 4     0        0        0   0   0           0         0         0       0
-## 5     0        0        0   0   0           1         0         0       0
-## 6     0        1        0   0   0           0         0         0       0
-##   conth2antagonist contaspirin contanticoag contsteroids
-## 1                0           0            0            0
-## 2                0           0            0            0
-## 3                0           0            0            0
-## 4                0           0            0            0
-## 5                0           0            0            0
-## 6                0           0            0            0</code></pre>
+<pre class="r"><code>head(a) # default is first six rows of data frame</code></pre>
+<pre><code>##             t eventtype ageatfda BASEIDU black cd4nadir arv dth       tarv
+## 1 0.002737851         2       48       0     1      695   1   1 1.53045859
+## 2 0.002737851         2       35       1     1      251   1   1 3.39493498
+## 3 0.010951403         2       28       0     1       18   0   1 0.01095140
+## 4 0.016427105         2       46       1     0      465   1   1 0.91444216
+## 5 0.016427105         2       31       0     1        8   0   1 0.01642711
+## 6 0.019164956         2       45       1     1      205   1   1 3.10198494
+##      taidsdth newid
+## 1 0.002737851     1
+## 2 0.002737851     2
+## 3 0.010951403     3
+## 4 0.016427105     4
+## 5 0.016427105     5
+## 6 0.019164956     6</code></pre>
+<pre class="r"><code>colnames(a) = tolower(colnames(a)) # make all column names lower case</code></pre>
+<p>Data handling.</p>
+<pre class="r"><code>a$u = runif(nrow(a)) # new random id
+a = a[order(a$u),] # order by random id
+head(a) # check</code></pre>
+<pre><code>##             t eventtype ageatfda baseidu black cd4nadir arv dth     tarv
+## 478 1.4948665         1       24       0     1       99   1   1 1.494867
+## 74  0.3997262         2       32       1     0      500   1   1 5.500342
+## 740 2.7351129         1       27       0     1      620   1   0 2.735113
+## 718 2.5845311         1       40       0     0      547   1   0 2.584531
+## 911 4.3559206         1       30       0     1      516   1   0 4.355921
+## 831 3.4715948         2       34       1     0      462   0   1 3.471595
+##       taidsdth newid            u
+## 478  6.2997947   478 0.0004653491
+## 74   0.3997262    74 0.0006247733
+## 740 10.4394251   740 0.0011916284
+## 718 10.8117728   718 0.0036842276
+## 911 10.3655031   911 0.0038963431
+## 831  3.4715948   831 0.0041069405</code></pre>
+<pre class="r"><code>a = within(a, {
+  art = round(ifelse(eventtype==1, tarv, NA), 3) # no missing eventtype. round to 3 decimal places
+  delta = ifelse(eventtype==2, 1,
+                 ifelse(eventtype==1 &amp; dth==1, 1,
+                        ifelse(eventtype==1 &amp; dth==0, 0,
+                               ifelse(eventtype==0, 0, NA))))
+  t = round(ifelse(eventtype==0, t, taidsdth), 3) # round to 3 decimal places
+  
+  delta[t&gt;10] = 0 # admin censor at 10 years
+  art[t&gt;10 &amp; art&gt;10] = NA
+  t[t&gt;10] = 10 
+
+  drop = ifelse(t&lt;10 &amp; delta==0, 1, 0)
+  id = 1:nrow(a)
+  idu = baseidu
+  white = 1-black
+  age = ageatfda
+  cd4 = cd4nadir
+  }) # rename variables
+
+summary(a)</code></pre>
+<pre><code>##        t            eventtype      ageatfda        baseidu      
+##  Min.   : 0.003   Min.   :0.0   Min.   :17.00   Min.   :0.0000  
+##  1st Qu.: 2.117   1st Qu.:1.0   1st Qu.:31.00   1st Qu.:0.0000  
+##  Median : 6.735   Median :1.0   Median :36.00   Median :0.0000  
+##  Mean   : 6.091   Mean   :1.2   Mean   :36.44   Mean   :0.3771  
+##  3rd Qu.:10.000   3rd Qu.:2.0   3rd Qu.:41.00   3rd Qu.:1.0000  
+##  Max.   :10.000   Max.   :2.0   Max.   :73.00   Max.   :1.0000  
+##                                                                 
+##      black           cd4nadir           arv             dth       
+##  Min.   :0.0000   Min.   :   0.0   Min.   :0.000   Min.   :0.000  
+##  1st Qu.:0.0000   1st Qu.: 212.8   1st Qu.:1.000   1st Qu.:0.000  
+##  Median :1.0000   Median : 348.5   Median :1.000   Median :1.000  
+##  Mean   :0.5773   Mean   : 393.6   Mean   :0.762   Mean   :0.512  
+##  3rd Qu.:1.0000   3rd Qu.: 516.2   3rd Qu.:1.000   3rd Qu.:1.000  
+##  Max.   :1.0000   Max.   :1933.0   Max.   :1.000   Max.   :1.000  
+##                                                                   
+##       tarv             taidsdth             newid       
+##  Min.   : 0.01095   Min.   : 0.002738   Min.   :   1.0  
+##  1st Qu.: 1.27584   1st Qu.: 2.117043   1st Qu.: 291.8  
+##  Median : 2.22177   Median : 6.735113   Median : 582.5  
+##  Mean   : 3.39914   Mean   : 6.305807   Mean   : 582.5  
+##  3rd Qu.: 4.50240   3rd Qu.:10.472279   3rd Qu.: 873.2  
+##  Max.   :10.81451   Max.   :10.817248   Max.   :1164.0  
+##                                                         
+##        u                  cd4              age            white       
+##  Min.   :0.0004653   Min.   :   0.0   Min.   :17.00   Min.   :0.0000  
+##  1st Qu.:0.2593812   1st Qu.: 212.8   1st Qu.:31.00   1st Qu.:0.0000  
+##  Median :0.4896324   Median : 348.5   Median :36.00   Median :0.0000  
+##  Mean   :0.4963191   Mean   : 393.6   Mean   :36.44   Mean   :0.4227  
+##  3rd Qu.:0.7427056   3rd Qu.: 516.2   3rd Qu.:41.00   3rd Qu.:1.0000  
+##  Max.   :0.9994045   Max.   :1933.0   Max.   :73.00   Max.   :1.0000  
+##                                                                       
+##       idu               id              drop            delta       
+##  Min.   :0.0000   Min.   :   1.0   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.:0.0000   1st Qu.: 291.8   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median :0.0000   Median : 582.5   Median :0.0000   Median :0.0000  
+##  Mean   :0.3771   Mean   : 582.5   Mean   :0.1091   Mean   :0.4974  
+##  3rd Qu.:1.0000   3rd Qu.: 873.2   3rd Qu.:0.0000   3rd Qu.:1.0000  
+##  Max.   :1.0000   Max.   :1164.0   Max.   :1.0000   Max.   :1.0000  
+##                                                                     
+##       art       
+##  Min.   :0.033  
+##  1st Qu.:1.224  
+##  Median :1.936  
+##  Mean   :2.612  
+##  3rd Qu.:3.279  
+##  Max.   :9.810  
+##  NA's   :493</code></pre>
+<pre class="r"><code>keep.vars = c(&quot;t&quot;, &quot;delta&quot;, &quot;art&quot;, &quot;drop&quot;, &quot;id&quot;, &quot;idu&quot;, &quot;white&quot;, &quot;age&quot;, &quot;cd4&quot;)
+b = a[,colnames(a) %in% keep.vars]
+head(b) # check</code></pre>
+<pre><code>##          t cd4 age white idu id drop delta   art
+## 478  6.300  99  24     0   0  1    0     1 1.495
+## 74   0.400 500  32     1   1  2    0     1    NA
+## 740 10.000 620  27     0   0  3    0     0 2.735
+## 718 10.000 547  40     1   0  4    0     0 2.585
+## 911 10.000 516  30     0   0  5    0     0 4.356
+## 831  3.472 462  34     1   1  6    0     1    NA</code></pre>
+<pre class="r"><code>summary(b[,keep.vars]) # check</code></pre>
+<pre><code>##        t              delta             art             drop       
+##  Min.   : 0.003   Min.   :0.0000   Min.   :0.033   Min.   :0.0000  
+##  1st Qu.: 2.117   1st Qu.:0.0000   1st Qu.:1.224   1st Qu.:0.0000  
+##  Median : 6.735   Median :0.0000   Median :1.936   Median :0.0000  
+##  Mean   : 6.091   Mean   :0.4974   Mean   :2.612   Mean   :0.1091  
+##  3rd Qu.:10.000   3rd Qu.:1.0000   3rd Qu.:3.279   3rd Qu.:0.0000  
+##  Max.   :10.000   Max.   :1.0000   Max.   :9.810   Max.   :1.0000  
+##                                    NA's   :493                     
+##        id              idu             white             age       
+##  Min.   :   1.0   Min.   :0.0000   Min.   :0.0000   Min.   :17.00  
+##  1st Qu.: 291.8   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:31.00  
+##  Median : 582.5   Median :0.0000   Median :0.0000   Median :36.00  
+##  Mean   : 582.5   Mean   :0.3771   Mean   :0.4227   Mean   :36.44  
+##  3rd Qu.: 873.2   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:41.00  
+##  Max.   :1164.0   Max.   :1.0000   Max.   :1.0000   Max.   :73.00  
+##                                                                    
+##       cd4        
+##  Min.   :   0.0  
+##  1st Qu.: 212.8  
+##  Median : 348.5  
+##  Mean   : 393.6  
+##  3rd Qu.: 516.2  
+##  Max.   :1933.0  
+## </code></pre>
+<pre class="r"><code>write.csv(b, &quot;c:/temp/hividu15dec15.dat&quot;)</code></pre>
 </div>
 <div id="sas" class="section level3">
 <h3><span class="header-section-number">0.2.2</span> SAS</h3>
-<pre class="sas"><code>libname dat &quot;c:\temp&quot;;
-filename dat1  &quot;c:\temp\nsaid008b.dta&quot;;
-
-proc import datafile=dat1 out=dat.nsaid008b dbms=dta replace; run; 
-
-proc print data = dat.nsaid008b(obs=10);
-run; quit;</code></pre>
-<pre><code>##  
-##  
-##  
-##  
-##  
-##  
-##                                                             r
-##                                 n                           a  r  r
-##                                 o                           c  e  e
-##                    p            r  m           m            e  a  a
-##                    a         r  t  i           e            b  s  s
-##                    t         e  h  d  s     p  d            l  1  1
-##          y         c         g  e  w  o  w  c  s  m      m  k  c  r
-##    O     e         o         i  a  e  u  e  d  p  d   a  a  o  i  e
-##    b     a         d         o  s  s  t  s  o  e  d   g  l  t  r  s
-##    s     r         e         n  t  t  h  t  c  c  o   e  e  h  c  p
-## 
-##     1  2005  2005000130008   1  1  0  0  0  1  0  1  44  1  0  0  0
-##     2  2005  2005000150004   1  1  0  0  0  1  0  1  58  0  0  0  0
-##     3  2005  2005000150014   1  1  0  0  0  1  0  1  78  0  0  0  0
-##     4  2005  2005000150020   1  1  0  0  0  1  0  1  23  1  0  0  0
-##     5  2005  2005000150033   1  1  0  0  0  1  0  1  56  1  0  0  0
-##     6  2005  2005000180011   1  1  0  0  0  1  0  1  68  0  0  0  0
-##     7  2005  2005000180018   1  1  0  0  0  1  0  1  46  0  0  0  0
-##     8  2005  2005000190010   1  1  0  0  0  1  0  1  40  0  0  0  0
-##     9  2005  2005000190017   1  1  0  0  0  1  0  1  29  1  0  0  0
-##    10  2005  2005000190020   1  1  0  0  0  1  0  1  61  1  0  0  0
-## 
-##                                                                 c
-##                                                                 o
-##                                                                 n
-##                                                                 t
-##                    r                                            h     c  c
-##        r           e                                t           2  c  o  o
-##        e     r  r  a  r                             o           a  o  n  n
-##        a  r  e  e  s  e                             b  b  b     n  n  t  t
-##        s  e  a  a  o  a  a              d  h        a  p  p     t  t  a  s
-##        1  a  s  s  n  s  r              i  y        c  _  _  n  a  a  n  t
-##        d  s  o  o  d  o  t  c           a  p        c  s  s  e  g  s  t  e
-##        i  1  n  n  i  n  h  a        d  b  l        o  t  t  w  o  p  i  r
-##        g  m  c  r  g  m  r  n     c  e  e  i        _  a  a  c  n  i  c  o
-##    O   e  u  i  e  e  u  t  c  c  o  p  t  p  h  i  i  g  g  o  i  r  o  i
-##    b   s  s  r  s  s  s  i  e  r  p  r  e  i  t  h  m  e  e  x  s  i  a  d
-##    s   t  c  c  p  t  c  s  r  f  d  n  s  d  n  d  p  2  1  2  t  n  g  s
-## 
-##     1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-##     2  0  1  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  1  0  0  0  0
-##     3  0  1  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-##     4  0  1  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-##     5  0  0  0  0  0  1  1  0  0  0  0  0  0  0  0  1  0  0  0  0  0  0  0
-##     6  0  1  0  0  0  1  1  0  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0
-##     7  0  0  0  0  0  0  0  0  0  0  0  1  0  0  0  0  1  0  0  0  0  0  0
-##     8  0  0  0  0  0  0  0  1  0  0  0  0  0  0  0  0  1  0  0  0  0  0  0
-##     9  0  0  0  0  0  1  1  0  0  0  0  0  0  0  0  1  0  0  0  1  0  0  0
-##    10  0  0  0  0  0  1  1  0  0  0  0  1  1  1  0  0  0  1  0  0  1  0  0</code></pre>
-</div>
-</div>
-<div id="simulate-outcome-using-logistic-regression" class="section level2">
-<h2><span class="header-section-number">0.3</span> Simulate outcome using logistic regression</h2>
-<div id="r-1" class="section level3">
-<h3><span class="header-section-number">0.3.1</span> R</h3>
-<pre class="r"><code>ns$pbleed=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
-                    .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
-                    .02*ns$raceblkoth- .3*ns$newcox2 )))
-
-ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
-
-rbind(percent=round(prop.table(table(ns$bleed)),2),
-      count=table(ns$bleed)) # quick and dirty way to get proportions</code></pre>
-<pre><code>##               0      1
-## percent    0.91   0.09
-## count   2618.00 264.00</code></pre>
-</div>
-<div id="sas-1" class="section level3">
-<h3><span class="header-section-number">0.3.2</span> SAS</h3>
-<!-- Note: I have to put libname in each SAS chunk because this is running it in batch mode.
-No recognition of data set in prior chunk.-->
-<pre class="sas"><code>libname dat &quot;c:\temp&quot;;
-DATA dat.ns;
-   SET dat.nsaid008b;
-   pbleed=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
-                    .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
-                    .02*raceblkoth- .3*newcox2 )));
-   call streaminit(1234);
-   bleed=rand(&quot;bernoulli&quot;,pbleed);   *simulate the observed outcome;
-run;
-
-proc freq data = dat.ns;
-    table bleed;
-run;</code></pre>
-<pre><code>##                             The FREQ Procedure
-## 
-##                                           Cumulative    Cumulative
-##         bleed    Frequency     Percent     Frequency      Percent
-##         ----------------------------------------------------------
-##             0        2591       89.90          2591        89.90  
-##             1         291       10.10          2882       100.00</code></pre>
-</div>
-</div>
-<div id="what-is-ey1-ey0-causal-risk-difference-and-ey1ey0-causal-risk-ratio." class="section level2">
-<h2><span class="header-section-number">0.4</span> What is E[Y(1)]-E[Y(0)], causal risk difference, and E[Y(1)]/E[Y(0)], causal risk ratio.</h2>
-<div id="r-2" class="section level3">
-<h3><span class="header-section-number">0.4.1</span> R</h3>
-<pre class="r"><code>pbleed.0=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
-                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
-                       .02*ns$raceblkoth)))
-
-pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
-                      .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
-                      .02*ns$raceblkoth - 0.3)))
-
-mean(pbleed.1)-mean(pbleed.0) # causal risk difference</code></pre>
-<pre><code>## [1] -0.02005892</code></pre>
-<pre class="r"><code>mean(pbleed.1)/mean(pbleed.0) # causal risk ratio</code></pre>
-<pre><code>## [1] 0.7890299</code></pre>
-</div>
-<div id="sas-2" class="section level3">
-<h3><span class="header-section-number">0.4.2</span> SAS</h3>
-<pre class="sas"><code>*Approach 2 - use the orginal dataset and add two predicted potential outcomes Y(1) and Y(2) as columns/variables;
-libname dat &quot;c:\temp&quot;;
-
-DATA dat.nsg;
-   SET dat.ns;
-   pbleed_1=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
-                       .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
-                       .02*raceblkoth -0.3*1)));  *E[Y(1)];
-   pbleed_0=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
-                       .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
-                       .02*raceblkoth -0.3*0)));  *E[Y(0)];
-RUN;
-
-*then use proc means to get causal RD and RR;
-
-proc means data = dat.nsg;
-     var pbleed_1 pbleed_0;
-     output out=b mean=upbleed_1 upbleed_0; run;
-
-DATA b1;
-    set b;
-    RD = upbleed_1 - upbleed_0;
-    RR = upbleed_1/upbleed_0; run;
-
-proc print data = b1; run;</code></pre>
-<pre><code>##                             The MEANS Procedure
-## 
-## Variable      N           Mean        Std Dev        Minimum        Maximum
-## ---------------------------------------------------------------------------
-## pbleed_1   2882      0.0750205      0.0939069      0.0030487      0.6769959
-## pbleed_0   2882      0.0950794      0.1125629      0.0041109      0.7388500
-## ---------------------------------------------------------------------------
-##  
-##                                                                            
-##  
-##                              upbleed_    upbleed_
-##   Obs    _TYPE_    _FREQ_        1           0           RD          RR
-## 
-##    1        0       2882     0.075021    0.095079    -0.020059    0.78903</code></pre>
-</div>
-</div>
-<div id="what-is-ey1x1-ey0x1" class="section level2">
-<h2><span class="header-section-number">0.5</span> What is E[Y(1)|X=1]-E[Y(0)|X=1]?</h2>
-<div id="r-3" class="section level3">
-<h3><span class="header-section-number">0.5.1</span> R</h3>
-<pre class="r"><code>mean(pbleed.1[ns$newcox2==1])-mean(pbleed.0[ns$newcox2==1])</code></pre>
-<pre><code>## [1] -0.0268157</code></pre>
 <pre class="sas"><code>
-*conditioning the dataset to the treated population;
-libname dat &quot;c:\temp&quot;;
+*Set a directory pointer;
+%LET dir = c:\temp;
+libname mle &quot;c:\temp&quot;;
 
-proc means data = dat.nsg;
-    where newcox2=1;
-     var pbleed_1 pbleed_0;
-     output out=me_trt mean=upbleed_1 upbleed_0;
-run;
+*Read excel data file;
+proc import out=a datafile=&quot;&amp;dir\hividu.csv&quot; dbms=csv replace; getnames=yes;
 
-DATA me_trt1;
-    set me_trt;
-    RD = upbleed_1 - upbleed_0;
-    RR = upbleed_1/upbleed_0;
-proc print data=me_trt1;
-    title &quot;among treated population&quot;; run;</code></pre>
-<pre><code>##                             The MEANS Procedure
+*Make new random id;
+data a; set a; 
+    call streaminit(123);
+    u=rand(&quot;uniform&quot;);
+proc sort data=a; by u;
+
+*Rename variables;
+data mle.b; set a; by u; * Note: I added a permanent dir to make this word in .Rmd file;
+
+* create delta, t and art variables;
+    if eventtype=0 then do; delta=0; t=t; art=.; end; *Censored w/out ART;
+    if eventtype=1 and dth=0 then do; delta=0; t=taidsdth; art=tarv; end; *Censored w/ART;
+    if eventtype=1 and dth=1 then do; delta=1; t=taidsdth; art=tarv; end; *Event (AIDS or death) w/ART;
+
+* FOLLOWUP NOTE: the following two lines seem redundant. Any reason for setting it up this way?;
+    if eventtype=2 and arv=0 then do; delta=1; t=taidsdth; art=.; end; *Event w/out ART;
+    if eventtype=2 and arv=1 then do; delta=1; t=taidsdth; art=.; end; *Event w/out ART, ART was after AIDS;
+
+    if t&gt;10 then do; *Admin censor at 10 years;
+        t=10; delta=0;
+        if art&gt;10 then art=.;
+    end;
+
+    if t&lt;10 and delta=0 then drop=1; else drop=0;
+    id=_n_;
+    idu=baseidu;
+    white=1-black;
+    age=ageatfda;
+    cd4=cd4nadir;
+    art=round(art, 0.001); *Round times to .001 of a year, or about 8h;
+    t=round(t, 0.001);
+    keep id idu white age cd4 drop delta art t;
+
+*Save as flat ASCII file;
+data _null_; set mle.b;
+    file &quot;&amp;dir\hividu15dec15.dat&quot;; 
+    put id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
+run; quit; run;
+
+proc contents data=mle.b; run;
+proc means data=mle.b; var _numeric_; run;</code></pre>
+<pre><code>##                           The CONTENTS Procedure
 ## 
-## Variable      N           Mean        Std Dev        Minimum        Maximum
-## ---------------------------------------------------------------------------
-## pbleed_1    240      0.1016708      0.1007706      0.0035757      0.6224593
-## pbleed_0    240      0.1284866      0.1193733      0.0048207      0.6899745
-## ---------------------------------------------------------------------------
+## Data Set Name        MLE.B                       Observations          1164
+## Member Type          DATA                        Variables             9   
+## Engine               V9                          Indexes               0   
+## Created              01/27/2016 16:54:59         Observation Length    72  
+## Last Modified        01/27/2016 16:54:59         Deleted Observations  0   
+## Protection                                       Compressed            NO  
+## Data Set Type                                    Sorted                NO  
+## Label                                                                      
+## Data Representation  WINDOWS_64                                            
+## Encoding             wlatin1  Western (Windows)                            
+## 
+## 
+##                     Engine/Host Dependent Information
+## 
+##               Data Set Page Size          65536             
+##               Number of Data Set Pages    2                 
+##               First Data Page             1                 
+##               Max Obs per Page            908               
+##               Obs in First Data Page      882               
+##               Number of Data Set Repairs  0                 
+##               ExtendObsCounter            YES               
+##               Filename                    c:\temp\b.sas7bdat
+##               Release Created             9.0401M1          
+##               Host Created                X64_8PRO          
+## 
+## 
+##                 Alphabetic List of Variables and Attributes
 ##  
-##                                                                            
-##  
-##                          among treated population
+##             #    Variable    Type    Len    Format     Informat
 ## 
-##                              upbleed_    upbleed_
-##   Obs    _TYPE_    _FREQ_        1           0           RD          RR
-## 
-##    1        0        240      0.10167     0.12849    -0.026816    0.79130</code></pre>
-</div>
-</div>
-<div id="what-is-ey1contanticoag1---ey0contanticoag1" class="section level2">
-<h2><span class="header-section-number">0.6</span> What is E[Y(1)|contanticoag=1] - E[Y(0)|contanticoag=1]?</h2>
-<div id="r-4" class="section level3">
-<h3><span class="header-section-number">0.6.1</span> R</h3>
-<pre class="r"><code>mean(pbleed.1[ns$contanticoag==1])-mean(pbleed.0[ns$contanticoag==1])</code></pre>
-<pre><code>## [1] -0.04778278</code></pre>
-</div>
-<div id="sas-3" class="section level3">
-<h3><span class="header-section-number">0.6.2</span> SAS</h3>
-<pre class="sas"><code>libname dat &quot;c:\temp&quot;;
-
-proc means data = dat.nsg;
-    where contanticoag=1;
-    var pbleed_1 pbleed_0;
-    output out=me_cont mean=upbleed_1 upbleed_0;
-run;
-
-DATA me_cont1;
-    set me_cont;
-    RD = upbleed_1 - upbleed_0;
-    RR = upbleed_1/upbleed_0;
-proc print data=me_cont1;
-    title &quot;among warfarin users&quot;; run;
-run;</code></pre>
-<pre><code>##                             The MEANS Procedure
-## 
-## Variable      N           Mean        Std Dev        Minimum        Maximum
-## ---------------------------------------------------------------------------
-## pbleed_1     11      0.2189069      0.1497809      0.0225326      0.4158095
-## pbleed_0     11      0.2666897      0.1759453      0.0301780      0.4900013
-## ---------------------------------------------------------------------------
-##  
-##                                                                            
-##  
-##                            among warfarin users
-## 
-##                              upbleed_    upbleed_
-##   Obs    _TYPE_    _FREQ_        1           0           RD          RR
-## 
-##    1        0        11       0.21891     0.26669    -0.047783    0.82083</code></pre>
-</div>
-</div>
-<div id="what-is-eytreat-on-if-on-warfarin-ey0" class="section level2">
-<h2><span class="header-section-number">0.7</span> What is E[Y(treat on if on warfarin)]-E[Y(0)]?</h2>
-<div id="r-5" class="section level3">
-<h3><span class="header-section-number">0.7.1</span> R</h3>
-<pre class="r"><code>newtreat=ifelse(ns$contanticoag==1,1,0)
-
-pbleed.0=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
-                      .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
-                      .02*ns$raceblkoth)))
-
-pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
-                      .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
-                      .02*ns$raceblkoth - 0.3*newtreat)))
-
-mean(pbleed.1)-mean(pbleed.0)</code></pre>
-<pre><code>## [1] -0.000182377</code></pre>
-</div>
-<div id="sas-4" class="section level3">
-<h3><span class="header-section-number">0.7.2</span> SAS</h3>
-<pre class="sas"><code>libname dat &quot;c:\temp&quot;;
-
-DATA nsh;
-   set dat.nsg;
-   if  contanticoag=1 then treat=1;
-   else treat=0;
-   pbleed_2=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 0.2*contaspirin + .7*arthrtis + .07*age + .3*male + 0.02*raceblkoth -0.3*treat)));  *E[Y(treated if on warfarin)];
-run;
-
-proc means data = nsh;
-     var pbleed_2 pbleed_0;
-     output out=me_war mean=upbleed_2 upbleed_0;
-run;
-
-DATA me_war1;
-    set me_war;
-    RD = upbleed_2 - upbleed_0;
-    RR = upbleed_2/upbleed_0;
-run;
-
-proc print data=me_war1;
-    title &quot;treated if only on warfarin&quot;;
-run;</code></pre>
-<pre><code>##                             The MEANS Procedure
-## 
-## Variable      N           Mean        Std Dev        Minimum        Maximum
-## ---------------------------------------------------------------------------
-## pbleed_2   2882      0.0948970      0.1121913      0.0041109      0.7388500
-## pbleed_0   2882      0.0950794      0.1125629      0.0041109      0.7388500
-## ---------------------------------------------------------------------------
-##  
-##                                                                            
-##  
-##                         treated if only on warfarin
-## 
-##                             upbleed_    upbleed_
-##  Obs    _TYPE_    _FREQ_        2           0            RD           RR
-## 
-##   1        0       2882     0.094897    0.095079    -.000182377    0.99808</code></pre>
-</div>
-</div>
-<div id="estimate-ey1-ey0-with-mle" class="section level2">
-<h2><span class="header-section-number">0.8</span> Estimate E[Y(1)]-E[Y(0)] with MLE?</h2>
-<div id="r-6" class="section level3">
-<h3><span class="header-section-number">0.8.1</span> R</h3>
-<p><strong>Estimate coefficients</strong></p>
-<pre class="r"><code>glm.out=glm(bleed~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth+newcox2,family=binomial,data=ns)
-
-coef(glm.out) # show coefficients from fitted generalized linear model</code></pre>
-<pre><code>##  (Intercept) contanticoag  tobacco_imp contsteroids  contaspirin 
-##  -6.86650464   1.23099748   1.03692269   0.28673489   0.37225040 
-##     arthrtis          age         male   raceblkoth      newcox2 
-##   0.64684675   0.07186027   0.35922778  -0.28377022  -0.13803245</code></pre>
-<p><strong>Predict outcome based on estimated coefficients from glm.out regression object</strong></p>
-<pre class="r"><code>ns.temp=ns
-ns.temp$newcox2=0
-pbleed.0=predict(glm.out,newdata=ns.temp,type=&quot;response&quot;)
-ns.temp$newcox2=1
-pbleed.1=predict(glm.out,newdata=ns.temp,type=&quot;response&quot;)
-
-mean(pbleed.1)-mean(pbleed.0)</code></pre>
-<pre><code>## [1] -0.009410001</code></pre>
-</div>
-<div id="sas-5" class="section level3">
-<h3><span class="header-section-number">0.8.2</span> SAS</h3>
-<pre class="sas"><code>
-libname dat &quot;c:\temp&quot;;
-
-ods select parameterestimates;
-ods output parameterestimates=betas(keep=parameter estimate);
-proc genmod data = dat.ns desc ;
-    model bleed = contanticoag tobacco_imp contsteroids contaspirin arthrtis age male raceblkoth newcox2/link=logit dist=bin;
-run;
-
-proc transpose data=betas out=betas2(drop=beta11) prefix=beta; *this makes the set of gamma horizontal;
-run;
-
-data ns_p;
-   set dat.ns;
-   if _N_=1 then set betas2;
-   pbleed_1=1/(1+exp(-(beta1 + beta2*contanticoag + beta3*tobacco_imp + beta4*contsteroids + 
-                       beta5*contaspirin + beta6*arthrtis + beta7*age + beta8*male + 
-                       beta9*raceblkoth + beta10*1)));  *E[Y(1)];
-   pbleed_0=1/(1+exp(-(beta1 + beta2*contanticoag + beta3*tobacco_imp + beta4*contsteroids + 
-                       beta5*contaspirin + beta6*arthrtis + beta7*age + beta8*male + 
-                       beta9*raceblkoth + beta10*0)));  *E[Y(0)];
-run;
-
-proc means data = ns_p;
-     var pbleed_1 pbleed_0;
-     output out=me_mle mean=upbleed_1 upbleed_0;
-run;
-
-DATA me_mle1;
-    set me_mle;
-    RD = upbleed_1 - upbleed_0;
-    RR = upbleed_1/upbleed_0;
-run; 
-
-proc print data=me_mle1;
-   title &quot;estimates with MLE&quot;;
-run;</code></pre>
-<pre><code>##                            The GENMOD Procedure
-## 
-##             Analysis Of Maximum Likelihood Parameter Estimates
-##  
-##                                Standard   Wald 95% Confidence         Wald
-## Parameter      DF   Estimate      Error          Limits         Chi-Square
-## 
-## Intercept       1    -6.4750     0.3133    -7.0890    -5.8610       427.22
-## contanticoag    1     1.1414     0.6959    -0.2225     2.5053         2.69
-## tobacco_imp     1     1.0828     0.1724     0.7449     1.4208        39.45
-## contsteroids    1     0.6673     0.6809    -0.6673     2.0019         0.96
-## contaspirin     1    -0.1608     0.3194    -0.7868     0.4652         0.25
-## arthrtis        1     0.7878     0.1353     0.5225     1.0530        33.89
-## age             1     0.0658     0.0046     0.0567     0.0749       200.12
-## male            1     0.3171     0.1348     0.0530     0.5813         5.54
-## raceblkoth      1     0.2502     0.1628    -0.0689     0.5693         2.36
-## newcox2         1    -0.4527     0.2397    -0.9226     0.0172         3.57
-## Scale           0     1.0000     0.0000     1.0000     1.0000             
-## 
-##                             Analysis Of Maximum
-##                            Likelihood Parameter
-##                                  Estimates
-##  
-##                          Parameter      Pr &gt; ChiSq
-## 
-##                          Intercept          &lt;.0001
-##                          contanticoag       0.1010
-##                          tobacco_imp        &lt;.0001
-##                          contsteroids       0.3271
-##                          contaspirin        0.6146
-##                          arthrtis           &lt;.0001
-##                          age                &lt;.0001
-##                          male               0.0186
-##                          raceblkoth         0.1244
-##                          newcox2            0.0590
-##                          Scale                    
-## 
-## NOTE: The scale parameter was held fixed.
+##             8    age         Num       8                       
+##             3    art         Num       8                       
+##             9    cd4         Num       8                       
+##             2    delta       Num       8                       
+##             4    drop        Num       8                       
+##             5    id          Num       8                       
+##             6    idu         Num       8                       
+##             1    t           Num       8    BEST12.    BEST32. 
+##             7    white       Num       8                       
 ##  
 ##                                                                            
 ##  
@@ -574,18 +385,819 @@ run;</code></pre>
 ## 
 ## Variable      N           Mean        Std Dev        Minimum        Maximum
 ## ---------------------------------------------------------------------------
-## pbleed_1   2882      0.0730658      0.0900286      0.0031921      0.6356902
-## pbleed_0   2882      0.1044772      0.1178504      0.0050106      0.7329076
-## ---------------------------------------------------------------------------
+## t          1164      6.0907216      3.8234075      0.0030000     10.0000000
+## delta      1164      0.4974227      0.5002083              0      1.0000000
+## art         671      2.6120611      2.0495385      0.0330000      9.8100000
+## drop       1164      0.1091065      0.3119068              0      1.0000000
+## id         1164    582.5000000    336.1621632      1.0000000        1164.00
+## idu        1164      0.3771478      0.4848807              0      1.0000000
+## white      1164      0.4226804      0.4941978              0      1.0000000
+## age        1164     36.4407216      8.1727327     17.0000000     73.0000000
+## cd4        1164    393.5515464    263.9804344              0        1933.00
+## ---------------------------------------------------------------------------</code></pre>
+</div>
+</div>
+<div id="program-2-table-1-and-table-2" class="section level2">
+<h2><span class="header-section-number">0.3</span> Program 2: Table 1 and Table 2</h2>
+<div id="r-1" class="section level3">
+<h3><span class="header-section-number">0.3.1</span> R</h3>
+<div id="table-1-continuous-by-idu" class="section level4">
+<h4><span class="header-section-number">0.3.1.1</span> Table 1 continuous, by IDU</h4>
+<pre class="r"><code>names(b) # What are column names in data frame &quot;b&quot;?</code></pre>
+<pre><code>## [1] &quot;t&quot;     &quot;cd4&quot;   &quot;age&quot;   &quot;white&quot; &quot;idu&quot;   &quot;id&quot;    &quot;drop&quot;  &quot;delta&quot; &quot;art&quot;</code></pre>
+<pre class="r"><code>cont.vars = c(&quot;age&quot;, &quot;cd4&quot;)
+t.one = CreateContTable(data=b, vars=cont.vars, strata=&quot;idu&quot;, test=F) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html or https://rpubs.com/kaz_yos/tableone-ext
+print(t.one, nonnormal=cont.vars)</code></pre>
+<pre><code>##                     Stratified by idu
+##                      0                       1                      
+##   n                  725                     439                    
+##   age (median [IQR])  33.00 [29.00, 39.00]    40.00 [35.00, 44.00]  
+##   cd4 (median [IQR]) 348.00 [216.00, 505.00] 352.00 [208.50, 522.00]</code></pre>
+</div>
+<div id="table-1-continuous-overall" class="section level4">
+<h4><span class="header-section-number">0.3.1.2</span> Table 1 continuous, overall</h4>
+<pre class="r"><code>t.one.t = CreateContTable(data=b, vars=cont.vars) 
+print(t.one.t, nonnormal=c(&quot;age&quot;, &quot;cd4&quot;))</code></pre>
+<pre><code>##                     
+##                      Overall                
+##   n                  1164                   
+##   age (median [IQR])  36.00 [31.00, 41.00]  
+##   cd4 (median [IQR]) 348.50 [212.75, 516.25]</code></pre>
+</div>
+</div>
+<div id="sas-1" class="section level3">
+<h3><span class="header-section-number">0.3.2</span> SAS</h3>
+<div id="table-1-continuous-by-idu-and-overall" class="section level4">
+<h4><span class="header-section-number">0.3.2.1</span> Table 1 continuous, by IDU and overall</h4>
+<pre class="sas"><code>  libname mle &quot;c:\temp&quot;;
+  data a; set mle.b; run;
+  
+  *First 20 records;
+  proc print data=a(obs=20) noobs; 
+    var id idu white age cd4 art drop delta t;
+    title &quot;First 20 records, WIHS IDU data&quot;;
+  
+  *Table 1, continuous;
+  proc sort data=a; by idu;
+  proc means data=a n median q1 q3 maxdec=1; by idu; 
+    var age cd4;
+    title &quot;Table 1, continuous variables, by IDU&quot;;
+  proc means data=a n median q1 q3 maxdec=1;
+    var age cd4;
+    title &quot;Table 1, continuous variables, overall&quot;;
+  
+  *Table 1, categorical;
+  proc freq data=a; 
+    tables white*idu/norow nopercent;
+    title &quot;Table 1, categorical variables, by IDU&quot;;
+  proc freq data=a; 
+    tables white;
+    title &quot;Table 1, categorical variables, overall&quot;;</code></pre>
+<pre><code>##                       First 20 records, WIHS IDU data
+## 
+## id    idu    white    age     cd4     art     drop    delta               t
+## 
+##  1     1       0       44     376     .         0       1             2.245
+##  2     1       1       32     392     .         0       1             1.213
+##  3     0       0       44     181    1.224      0       0                10
+##  4     1       0       35     526     .         0       1              1.24
+##  5     1       1       46     386     .         0       1             7.871
+##  6     0       1       29     285    2.207      0       1             6.593
+##  7     1       0       34     358     .         0       1             1.191
+##  8     0       1       39     708    2.300      0       1             5.098
+##  9     1       0       45     840     .         0       1             2.226
+## 10     0       0       47     274     .         0       1             8.761
+## 11     0       0       33     288     .         0       0                10
+## 12     1       1       48     213    2.316      0       0                10
+## 13     1       1       46     133    3.663      0       1             5.005
+## 14     0       1       28     431     .         0       1             1.903
+## 15     1       1       34    1095     .         0       1             1.862
+## 16     0       0       40     234    1.188      0       0                10
+## 17     0       1       26     477    1.684      0       0                10
+## 18     0       1       29     352    8.531      0       0                10
+## 19     0       1       38     338    0.841      0       1             1.339
+## 20     0       0       20    1231     .         0       0                10
 ##  
 ##                                                                            
 ##  
-##                             estimates with MLE
+##                    Table 1, continuous variables, by IDU
 ## 
-##                              upbleed_    upbleed_
-##   Obs    _TYPE_    _FREQ_        1           0           RD          RR
+## ---------------------------------- idu=0 ----------------------------------
 ## 
-##    1        0       2882     0.073066     0.10448    -0.031411    0.69935</code></pre>
+##                             The MEANS Procedure
+## 
+##                                                 Lower           Upper
+##      Variable       N          Median        Quartile        Quartile
+##      ----------------------------------------------------------------
+##      age          725            33.0            29.0            39.0
+##      cd4          725           348.0           216.0           505.0
+##      ----------------------------------------------------------------
+## 
+## 
+## ---------------------------------- idu=1 ----------------------------------
+## 
+##                                                 Lower           Upper
+##      Variable       N          Median        Quartile        Quartile
+##      ----------------------------------------------------------------
+##      age          439            40.0            35.0            44.0
+##      cd4          439           352.0           208.0           522.0
+##      ----------------------------------------------------------------
+##  
+##                                                                            
+##  
+##                   Table 1, continuous variables, overall
+## 
+##                             The MEANS Procedure
+## 
+##                                                 Lower           Upper
+##      Variable       N          Median        Quartile        Quartile
+##      ----------------------------------------------------------------
+##      age         1164            36.0            31.0            41.0
+##      cd4         1164           348.5           212.5           516.5
+##      ----------------------------------------------------------------
+##  
+##                                                                            
+##  
+##                   Table 1, categorical variables, by IDU
+## 
+##                             The FREQ Procedure
+## 
+##                            Table of white by idu
+## 
+##                     white     idu
+## 
+##                     Frequency|
+##                     Col Pct  |       0|       1|  Total
+##                     ---------+--------+--------+
+##                            0 |    399 |    273 |    672
+##                              |  55.03 |  62.19 |
+##                     ---------+--------+--------+
+##                            1 |    326 |    166 |    492
+##                              |  44.97 |  37.81 |
+##                     ---------+--------+--------+
+##                     Total         725      439     1164
+##  
+##                                                                            
+##  
+##                   Table 1, categorical variables, overall
+## 
+##                             The FREQ Procedure
+## 
+##                                           Cumulative    Cumulative
+##         white    Frequency     Percent     Frequency      Percent
+##         ----------------------------------------------------------
+##             0         672       57.73           672        57.73  
+##             1         492       42.27          1164       100.00</code></pre>
+</div>
+</div>
+<div id="r-2" class="section level3">
+<h3><span class="header-section-number">0.3.3</span> R</h3>
+<div id="table-1-categorical-by-idu" class="section level4">
+<h4><span class="header-section-number">0.3.3.1</span> Table 1 categorical, by IDU</h4>
+<pre class="r"><code>names(b) # What are column names in data frame &quot;b&quot;?</code></pre>
+<pre><code>## [1] &quot;t&quot;     &quot;cd4&quot;   &quot;age&quot;   &quot;white&quot; &quot;idu&quot;   &quot;id&quot;    &quot;drop&quot;  &quot;delta&quot; &quot;art&quot;</code></pre>
+<pre class="r"><code>cat.vars = c(&quot;white&quot;)
+t.one = CreateCatTable(data=b, vars=cat.vars, strata=&quot;idu&quot;, test=F)
+t.one</code></pre>
+<pre><code>##                Stratified by idu
+##                 0           1          
+##   n             725         439        
+##   white = 1 (%) 326 (45.0)  166 (37.8)</code></pre>
+</div>
+<div id="table-1-categorical-overall" class="section level4">
+<h4><span class="header-section-number">0.3.3.2</span> Table 1 categorical, overall</h4>
+<pre class="r"><code>cat.vars = c(&quot;white&quot;)
+t.one.t = CreateCatTable(data=b, vars=cat.vars, test=F)
+t.one.t</code></pre>
+<pre><code>##                
+##                 Overall    
+##   n             1164       
+##   white = 1 (%) 492 (42.3)</code></pre>
+</div>
+</div>
+<div id="sas-2" class="section level3">
+<h3><span class="header-section-number">0.3.4</span> SAS</h3>
+<div id="table-1-categorical-by-idu-and-overall" class="section level4">
+<h4><span class="header-section-number">0.3.4.1</span> Table 1, categorical by IDU and overall</h4>
+<pre class="sas"><code>  libname mle &quot;c:\temp&quot;;
+  data a; set mle.b; run;
+  
+  *Table 1, categorical;
+  proc freq data=a; 
+    tables white*idu/norow nopercent;
+    title &quot;Table 1, categorical variables, by IDU&quot;;
+  proc freq data=a; 
+    tables white;
+    title &quot;Table 1, categorical variables, overall&quot;;
+  run;</code></pre>
+<pre><code>##                   Table 1, categorical variables, by IDU
+## 
+##                             The FREQ Procedure
+## 
+##                            Table of white by idu
+## 
+##                     white     idu
+## 
+##                     Frequency|
+##                     Col Pct  |       0|       1|  Total
+##                     ---------+--------+--------+
+##                            0 |    399 |    273 |    672
+##                              |  55.03 |  62.19 |
+##                     ---------+--------+--------+
+##                            1 |    326 |    166 |    492
+##                              |  44.97 |  37.81 |
+##                     ---------+--------+--------+
+##                     Total         725      439     1164
+##  
+##                                                                            
+##  
+##                   Table 1, categorical variables, overall
+## 
+##                             The FREQ Procedure
+## 
+##                                           Cumulative    Cumulative
+##         white    Frequency     Percent     Frequency      Percent
+##         ----------------------------------------------------------
+##             0         672       57.73           672        57.73  
+##             1         492       42.27          1164       100.00</code></pre>
+</div>
+</div>
+<div id="r-3" class="section level3">
+<h3><span class="header-section-number">0.3.5</span> R</h3>
+<div id="table-2-disposition" class="section level4">
+<h4><span class="header-section-number">0.3.5.1</span> Table 2, disposition</h4>
+<pre class="r"><code>CreateCatTable(vars = &quot;delta&quot;, strata=&quot;drop&quot;, data = b, test=F)</code></pre>
+<pre><code>##                Stratified by drop
+##                 0           1       
+##   n             1037        127     
+##   delta = 1 (%) 579 (55.8)  0 (0.0)</code></pre>
+</div>
+</div>
+<div id="sas-3" class="section level3">
+<h3><span class="header-section-number">0.3.6</span> SAS</h3>
+<div id="table-2-disposition-1" class="section level4">
+<h4><span class="header-section-number">0.3.6.1</span> Table 2, disposition</h4>
+<pre class="sas"><code>  libname mle &quot;c:\temp&quot;;
+  data a; set mle.b; run;
+  *Table 2, disposition;
+  proc freq; tables delta*drop; title &quot;Table 2, disposition&quot;;
+  run; quit; run;</code></pre>
+<pre><code>##                            Table 2, disposition
+## 
+##                             The FREQ Procedure
+## 
+##                           Table of delta by drop
+## 
+##                     delta     drop
+## 
+##                     Frequency|
+##                     Percent  |
+##                     Row Pct  |
+##                     Col Pct  |       0|       1|  Total
+##                     ---------+--------+--------+
+##                            0 |    458 |    127 |    585
+##                              |  39.35 |  10.91 |  50.26
+##                              |  78.29 |  21.71 |
+##                              |  44.17 | 100.00 |
+##                     ---------+--------+--------+
+##                            1 |    579 |      0 |    579
+##                              |  49.74 |   0.00 |  49.74
+##                              | 100.00 |   0.00 |
+##                              |  55.83 |   0.00 |
+##                     ---------+--------+--------+
+##                     Total        1037      127     1164
+##                                 89.09    10.91   100.00</code></pre>
+</div>
+</div>
+</div>
+<div id="program-3-maximum-likelihood" class="section level2">
+<h2><span class="header-section-number">0.4</span> Program 3: Maximum likelihood</h2>
+<div id="injection-drug-use-by-aids-or-death" class="section level3">
+<h3><span class="header-section-number">0.4.1</span> Injection drug use by AIDS or death</h3>
+<div id="r-4" class="section level4">
+<h4><span class="header-section-number">0.4.1.1</span> R</h4>
+<pre class="r"><code>CreateCatTable(vars = &quot;idu&quot;, strata=&quot;delta&quot;, data = b, test=F)</code></pre>
+<pre><code>##              Stratified by delta
+##               0           1          
+##   n           585         579        
+##   idu = 1 (%) 167 (28.5)  272 (47.0)</code></pre>
+</div>
+<div id="sas-4" class="section level4">
+<h4><span class="header-section-number">0.4.1.2</span> SAS</h4>
+<pre class="sas"><code>  libname mle &quot;c:\temp&quot;;
+  data a; set mle.b; run;
+  *Simplify to a binary outcome, delta;
+  proc freq data=a; 
+    tables idu*delta;
+    title &quot;Injection drug use by AIDS or death&quot;;
+  run;</code></pre>
+<pre><code>##                     Injection drug use by AIDS or death
+## 
+##                             The FREQ Procedure
+## 
+##                            Table of idu by delta
+## 
+##                     idu       delta
+## 
+##                     Frequency|
+##                     Percent  |
+##                     Row Pct  |
+##                     Col Pct  |       0|       1|  Total
+##                     ---------+--------+--------+
+##                            0 |    418 |    307 |    725
+##                              |  35.91 |  26.37 |  62.29
+##                              |  57.66 |  42.34 |
+##                              |  71.45 |  53.02 |
+##                     ---------+--------+--------+
+##                            1 |    167 |    272 |    439
+##                              |  14.35 |  23.37 |  37.71
+##                              |  38.04 |  61.96 |
+##                              |  28.55 |  46.98 |
+##                     ---------+--------+--------+
+##                     Total         585      579     1164
+##                                 50.26    49.74   100.00</code></pre>
+</div>
+</div>
+<div id="ml-by-logistic" class="section level3">
+<h3><span class="header-section-number">0.4.2</span> ML by logistic</h3>
+<div id="r-5" class="section level4">
+<h4><span class="header-section-number">0.4.2.1</span> R</h4>
+<pre class="r"><code>summary(glm(delta ~ idu, family=binomial(link = &quot;logit&quot;), data=b))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = delta ~ idu, family = binomial(link = &quot;logit&quot;), 
+##     data = b)
+## 
+## Deviance Residuals: 
+##    Min      1Q  Median      3Q     Max  
+## -1.390  -1.049  -1.049   1.311   1.311  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -0.30863    0.07516  -4.106 4.02e-05 ***
+## idu          0.79644    0.12375   6.436 1.23e-10 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1613.6  on 1163  degrees of freedom
+## Residual deviance: 1571.2  on 1162  degrees of freedom
+## AIC: 1575.2
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+<div id="sas-5" class="section level4">
+<h4><span class="header-section-number">0.4.2.2</span> SAS</h4>
+<p>Note: adding genmod in here as well.</p>
+<pre class="sas"><code>  libname mle &quot;c:\temp&quot;;
+  data a; set mle.b; run;
+  *ML by logistic;
+  proc logistic data=a desc; 
+    model delta=idu;
+    ods select modelinfo fitstatistics parameterestimates;
+    title &quot;ML by logistic procedure&quot;;
+  run;
+  
+  * ML by genmod;
+  proc genmod data=a desc; 
+    model delta=idu/d=b;
+    ods select modelinfo modelfit parameterestimates;
+    title &quot;ML by genmod procedure&quot;;
+    run; quit;</code></pre>
+<pre><code>##                          ML by logistic procedure
+## 
+##                           The LOGISTIC Procedure
+## 
+##                             Model Information
+## 
+##               Data Set                      WORK.A          
+##               Response Variable             delta           
+##               Number of Response Levels     2               
+##               Model                         binary logit    
+##               Optimization Technique        Fisher's scoring
+## 
+## 
+##                            Model Fit Statistics
+##  
+##                                                Intercept
+##                                 Intercept            and
+##                   Criterion          Only     Covariates
+## 
+##                   AIC            1615.616       1575.226
+##                   SC             1620.675       1585.345
+##                   -2 Log L       1613.616       1571.226
+## 
+## 
+##                  Analysis of Maximum Likelihood Estimates
+##  
+##                                    Standard          Wald
+##     Parameter    DF    Estimate       Error    Chi-Square    Pr &gt; ChiSq
+## 
+##     Intercept     1     -0.3086      0.0752       16.8602        &lt;.0001
+##     idu           1      0.7964      0.1238       41.4194        &lt;.0001
+##  
+##                                                                            
+##  
+##                           ML by genmod procedure
+## 
+##                            The GENMOD Procedure
+## 
+##                             Model Information
+## 
+##                       Data Set                WORK.A
+##                       Distribution          Binomial
+##                       Link Function            Logit
+##                       Dependent Variable       delta
+## 
+## 
+##                   Criteria For Assessing Goodness Of Fit
+##  
+##      Criterion                     DF           Value        Value/DF
+## 
+##      Log Likelihood                         -785.6131                
+##      Full Log Likelihood                    -785.6131                
+##      AIC (smaller is better)                1575.2261                
+##      AICC (smaller is better)               1575.2365                
+##      BIC (smaller is better)                1585.3454                
+## 
+## 
+##             Analysis Of Maximum Likelihood Parameter Estimates
+##  
+##                               Standard   Wald 95% Confidence         Wald
+##   Parameter   DF   Estimate      Error          Limits         Chi-Square
+## 
+##   Intercept    1    -0.3086     0.0752    -0.4560    -0.1613        16.86
+##   idu          1     0.7964     0.1238     0.5539     1.0390        41.42
+##   Scale        0     1.0000     0.0000     1.0000     1.0000             
+## 
+##                            Analysis Of Maximum
+##                            Likelihood Parameter
+##                                 Estimates
+##  
+##                           Parameter   Pr &gt; ChiSq
+## 
+##                           Intercept       &lt;.0001
+##                           idu             &lt;.0001
+##                           Scale                 
+## 
+## NOTE: The scale parameter was held fixed.</code></pre>
+</div>
+</div>
+<div id="ml-by-non-linear-mixed-model" class="section level3">
+<h3><span class="header-section-number">0.4.3</span> ML by non-linear mixed model</h3>
+<div id="r-6" class="section level4">
+<h4><span class="header-section-number">0.4.3.1</span> R</h4>
+<p>Background info for the optim function use</p>
+<p><em>Logistic regression model</em></p>
+<p><span class="math">\[
+  \text{logit }P(Y_i=1|X) = X_i\beta = \beta_0 + \beta_1 \cdot x_{i}
+\]</span></p>
+<p>with Y <span class="math">\(\sim Bin(n,p)\)</span> with n=1 and</p>
+<p><span class="math">\[
+  P(Y=y) = {n \choose y} p^y(1-p)^{n-y}
+\]</span></p>
+<p>The log likelihood for the logistic model would be as follows:</p>
+
+<p>also, with the logit link, <span class="math">\[
+ \text{logit(p) =} \beta_0 + \beta_1 x_i \text{ = lp} \text{ and}
+\]</span></p>
+<p><span class="math">\[
+  \text{p = } (1+exp(-lp))^{-1}
+\]</span></p>
+<p>So the final function to maximize with respect to <span class="math">\(\beta_0\)</span> and <span class="math">\(\beta_1\)</span> is:</p>
+<p><span class="math">\[
+  \sum_{i=1}^{n}[y_i \cdot log\left((1+exp(-lp))^{-1}\right) + (1-y_i) \cdot log\left(1 - (1+exp(-lp))^{-1}\right)]
+\]</span></p>
+<pre class="r"><code># ML for the observed data
+# now set up likelihood function for logistic regression so you can put it in the optim function
+# ##################################################
+
+LL.logistic.reg = function(beta, x, y) {
+  lp = x %*% beta
+  return(-sum(
+    y*(log((1+exp(-lp))^(-1))) + (1-y)*(log(1 - (1+exp(-lp))^(-1)))
+  )
+  ) 
+}
+
+# initial set of parameters
+start.beta = c(0, 1) # arbitrary starting parameters
+
+x.2 = cbind(rep(1,length(b$idu)), b$idu) # add an intercept to x matrix
+
+# minimize the (negative) log-likelihood to get the logit fit
+o.logit = optim(start.beta, LL.logistic.reg,
+                   x = x.2, y = b$delta, 
+                   method = 'BFGS', 
+                   hessian=TRUE) # see http://stats.stackexchange.com/questions/81000/calculate-coefficients-in-a-logistic-regression-with-r
+o.logit$par</code></pre>
+<pre><code>## [1] -0.3086206  0.7963172</code></pre>
+<pre class="r"><code># variance: see http://stats.stackexchange.com/questions/27033/in-r-given-an-output-from-optim-with-a-hessian-matrix-how-to-calculate-paramet
+fisher_info = solve(o.logit$hessian)
+prop.sigma = sqrt(diag(fisher_info))
+upper = o.logit$par + 1.96*prop.sigma
+lower = o.logit$par - 1.96*prop.sigma
+interval&lt;-data.frame(value = o.logit$par, upper=upper, lower=lower)
+interval</code></pre>
+<pre><code>##        value      upper      lower
+## 1 -0.3086206 -0.1612987 -0.4559425
+## 2  0.7963172  1.0388659  0.5537685</code></pre>
+<pre class="r"><code>m.1 = glm(delta ~ idu, data=b, family=&quot;binomial&quot;) # double check
+cbind(coef(m.1), confint(m.1))</code></pre>
+<pre><code>## Waiting for profiling to be done...</code></pre>
+<pre><code>##                             2.5 %     97.5 %
+## (Intercept) -0.3086337 -0.4565754 -0.1618019
+## idu          0.7964419  0.5549434  1.0402227</code></pre>
+<pre class="r"><code># Plot likelihood
+# .........................
+
+LL.logistic.reg.rev = function(beta) {
+  lp = x.2 %*% beta
+  return(sum(
+    b$delta*(log((1+exp(-lp))^(-1))) + (1-b$delta)*(log(1 - (1+exp(-lp))^(-1)))
+  )
+  ) 
+}
+
+beta.vals = seq(-1, 5, by=0.1)
+ll.dat.1 = apply(cbind(rep(o.logit$par[1],length(beta.vals)), beta.vals), 1, LL.logistic.reg.rev) # loop through various values for beta and get likelihood, 
+# need to start with the estimated intercept...
+head(ll.dat.1)</code></pre>
+<pre><code>## [1] -954.9407 -937.4537 -920.7439 -904.8530 -889.8218 -875.6892</code></pre>
+<pre class="r"><code>ll.dat.2 = data.frame(cbind(beta.vals, ll.dat.1))
+head(ll.dat.2)</code></pre>
+<pre><code>##   beta.vals  ll.dat.1
+## 1      -1.0 -954.9407
+## 2      -0.9 -937.4537
+## 3      -0.8 -920.7439
+## 4      -0.7 -904.8530
+## 5      -0.6 -889.8218
+## 6      -0.5 -875.6892</code></pre>
+<pre class="r"><code># see http://stackoverflow.com/questions/29642867/drawing-a-tangent-to-the-plot-and-finding-the-x-intercept-using-r
+# for plotting tangents
+
+beta.plot.val = o.logit$par[2]
+spl = smooth.spline(ll.dat.2$ll.dat.1 ~ ll.dat.2$beta.vals )
+pred0 = predict(spl, x=beta.plot.val, deriv=0); pred0</code></pre>
+<pre><code>## $x
+## [1] 0.7963172
+## 
+## $y
+## [1] -785.613</code></pre>
+<pre class="r"><code>pred1 &lt;- predict(spl, x=beta.plot.val, deriv=1); pred1</code></pre>
+<pre><code>## $x
+## [1] 0.7963172
+## 
+## $y
+## [1] 0.01133466</code></pre>
+<pre class="r"><code># see http://docs.ggplot2.org/current/geom_segment.html
+ggplot(data.frame(ll.dat.2), aes(x=beta.vals, y=ll.dat.1)) +
+  geom_line() +
+  geom_segment(aes(x=pred0$x, y=pred0$y, xend=pred0$x+1, yend = pred0$y + pred1$y*1 ,  
+                   arrow = arrow(length = unit(2, &quot;cm&quot;), ends=&quot;last&quot;, type=&quot;closed&quot;))) +
+  geom_point(aes(x=pred0$x, y=pred0$y)) +
+  ylab(&quot;Likelihood&quot;) + xlab(expression(beta)) +
+  theme_bw() +
+  ggtitle(&quot;Plot of maximum likelihood values by beta coefficient \nvalues for the sample logistic regression model.&quot;)</code></pre>
+<p><img src="data:image/png;base64,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" title alt width="672" /></p>
+</div>
+<div id="sas-6" class="section level4">
+<h4><span class="header-section-number">0.4.3.2</span> SAS</h4>
+<pre class="sas"><code>  libname mle &quot;c:\temp&quot;;
+  data a; set mle.b; run;
+*ML by nlmixed;
+proc nlmixed data=a; 
+    parms b0 b1 0;
+    mu=1/(1+exp(-(b0+b1*idu)));
+    logl=delta*log(mu)+(1-delta)*log(1-mu);
+    model delta~general(logl);
+    ods select specifications fitstatistics parameterestimates;
+    title &quot;ML by nlmixed procedure&quot;;
+    run; quit;</code></pre>
+<pre><code>##                           ML by nlmixed procedure
+## 
+##                            The NLMIXED Procedure
+## 
+##                               Specifications
+## 
+##      Data Set                                    WORK.A              
+##      Dependent Variable                          delta               
+##      Distribution for Dependent Variable         General             
+##      Optimization Technique                      Dual Quasi-Newton   
+##      Integration Method                          None                
+## 
+## 
+##                               Fit Statistics
+## 
+##                  -2 Log Likelihood                 1571.2
+##                  AIC (smaller is better)           1575.2
+##                  AICC (smaller is better)          1575.2
+##                  BIC (smaller is better)           1585.3
+## 
+## 
+##                            Parameter Estimates
+##  
+##                       Standard
+##  Parameter  Estimate     Error    DF  t Value  Pr &gt; |t|   Alpha     Lower
+## 
+##  b0          -0.3086   0.07516  1164    -4.11    &lt;.0001    0.05   -0.4561
+##  b1           0.7964    0.1238  1164     6.44    &lt;.0001    0.05    0.5536
+## 
+##                             Parameter Estimates
+##  
+##                       Parameter     Upper    Gradient
+## 
+##                       b0          -0.1612    4.085E-6
+##                       b1           1.0392    -6.37E-9</code></pre>
+</div>
+</div>
+<div id="profile-ml" class="section level3">
+<h3><span class="header-section-number">0.4.4</span> Profile ML</h3>
+<div id="r-7" class="section level4">
+<h4><span class="header-section-number">0.4.4.1</span> R</h4>
+<pre class="r"><code># Profile ML for beta_1
+# ..............................
+b1.prep = c(0.796442, seq(0,5,by=0.2))
+#df.3 = expand.grid(df.2[,c(&quot;x&quot;,&quot;y&quot;)], b1=b1.prep)
+
+b.3 = cbind(b[rep(1:nrow(b), times=length(b1.prep)),],
+             b1=rep(b1.prep, each=nrow(b))) # see http://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
+
+nrow(b) # should be 30 times 27 (length of b1.prep) = 810; # note: fix this. wrong.</code></pre>
+<pre><code>## [1] 1164</code></pre>
+<pre class="r"><code>b.3$offset = with(b.3, {b1*idu})
+head(b.3)</code></pre>
+<pre><code>##          t cd4 age white idu id drop delta   art       b1   offset
+## 478  6.300  99  24     0   0  1    0     1 1.495 0.796442 0.000000
+## 74   0.400 500  32     1   1  2    0     1    NA 0.796442 0.796442
+## 740 10.000 620  27     0   0  3    0     0 2.735 0.796442 0.000000
+## 718 10.000 547  40     1   0  4    0     0 2.585 0.796442 0.000000
+## 911 10.000 516  30     0   0  5    0     0 4.356 0.796442 0.000000
+## 831  3.472 462  34     1   1  6    0     1    NA 0.796442 0.796442</code></pre>
+<pre class="r"><code>b.3.split = split(b.3, b.3$b1)
+
+glm.3 = lapply(b.3.split, function(z) glm(delta~1, offset=offset, family=&quot;binomial&quot;, data=z)) # do regression for each unique value of b1. See http://stackoverflow.com/questions/9014308/r-extract-regression-coefficients-from-multiply-regression-via-lapply-command
+coef(glm.3[[1]])</code></pre>
+<pre><code>## (Intercept) 
+## -0.01030937</code></pre>
+<pre class="r"><code>deviance(glm.3[[1]]) # -2ll</code></pre>
+<pre><code>## [1] 1613.616</code></pre>
+<pre class="r"><code>logLik(glm.3[[1]]) # ll</code></pre>
+<pre><code>## 'log Lik.' -806.8079 (df=1)</code></pre>
+<pre class="r"><code>glm.3.int = sapply(glm.3, coef) # extract regression coefficients from glm.3 object, just intercepts
+head(glm.3.int)</code></pre>
+<pre><code>##        0.(Intercept)      0.2.(Intercept)      0.4.(Intercept) 
+##          -0.01030937          -0.08572467          -0.16095741 
+##      0.6.(Intercept) 0.796442.(Intercept)      0.8.(Intercept) 
+##          -0.23577578          -0.30863371          -0.30994618</code></pre>
+<pre class="r"><code>length(glm.3.int) # check</code></pre>
+<pre><code>## [1] 27</code></pre>
+<pre class="r"><code>glm.3.ll = sapply(glm.3, logLik) # extract ll from glm.3 object, just intercepts
+head(glm.3.ll)</code></pre>
+<pre><code>##         0       0.2       0.4       0.6  0.796442       0.8 
+## -806.8079 -797.4481 -790.8140 -786.8820 -785.6131 -785.6135</code></pre>
+<pre class="r"><code>hess = data.frame(b1 = sort(b1.prep), logl=glm.3.ll)
+
+# add first and second derivatives
+spl = with(hess, smooth.spline(logl ~ b1 ))
+pred0 = predict(spl,  deriv=0); #pred0
+pred1 = predict(spl, deriv=1); #pred1
+pred2 = predict(spl, deriv=2); #pred2
+
+hess$first = pred1$y
+hess$second = pred2$y
+hess$seb1 = with(hess, sqrt(1/-second))</code></pre>
+<pre><code>## Warning in sqrt(1/-second): NaNs produced</code></pre>
+<pre class="r"><code>hess</code></pre>
+<pre><code>##                b1       logl         first       second      seb1
+## 0        0.000000  -806.8079  4.967526e+01   0.13707570       NaN
+## 0.2      0.200000  -797.4481  4.103158e+01 -86.57389601 0.1074748
+## 0.4      0.400000  -790.8140  2.610684e+01 -62.67354918 0.1263159
+## 0.6      0.600000  -786.8820  1.303275e+01 -68.06734215 0.1212078
+## 0.796442 0.796442  -785.6131 -7.826284e-04 -64.62863386 0.1243906
+## 0.8      0.800000  -785.6135 -2.319375e-01 -65.30665111 0.1237432
+## 1        1.000000  -786.9547 -1.312310e+01 -63.60500382 0.1253875
+## 1.2      1.200000  -790.8380 -2.564281e+01 -61.59209797 0.1274200
+## 1.4      1.400000  -797.1830 -3.773093e+01 -59.28911354 0.1298711
+## 1.6      1.600000  -805.8979 -4.933333e+01 -56.73485079 0.1327624
+## 1.8      1.800000  -816.8809 -6.040345e+01 -53.96638751 0.1361251
+## 2        2.000000  -830.0213 -7.090240e+01 -51.02307574 0.1399963
+## 2.2      2.200000  -845.2017 -8.079915e+01 -47.94442891 0.1444212
+## 2.4      2.400000  -862.2992 -9.007058e+01 -44.76982907 0.1494539
+## 2.6      2.600000  -881.1872 -9.870135e+01 -41.53793110 0.1551592
+## 2.8      2.800000  -901.7365 -1.066838e+02 -38.28633362 0.1616137
+## 3        3.000000  -923.8175 -1.140175e+02 -35.05121821 0.1689073
+## 3.2      3.200000  -947.3008 -1.207094e+02 -31.86730177 0.1771444
+## 3.4      3.400000  -972.0593 -1.267728e+02 -28.76664712 0.1864470
+## 3.6      3.600000  -997.9693 -1.322276e+02 -25.78140876 0.1969458
+## 3.8      3.800000 -1024.9114 -1.370989e+02 -22.93134129 0.2088263
+## 4        4.000000 -1052.7721 -1.414188e+02 -20.26755403 0.2221260
+## 4.2      4.200000 -1081.4441 -1.452161e+02 -17.70589727 0.2376518
+## 4.4      4.400000 -1110.8277 -1.485512e+02 -15.64540585 0.2528172
+## 4.6      4.600000 -1140.8309 -1.513815e+02 -12.65739310 0.2810787
+## 4.8      4.800000 -1171.3701 -1.540581e+02 -14.10815106 0.2662349
+## 5        5.000000 -1202.3696 -1.554667e+02   0.02156132       NaN</code></pre>
+</div>
+<div id="sas-7" class="section level4">
+<h4><span class="header-section-number">0.4.4.2</span> SAS</h4>
+<pre class="sas"><code>  %let dir=c:\temp;
+  libname mle &quot;c:\temp&quot;;
+  data a; set mle.b; run;
+
+  * profile ML;
+  data b; 
+    set a;
+    do b1=0 to 1 by .02, .796442;
+        b1idu=b1*idu;
+        output;
+    end;
+  proc sort data=b; 
+    by b1;
+  run; ods select none; run; *Turn off output;
+  proc genmod data=b desc; 
+    by b1;
+    model delta=/d=b offset=b1idu;
+    ods output modelfit=c;
+  run; ods select all; run; *Turn on output;
+  data d; 
+    set c;
+    by b1;
+    logl=value;
+    format logl stderr 10.4;
+    if criterion='Log Likelihood' then output;
+    keep b1 logl;
+  
+  *plot profile loglikelihood;
+  *Note: left this part out of the R markdown output;
+  * See SAS program titled, &quot;program3.19jan16.sas&quot;;
+  
+  *approximate derivatives using cubic splines;
+  proc expand data=d out=e; convert logl=first/observed=(beginning,derivative); id b1;
+  proc expand data=e out=f; convert first=second/observed=(beginning,derivative); id b1;
+  data f; 
+    set f;
+    se=sqrt(1/-second);
+  proc print data=f noobs; 
+    var b1 logl first second se;
+    title '1st and 2nd approximate derivitives';</code></pre>
+<pre><code>##                     1st and 2nd approximate derivitives
+## 
+##           b1            logl         first        second       se
+## 
+##        0.00000     -806.8079       53.6315      -68.3584    0.12095
+##        0.02000     -805.7489       52.2643      -68.3559    0.12095
+##        0.04000     -804.7173       50.8972      -68.3514    0.12096
+##        0.06000     -803.7130       49.5303      -68.3433    0.12096
+##        0.08000     -802.7361       48.1635      -68.3308    0.12097
+##        0.10000     -801.7865       46.7971      -68.3144    0.12099
+##        0.12000     -800.8642       45.4310      -68.2940    0.12101
+##        0.14000     -799.9692       44.0653      -68.2695    0.12103
+##        0.16000     -799.1016       42.7002      -68.2410    0.12105
+##        0.18000     -798.2612       41.3357      -68.2085    0.12108
+##        0.20000     -797.4481       39.9719      -68.1720    0.12111
+##        0.22000     -796.6623       38.6089      -68.1315    0.12115
+##        0.24000     -795.9038       37.2467      -68.0870    0.12119
+##        0.26000     -795.1725       35.8854      -68.0385    0.12123
+##        0.28000     -794.4683       34.5252      -67.9860    0.12128
+##        0.30000     -793.7914       33.1660      -67.9296    0.12133
+##        0.32000     -793.1417       31.8080      -67.8692    0.12138
+##        0.34000     -792.5191       30.4513      -67.8049    0.12144
+##        0.36000     -791.9236       29.0958      -67.7366    0.12150
+##        0.38000     -791.3553       27.7418      -67.6644    0.12157
+##        0.40000     -790.8140       26.3893      -67.5883    0.12164
+##        0.42000     -790.2997       25.0383      -67.5083    0.12171
+##        0.44000     -789.8124       23.6890      -67.4245    0.12178
+##        0.46000     -789.3521       22.3414      -67.3368    0.12186
+##        0.48000     -788.9187       20.9955      -67.2452    0.12195
+##        0.50000     -788.5123       19.6516      -67.1498    0.12203
+##        0.52000     -788.1327       18.3096      -67.0506    0.12212
+##        0.54000     -787.7799       16.9696      -66.9475    0.12222
+##        0.56000     -787.4539       15.6317      -66.8407    0.12231
+##        0.58000     -787.1546       14.2960      -66.7302    0.12242
+##        0.60000     -786.8820       12.9625      -66.6159    0.12252
+##        0.62000     -786.6361       11.6314      -66.4979    0.12263
+##        0.64000     -786.4167       10.3026      -66.3762    0.12274
+##        0.66000     -786.2240        8.9763      -66.2508    0.12286
+##        0.68000     -786.0577        7.6526      -66.1217    0.12298
+##        0.70000     -785.9178        6.3315      -65.9891    0.12310
+##        0.72000     -785.8044        5.0131      -65.8528    0.12323
+##        0.74000     -785.7173        3.6974      -65.7129    0.12336
+##        0.76000     -785.6565        2.3846      -65.5695    0.12349
+##        0.78000     -785.6219        1.0747      -65.4224    0.12363
+##        0.79644     -785.6131       -0.0000      -65.2992    0.12375
+##        0.80000     -785.6135       -0.2323      -65.2721    0.12378
+##        0.82000     -785.6312       -1.5362      -65.1180    0.12392
+##        0.84000     -785.6749       -2.8370      -64.9606    0.12407
+##        0.86000     -785.7446       -4.1346      -64.7997    0.12423
+##        0.88000     -785.8403       -5.4290      -64.6354    0.12438
+##        0.90000     -785.9618       -6.7200      -64.4678    0.12455
+##        0.92000     -786.1090       -8.0076      -64.2967    0.12471
+##        0.94000     -786.2820       -9.2918      -64.1225    0.12488
+##        0.96000     -786.4807      -10.5725      -63.9447    0.12505
+##        0.98000     -786.7049      -11.8496      -63.7639    0.12523
+##        1.00000     -786.9547      -13.1231      -63.5815    0.12541</code></pre>
+</div>
 </div>
 </div>
 
