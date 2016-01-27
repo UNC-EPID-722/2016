@@ -68,14 +68,36 @@ img {
 
 <div id="TOC">
 <ul>
-<li><a href="#preliminaries"><span class="toc-section-number">0.1</span> Preliminaries</a></li>
-<li><a href="#read-in-namcs-data-will-need-to-correct-the-path"><span class="toc-section-number">0.2</span> Read in NAMCS data – will need to correct the path</a></li>
-<li><a href="#simulate-outcome-using-logistic-regression"><span class="toc-section-number">0.3</span> Simulate outcome using logistic regression</a></li>
-<li><a href="#what-is-ey1-ey0-causal-risk-difference-and-ey1ey0-causal-risk-ratio."><span class="toc-section-number">0.4</span> What is E[Y(1)]-E[Y(0)], causal risk difference, and E[Y(1)]/E[Y(0)], causal risk ratio.</a></li>
-<li><a href="#what-is-ey1x1-ey0x1"><span class="toc-section-number">0.5</span> What is E[Y(1)|X=1]-E[Y(0)|X=1]?</a></li>
-<li><a href="#what-is-ey1x1-ey0contanticoag1"><span class="toc-section-number">0.6</span> What is E[Y(1)|X=1]-E[Y(0)|contanticoag=1]?</a></li>
-<li><a href="#what-is-eytreat-on-if-on-warfarin-ey0"><span class="toc-section-number">0.7</span> What is E[Y(treat on if on warfarin)]-E[Y(0)]?</a></li>
-<li><a href="#estimate-ey1-ey0-with-mle"><span class="toc-section-number">0.8</span> Estimate E[Y(1)]-E[Y(0)] with MLE?</a></li>
+<li><a href="#preliminaries"><span class="toc-section-number">0.1</span> Preliminaries</a><ul>
+<li><a href="#specify-packages-for-r"><span class="toc-section-number">0.1.1</span> Specify packages for R</a></li>
+</ul></li>
+<li><a href="#read-in-namcs-data-will-need-to-correct-the-path"><span class="toc-section-number">0.2</span> Read in NAMCS data – will need to correct the path</a><ul>
+<li><a href="#r"><span class="toc-section-number">0.2.1</span> R</a></li>
+<li><a href="#sas"><span class="toc-section-number">0.2.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#simulate-outcome-using-logistic-regression"><span class="toc-section-number">0.3</span> Simulate outcome using logistic regression</a><ul>
+<li><a href="#r-1"><span class="toc-section-number">0.3.1</span> R</a></li>
+<li><a href="#sas-1"><span class="toc-section-number">0.3.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#what-is-ey1-ey0-causal-risk-difference-and-ey1ey0-causal-risk-ratio."><span class="toc-section-number">0.4</span> What is E[Y(1)]-E[Y(0)], causal risk difference, and E[Y(1)]/E[Y(0)], causal risk ratio.</a><ul>
+<li><a href="#r-2"><span class="toc-section-number">0.4.1</span> R</a></li>
+<li><a href="#sas-2"><span class="toc-section-number">0.4.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#what-is-ey1x1-ey0x1"><span class="toc-section-number">0.5</span> What is E[Y(1)|X=1]-E[Y(0)|X=1]?</a><ul>
+<li><a href="#r-3"><span class="toc-section-number">0.5.1</span> R</a></li>
+</ul></li>
+<li><a href="#what-is-ey1x1-ey0contanticoag1"><span class="toc-section-number">0.6</span> What is E[Y(1)|X=1]-E[Y(0)|contanticoag=1]?</a><ul>
+<li><a href="#r-4"><span class="toc-section-number">0.6.1</span> R</a></li>
+<li><a href="#sas-3"><span class="toc-section-number">0.6.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#what-is-eytreat-on-if-on-warfarin-ey0"><span class="toc-section-number">0.7</span> What is E[Y(treat on if on warfarin)]-E[Y(0)]?</a><ul>
+<li><a href="#r-5"><span class="toc-section-number">0.7.1</span> R</a></li>
+<li><a href="#sas-4"><span class="toc-section-number">0.7.2</span> SAS</a></li>
+</ul></li>
+<li><a href="#estimate-ey1-ey0-with-mle"><span class="toc-section-number">0.8</span> Estimate E[Y(1)]-E[Y(0)] with MLE?</a><ul>
+<li><a href="#r-6"><span class="toc-section-number">0.8.1</span> R</a></li>
+<li><a href="#sas-5"><span class="toc-section-number">0.8.2</span> SAS</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -210,7 +232,13 @@ run; quit;</code></pre>
                     .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
                     .02*ns$raceblkoth- .3*ns$newcox2 )))
 
-ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)</code></pre>
+ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
+
+rbind(percent=round(prop.table(table(ns$bleed)),2),
+      count=table(ns$bleed)) # quick and dirty way to get proportions</code></pre>
+<pre><code>##               0      1
+## percent    0.91   0.09
+## count   2618.00 264.00</code></pre>
 </div>
 <div id="sas-1" class="section level3">
 <h3><span class="header-section-number">0.3.2</span> SAS</h3>
