@@ -23,9 +23,13 @@ set.seed(123) # set seed so you get same results each time you run.
 <!-- # Read in SAS code to insert later in this document. Note: this won't work if there are any errors in the SAS code.-->
 
 ```{r, echo=F, cache=FALSE}
-#read_chunk('C:\\Users\\chelo\\Dropbox\\unc.grad.school.2016.spring\\epid.722\\2016\\recitation\\sample-intro.sas')
-read_chunk('C:\\Users\\vonholle\\Dropbox\\unc.grad.school.2016.spring\\epid.722\\2016\\recitation\\sample-intro.sas')
+read_chunk('C:\\Users\\chelo\\Dropbox\\unc.grad.school.2016.spring\\epid.722\\2016\\recitation\\sample-intro.sas')
+#read_chunk('C:\\Users\\vonholle\\Dropbox\\unc.grad.school.2016.spring\\epid.722\\2016\\recitation\\sample-intro.sas')
 ```
+
+# Part 1
+
+---
 
 ## Simulate data object in R, exdat, and export to .csv file
 
@@ -104,9 +108,19 @@ RUN;
 
 ```{r}
 # adding a column to a data frame
-exdat$newcol <- NA #assign a single value to the new col
-exdat$newcol1 <- NA #assign a single value to the new col
-exdat$d <- "d" #assign a new vector
+exdat$newcol <- 6 #assign a single value, 6, to the new col
+exdat$newcol1 <- 7 #assign a single value, 7, to the new col
+
+d = 1:nrow(exdat) # make a vector of values from 1 to 50, number of rows in the exdat data frame
+d
+
+colnames(exdat)
+
+exdat$d <- d #assign the vector d to a column to be labeled 'd' in the exdat data frame
+
+colnames(exdat)
+head(exdat)
+
 # deleting a column from a data frame
 exdat$d <- NULL
 #exdat <-subset(exdat, select= -newcol)
@@ -263,3 +277,4 @@ LL = coef(m1) - 1.96 * std.err,
 UL = coef(m1) + 1.96 * std.err)
 r.est
 ```
+
