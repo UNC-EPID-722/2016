@@ -31,6 +31,7 @@ getwd() # find working directory for this session
 
 ns=read.dta("../../data/nsaid008b.dta") # read in data. relative to the working directory go up 2 levels and into 'data' folder to read data. 
 # Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008b.dta
+# ns=read.dta("../data/nsaid008b.dta") # ignore. for debugging only.
 ```
 
 
@@ -42,7 +43,11 @@ ns$pbleed=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$conts
                        .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
                        .02*ns$raceblkoth- .3*ns$newcox2 )))
 
-ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
+ns$bleed = rbinom(size=1,n=nrow(ns),p=ns$pbleed)
+
+sim.coef = coef(glm(bleed ~ contanticoag + tobacco_imp + contsteroids + contaspirin + arthrtis + age + male + raceblkoth + newcox2, data=ns))
+sim.coef
+sim.coef[length(sim.coef)] # get the last coefficient, the stated effect
 ```
 
 # What is true E[Y(1)]-E[Y(0)] in our population, the causal risk difference?
@@ -56,8 +61,12 @@ pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contst
                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
                       .02*ns$raceblkoth - 0.3)))
 
+mean(pbleed.1)
+mean(pbleed.0)
 mean(pbleed.1)-mean(pbleed.0)
 ```
+
+If you were to do a trial you would reduce the risk of bleeding by `r 100*abs(mean(pbleed.1)-mean(pbleed.0))` percent.
 
 # What is E[Y(1)]/E[Y(0)], the true causal risk ratio?
 ```{r}
@@ -72,6 +81,8 @@ mean(pbleed.1[ns$newcox2==1])-mean(pbleed.0[ns$newcox2==1])
 
 # Estimate the (unknown) propensity score, and plot the density by treatment group
 
+## Look for violations of positivity
+
 ```{r}
 glm.out=glm(newcox2~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth,family=binomial,data=ns)
 ns$ps=predict(glm.out,type="response")
@@ -80,9 +91,29 @@ plot(density(ns$ps[ns$newcox2==0]),lty=1,main="Propensity Score Distribution")
 lines(density(ns$ps[ns$newcox2==1]),lty=2)
 legend("right",c("newcox2==0","newcox2==1"),lty=c(1,2),box.col=NA)
 
-ggplot(data=ns,aes(x=ps,group=factor(newcox2), fill=factor(newcox2)))+
-  geom_histogram(aes(y=..density..),alpha = 0.75,binwidth=0.01, 
-                 position = position_dodge(width=0.005))+theme_bw()
+ggplot(data=ns, aes(x=ps,group=factor(newcox2), 
+                    fill=factor(newcox2))) + 
+  geom_histogram(aes(y=..density..),
+                 alpha = 0.75,
+                 binwidth=0.01, 
+                 position = position_dodge(width=0.005)) + 
+  theme_bw()
+
+# Demo: show how to make panels in ggplot
+levels(factor(ns$male)) # double check current ordering of values for male
+ns$male.f = factor(ns$male, labels=c("Female", "Male") )
+
+ggplot(data=ns, aes(x=ps,group=factor(newcox2), 
+                    fill=factor(newcox2))) + 
+  geom_histogram(aes(y=..density..),
+                 alpha = 0.75,
+                 binwidth=0.01, 
+                 position = position_dodge(width=0.005)) + 
+  theme_bw() +
+  facet_wrap(~male.f) +
+  scale_fill_discrete(name="Treatment",
+                            breaks=c(0, 1),
+                            labels=c("No", "Yes"))
 ```
 
 # compute IPTW and SMRW weights
@@ -117,12 +148,23 @@ round(ret,2)
 summary(glm(bleed~newcox2,data=ns))
 ```
 
+In unweighted model, suggestion that risk of bleeding is increased by 2 percent.
+
 # IPT weighted, to get SE correct must bootstrap or use GEE
 ```{r}
-summary(glm(bleed~newcox2,weight=iptw,data=ns))
+m.iptw = glm(bleed~newcox2,weight=iptw,data=ns) 
+summary(m.iptw)
+coef.iptw = coef(m.iptw)
+
 ```
+
+Now, the estimate, `r coef.iptw[2]` is closer to the simulated value, `r sim.coef[length(sim.coef)]`.
 
 # SMR weighted, to get SE correct must bootstrap or use GEE
 ```{r}
-summary(glm(bleed~newcox2,weight=smrw,data=ns))
+m.smrw = glm(bleed~newcox2,weight=smrw,data=ns) 
+summary(m.smrw)
+coef.smrw = coef(m.smrw)
 ```
+
+Estimate for effect, `r coef.smrw[2]`, now even larger than the iptw, `r coef.iptw[2]`, because standardized to sicker patients who could benefit more from treatment.
