@@ -35,7 +35,6 @@ ns=read.dta("../../data/nsaid008b.dta") # read in data. relative to the working 
 ```
 
 
-
 # Simulate outcome using logistic regression
 
 ```{r}
@@ -145,17 +144,18 @@ round(ret,2)
 
 # Unweighted regression, crude
 ```{r}
-summary(glm(bleed~newcox2,data=ns))
+m.unwt = glm(bleed~newcox2,data=ns)
+summary(m.unwt)
+coef.unwt = coef(m.unwt)
 ```
 
-In unweighted model, suggestion that risk of bleeding is increased by 2 percent.
+In unweighted model, the coefficient for the treatment in the model, `r coef.unwt[length(coef.unwt)]` suggests that risk of bleeding is increased by 2 percent.
 
 # IPT weighted, to get SE correct must bootstrap or use GEE
 ```{r}
 m.iptw = glm(bleed~newcox2,weight=iptw,data=ns) 
 summary(m.iptw)
 coef.iptw = coef(m.iptw)
-
 ```
 
 Now, the estimate, `r coef.iptw[2]` is closer to the simulated value, `r sim.coef[length(sim.coef)]`.
