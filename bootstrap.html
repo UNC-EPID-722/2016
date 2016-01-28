@@ -340,7 +340,7 @@ n=nrow(ns)</code></pre>
 <div id="how-do-we-know-if-this-bootstrap-variance-is-correct" class="section level3">
 <h3>how do we know if this bootstrap variance is correct?</h3>
 <pre class="r"><code>set.seed(100)</code></pre>
-<pre class="r"><code>sims=5
+<pre class="r"><code>sims=100
 cov=rep(0,sims)
 
 for (i in 1:sims)
@@ -355,7 +355,7 @@ for (i in 1:sims)
 }
 
 mean(cov)</code></pre>
-<pre><code>## [1] 1</code></pre>
+<pre><code>## [1] 0.95</code></pre>
 </div>
 </div>
 </div>
