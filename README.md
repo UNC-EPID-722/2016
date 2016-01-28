@@ -19,7 +19,7 @@
 
 [Lecture 4: Propensity Score and Inverse-Probability of Treatment Weighted Estimators](http://unc-epid-722.github.io/2016/iptw-example.html) -- [.Rmd file](lectures/L04-iptw/iptw-example.Rmd)
 
-[Lecture 5: Bootstrap Estimation](http://unc-epid-722.github.io/2016/bootstrap.html) -- [.Rmd file](lectures/L05-bootstrap/bootstrap.Rmd)
+<!--[Lecture 5: Bootstrap Estimation](http://unc-epid-722.github.io/2016/bootstrap.html) -- [.Rmd file](lectures/L05-bootstrap/bootstrap.Rmd)-->
 
 ---
 
