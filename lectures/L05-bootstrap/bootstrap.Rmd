@@ -238,7 +238,7 @@ set.seed(100)
 ```
 
 ```{r}
-sims=5
+sims=100 # WARNING: This takes over 15 minutes to run on a Intel Core i3 - 1.5GHz processor
 cov=rep(0,sims)
 
 for (i in 1:sims)
