@@ -30,42 +30,70 @@ Specify the number of times you will do the simulations below. For debugging sta
 
 ## Bootstrapping estimation of CIs for quantiles
 
+###  generate some random data, plot its density, and find the median
+
 ```{r bootci, cache=TRUE}
-# need to write wrapper function for bootstrap procedure, indices allows boot to do the resampling
-# by just randomly generating new indices which select observations
 
-quant=function(x, indices, q=0.5){
-    newx=x[indices]
-    quantile(newx,q)
-    }
-
-# generate some data
 x=rnorm(1000)
-
-# demontrating  how indices work
-x[c(1,2,3,1,2)]
-
-quant(x,1:length(x),q=0.5)
+plot(density(x),main="Density of x")
 quantile(x,0.50)
-quant(x,sample(1:length(x),length(x),replace=T),q=0.5)
-
-# call boot function
-boot.out=boot(x, quant, R=n.sims, q=0.5)
-boot.ci(boot.out, type="norm", conf=0.95)
-boot.ci(boot.out, type="perc", conf=0.95)
-
-plot(density(boot.out$t))
-unique(boot.out$t)
-table(boot.out$t)
 ```
 
-## Are these intervals correct?
+### What is the CI of the median?
+```{r}
+# First, need to write wrapper function that takes the data, 
+# some indices and a function as arguments.  The wrapper function 
+# resamples the data using the supplied indices and applies the
+# function to the resampled data.
+#
+# This function is used by the bootstrap procedure "boot" to generate
+# the bootstrap distribution.
+
+quant=function(x,indices,q=0.5)
+{
+  newx=x[indices]
+  quantile(newx,q)
+}
+```
+
+
+### demontrating  how indices work
+```{r}
+x[c(1,2,3,1,2)]
+
+# check to make sure we get the same answer when our bootstrap sample
+# is the actual sample
+
+quant(x,1:length(x),q=0.5)
+
+# draw a single random resample
+
+quant(x,sample(1:length(x),length(x),replace=T),q=0.5)
+```
+
+### call boot function, and generate 1000 resamples
+```{r}
+boot.out=boot(x,quant,R=1000,q=0.5)
+```
+
+### compute bootstrap CIs using the percentile and normal methods
+```{r}
+boot.ci(boot.out,type="norm",conf=0.95)
+boot.ci(boot.out,type="perc",conf=0.95)
+
+# plot the bootstrap distribution
+
+plot(density(boot.out$t))
+```
+
+
+## Are these intervals correct?  Can use simluaton to determine.
 ```{r}
 set.seed(151)
 ```
 
-```{r bootci2, cache=TRUE}
-sims=n.sims
+```{r}
+sims=500
 cov1=rep(0,sims)
 cov2=rep(0,sims)
 
@@ -82,6 +110,8 @@ for (i in 1:sims)
 mean(cov1)
 mean(cov2)
 ```
+
+
 
 # Bootstrap Estimation of IPTW and G-comp estimators
 
@@ -106,55 +136,109 @@ ns$pbleed=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + 0.5*ns$cont
 ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
 ```
 
-## Bootstrapping the G-comp estimator
+
+##  IPTW code
+
+### estimating the PS
+```{r}
+glm.out=glm(newcox2~contanticoag+copd+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth,family=binomial,data=ns)
+ps=predict(glm.out,type="response")
+```
+
+### computing IPTW
+```{r}
+iptw=ns$newcox2/ps+(1-ns$newcox2)/(1-ps)
+sptw=ns$newcox2*mean(ns$newcox2)/ps+(1-ns$newcox2)*(1-mean(ns$newcox2))/(1-ps)
+n=nrow(ns)
+```
+
+### getting correct inference for IPTW using a robust variance matrix (install package geepack)
+```{r}
+summary(geeglm(bleed~newcox2,family=gaussian, weight=iptw, id=patcode, data=ns))
+```
+
+### Bootstrap IPTW
+```{r}
+iptw.boot=function(dat,indices)
+{
+  dat=dat[indices,]
+  ps.out=glm(newcox2~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth,family=binomial,data=dat)
+  dat$ps=predict(ps.out,type="response")
+  dat$iptw=dat$newcox2/dat$ps+(1-dat$newcox2)/(1-dat$ps)
+  glm.out=glm(bleed~newcox2,weight=iptw,data=dat)
+  coef(glm.out)[2] 
+}
+```
+
+### can get original estimate, by plugging indices 1:n
+```{r}
+iptw.boot(ns,indices=1:nrow(ns))
+```
+
+### draw 500 bootstrap resamples, each with an IPTW estimates of the RD
+```{r}
+boot.out=boot(ns,iptw.boot,500)
+```
+
+### plot density of bootstrap resamples
+```{r}
+plot(density(boot.out$t))
+```
+
+### compute confidence intervals using percentile method
+```{r}
+boot.ci(boot.out,type="perc",conf=0.95)
+boot.ci(boot.out,type="norm",conf=0.95)
+```
+
+## Bootstrapping the G-comp esitmator
+
 
 ### G-computation wrapper function
 ```{r}
-  g.comp=function(dat,indices){
-    dat=dat[indices,]
-    glm.out=glm(bleed~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth+newcox2,family=binomial,data=dat)
-    dat.temp=dat
-    dat.temp$newcox2=0
-    pbleed.0=predict(glm.out,newdata=dat.temp,type="response")
-    dat.temp$newcox2=1
-    pbleed.1=predict(glm.out,newdata=dat.temp,type="response")  
-    mean(pbleed.1)-mean(pbleed.0)
-  }
+g.comp=function(dat,indices)
+{
+  dat=dat[indices,]
+  glm.out=glm(bleed~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth+newcox2,family=binomial,data=dat)
+  dat.temp=dat
+  dat.temp$newcox2=0
+  pbleed.0=predict(glm.out,newdata=dat.temp,type="response")
+  dat.temp$newcox2=1
+  pbleed.1=predict(glm.out,newdata=dat.temp,type="response")  
+  mean(pbleed.1)-mean(pbleed.0)
+}
 ```
 
-
-### Use wrapper to get ci
-```{r wrapper, cache=TRUE}
-# can get original estimate, by plugging indices 1:n
-
+### Can get original estimate, by plugging in indices 1:n
+```{r}
 g.comp(ns,indices=1:nrow(ns))
+```
 
-# draw a number (specified in the n.sims object above) bootstrap sample estimates of RD
-boot.out = boot(ns, g.comp, n.sims)
+### Draw 100 bootstrap sample estimates of RD
+```{r}
+boot.out=boot(ns, g.comp,100)
+```
 
-# plot density of bootstrap resamples
-
-plot(density(boot.out$t))
-#lines(density(g.comp),main="Density of Different Estimators of the RD")
-
-# compute confidence intervals using percentile method
-
-boot.ci(boot.out, type="perc", conf=0.95)
-boot.ci(boot.out, type="norm", conf=0.95)
-
-# plot density of bootstrap resamples
-
+### plot density of bootstrap resamples
+```{r}
 plot(density(boot.out$t))
 ```
 
+### compute confidence intervals using percentile method
+```{r}
+boot.ci(boot.out,type="perc",conf=0.95)
+boot.ci(boot.out,type="norm",conf=0.95)
+```
 
-### How do we know if this bootstrap variance is correct?
+
+### how do we know if this bootstrap variance is correct?
+
 ```{r}
 set.seed(100)
 ```
 
 ```{r}
-sims=10
+sims=5
 cov=rep(0,sims)
 
 for (i in 1:sims)
@@ -163,72 +247,10 @@ for (i in 1:sims)
   ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
   
   # estimate RD by G-comp
-  boot.out=boot(ns, g.comp, R=5) # NOTE: I changed the R value to 5 to make it go faster -- original value in program is 500
-  temp=boot.ci(boot.out, type="perc", conf=0.95)
+  boot.out=boot(ns,g.comp,R=100)
+  temp=boot.ci(boot.out,type="perc",conf=0.95)
   cov[i]=(temp$perc[4]<-0.02 & temp$perc[5]> -0.02)
 }
-```
 
-# Apply bootstrap to IPTW code
-
-## Estimating the PS
-```{r}
-glm.out = glm( newcox2~contanticoag+copd+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth,family=binomial,
-               data=ns)
-
-ps=predict(glm.out,type="response")
-```
-
-## computing IPTW
-```{r}
-iptw=ns$newcox2/ps+(1-ns$newcox2)/(1-ps)
-sptw=ns$newcox2*mean(ns$newcox2)/ps+(1-ns$newcox2)*(1-mean(ns$newcox2))/(1-ps)
-
-n=nrow(ns)
-```
-
-## getting correct inference for IPTW using a robust variance matrix (install package geepack)
-
-```{r}
-summary(geeglm(bleed~newcox2,family=gaussian, weight=iptw, id=patcode, data=ns))
-```
-
-## Bootstrap IPTW
-```{r}
-iptw.boot = function(dat,indices){
-    dat = dat[indices,]
-    ps.out = glm(newcox2~contanticoag+tobacco_imp+contsteroids+contaspirin+arthrtis+age+male+raceblkoth,
-                 family=binomial,
-                 data=dat)
-    ns$ps = predict(ps.out,type="response") # Note: changed this from glm.out in bootstrap.R program to ps.out
-    dat$iptw=dat$newcox2/ns$ps + (1-dat$newcox2)/(1-ns$ps) # Note: changed dat to ns
-    glm.out=glm(bleed~newcox2, weight=iptw, data=dat)
-    coef(glm.out)[2] 
-  }
-```
-
-## can get original estimate, by plugging indices 1:n
-```{r}
-iptw.boot(ns, indices=1:nrow(ns))
-```
-
-## Draw [a number = n.sims above] bootstrap resamples, each with an IPTW estimates of the RD
-```{r}
-boot.out=boot(ns, iptw.boot, n.sims)
-```
-
-## Plot density of bootstrap resamples
-```{r}
-plot(density(boot.out$t))
-```
-
-## Compute confidence intervals using percentile method
-```{r}
-boot.ci(boot.out, type="perc", conf=0.95)
-boot.ci(boot.out, type="norm", conf=0.95)
-```
-
-## Plot density of bootstrap resamples
-```{r}
-plot(density(boot.out$t))
+mean(cov)
 ```
