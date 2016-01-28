@@ -23,14 +23,12 @@ output: html_document
   library(geepack)
 ```
 
-Specify the number of times you will do the simulations below. For debugging start with a low number. Once it works use larger number.
-```{r}
-  n.sims=500
-```
-
 ## Bootstrapping estimation of CIs for quantiles
 
 ###  generate some random data, plot its density, and find the median
+```{r}
+  set.seed(123456)
+```
 
 ```{r bootci, cache=TRUE}
 
@@ -237,7 +235,7 @@ boot.ci(boot.out,type="norm",conf=0.95)
 set.seed(100)
 ```
 
-```{r}
+```{r, eval=T}
 sims=100 # WARNING: This takes over 15 minutes to run on a Intel Core i3 - 1.5GHz processor
 cov=rep(0,sims)
 
