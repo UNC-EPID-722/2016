@@ -32,7 +32,7 @@ library(boot)
 library(foreign)
 library(geepack)
 
-set.seed(123) # set seed so you get same results each time you run.
+set.seed(1234) # set seed so you get same results each time you run. Note: no seed in original Gcomp.R program.
 ```
 
 ```{r, echo=FALSE}
@@ -48,11 +48,11 @@ sasopts <- "-nosplash -log 'c:\\temp'  -ls 80 -ps 60  -nocenter -nodate" # see h
 
 ```{r read1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 libname dat "c:\temp";
-filename dat1  "c:\temp\nsaid008b.dta";
+filename dat1  "c:\temp\nsaid008.dta";
 
-proc import datafile=dat1 out=dat.nsaid008b dbms=dta replace; run; 
+proc import datafile=dat1 out=dat.nsaid008 dbms=dta replace; run; 
 
-proc print data = dat.nsaid008b(obs=10);
+proc print data = dat.nsaid008(obs=10);
 run; quit;
 ```
 
@@ -75,11 +75,11 @@ No recognition of data set in prior chunk.-->
 ```{r s-part1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 libname dat "c:\temp";
 DATA dat.ns;
-   SET dat.nsaid008b;
+   SET dat.nsaid008;
    pbleed=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
                     .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
                     .02*raceblkoth- .3*newcox2 )));
-   call streaminit(1234);
+   call streaminit(1235); * Note: same seed as in g-comp_wboot.sas;
    bleed=rand("bernoulli",pbleed);   *simulate the observed outcome;
 run;
 
@@ -107,6 +107,7 @@ rbind(percent=round(prop.table(table(ns$bleed)),2),
 ### SAS
 
 ```{r s-part2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+
 *Approach 2 - use the orginal dataset and add two predicted potential outcomes Y(1) and Y(2) as columns/variables;
 libname dat "c:\temp";
 
@@ -144,6 +145,9 @@ pbleed.0=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contst
 pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
                       .02*ns$raceblkoth - 0.3)))
+
+mean(pbleed.1)
+mean(pbleed.0)
 
 mean(pbleed.1)-mean(pbleed.0) # causal risk difference
 
@@ -203,7 +207,10 @@ run;
 ### R
 
 ```{r r-part4}
-mean(pbleed.1[ns$contanticoag==1])-mean(pbleed.0[ns$contanticoag==1])
+mean(pbleed.1[ns$contanticoag==1])
+mean(pbleed.0[ns$contanticoag==1])
+
+mean(pbleed.1[ns$contanticoag==1]) - mean(pbleed.0[ns$contanticoag==1])
 ```
 
 ## What is E[Y(treat on if on warfarin)]-E[Y(0)]?
@@ -249,8 +256,10 @@ pbleed.0=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contst
 pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
                       .02*ns$raceblkoth - 0.3*newtreat)))
+mean(pbleed.1)
+mean(pbleed.0)
 
-mean(pbleed.1)-mean(pbleed.0)
+mean(pbleed.1) - mean(pbleed.0)
 ```
 
 ## Estimate E[Y(1)]-E[Y(0)] with MLE?
@@ -263,15 +272,15 @@ libname dat "c:\temp";
 
 ods select parameterestimates;
 ods output parameterestimates=betas(keep=parameter estimate);
-proc genmod data = dat.ns desc ;
-    model bleed = contanticoag tobacco_imp contsteroids contaspirin arthrtis age male raceblkoth newcox2/link=logit dist=bin;
+proc genmod data = dat.nsg desc ;
+    model bleed = contanticoag tobacco_imp contsteroids contaspirin arthrtis age male raceblkoth newcox2 / link=logit dist=bin;
 run;
 
 proc transpose data=betas out=betas2(drop=beta11) prefix=beta; *this makes the set of gamma horizontal;
 run;
 
 data ns_p;
-   set dat.ns;
+   set dat.nsg;
    if _N_=1 then set betas2;
    pbleed_1=1/(1+exp(-(beta1 + beta2*contanticoag + beta3*tobacco_imp + beta4*contsteroids + 
                        beta5*contaspirin + beta6*arthrtis + beta7*age + beta8*male + 
@@ -316,7 +325,10 @@ pbleed.0=predict(glm.out,newdata=ns.temp,type="response")
 ns.temp$newcox2=1
 pbleed.1=predict(glm.out,newdata=ns.temp,type="response")
 
-mean(pbleed.1)-mean(pbleed.0)
+mean(pbleed.1)
+mean(pbleed.0)
+
+mean(pbleed.1) - mean(pbleed.0)
 ```
 
 ---
