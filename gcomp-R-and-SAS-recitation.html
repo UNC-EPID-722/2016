@@ -148,7 +148,7 @@ library(boot)
 library(foreign)
 library(geepack)
 
-set.seed(123) # set seed so you get same results each time you run.</code></pre>
+set.seed(1234) # set seed so you get same results each time you run. Note: no seed in original Gcomp.R program.</code></pre>
 </div>
 </div>
 <div id="read-in-namcs-data-will-need-to-correct-the-path" class="section level2">
@@ -156,11 +156,11 @@ set.seed(123) # set seed so you get same results each time you run.</code></pre>
 <div id="sas" class="section level3">
 <h3><span class="header-section-number">1.2.1</span> SAS</h3>
 <pre class="sas"><code>libname dat &quot;c:\temp&quot;;
-filename dat1  &quot;c:\temp\nsaid008b.dta&quot;;
+filename dat1  &quot;c:\temp\nsaid008.dta&quot;;
 
-proc import datafile=dat1 out=dat.nsaid008b dbms=dta replace; run; 
+proc import datafile=dat1 out=dat.nsaid008 dbms=dta replace; run; 
 
-proc print data = dat.nsaid008b(obs=10);
+proc print data = dat.nsaid008(obs=10);
 run; quit;</code></pre>
 <pre><code>##  
 ##  
@@ -168,55 +168,83 @@ run; quit;</code></pre>
 ##  
 ##  
 ##  
-##                                                            r
-##                                n                           a  r  r
-##                                o                           c  e  e
-##                   p            r  m           m            e  a  a
-##                   a         r  t  i           e            b  s  s
-##                   t         e  h  d  s     p  d            l  1  1
-##         y         c         g  e  w  o  w  c  s  m      m  k  c  r
-##   O     e         o         i  a  e  u  e  d  p  d   a  a  o  i  e
-##   b     a         d         o  s  s  t  s  o  e  d   g  l  t  r  s
-##   s     r         e         n  t  t  h  t  c  c  o   e  e  h  c  p
+##  
+##                                         n
+##                                         o                  s
+##               p            p            r m            s   u m c
+##               h            a          r t i            p   r e v
+##               y            t          e h d s        s e p g d d
+##        y      c            c          g e w o w  s   p c c s s s m
+##   O    e      o            o        m i a e u e  p   e c d p p p d    a
+##   b    a      d            d        s o s s t s  e   c a o e e e d d  g
+##   s    r      e            e        a n t t h t  c   r t c c c c o o  e
 ## 
-##    1  2005  2005000130008   1  1  0  0  0  1  0  1  44  1  0  0  0
-##    2  2005  2005000150004   1  1  0  0  0  1  0  1  58  0  0  0  0
-##    3  2005  2005000150014   1  1  0  0  0  1  0  1  78  0  0  0  0
-##    4  2005  2005000150020   1  1  0  0  0  1  0  1  23  1  0  0  0
-##    5  2005  2005000150033   1  1  0  0  0  1  0  1  56  1  0  0  0
-##    6  2005  2005000180011   1  1  0  0  0  1  0  1  68  0  0  0  0
-##    7  2005  2005000180018   1  1  0  0  0  1  0  1  46  0  0  0  0
-##    8  2005  2005000190010   1  1  0  0  0  1  0  1  40  0  0  0  0
-##    9  2005  2005000190017   1  1  0  0  0  1  0  1  29  1  0  0  0
-##   10  2005  2005000190020   1  1  0  0  0  1  0  1  61  1  0  0  0
+##    1 2005 200500013  2005000130008  1 1 1 0 0 0 FP   1 1 1 0 0 0 1 0 44
+##    2 2005 200500015  2005000150004  0 1 1 0 0 0 GP   1 1 1 0 0 0 1 0 58
+##    3 2005 200500015  2005000150014  0 1 1 0 0 0 GP   1 1 1 0 0 0 1 0 78
+##    4 2005 200500015  2005000150020  0 1 1 0 0 0 GP   1 1 1 0 0 0 1 0 23
+##    5 2005 200500015  2005000150033  0 1 1 0 0 0 GP   1 1 1 0 0 0 1 0 56
+##    6 2005 200500018  2005000180011  0 1 1 0 0 0 FP   1 1 1 0 0 0 1 0 68
+##    7 2005 200500018  2005000180018  0 1 1 0 0 0 FP   1 1 1 0 0 0 1 0 46
+##    8 2005 200500019  2005000190010  0 1 1 0 0 0 FP   1 1 1 0 0 0 1 0 40
+##    9 2005 200500019  2005000190017  0 1 1 0 0 0 FP   1 1 1 0 0 0 1 0 29
+##   10 2005 200500019  2005000190020  0 1 1 0 0 0 FP   1 1 1 0 0 0 1 0 61
 ## 
-##                                                                c
-##                                                                o
-##                                                                n
-##                                                                t
-##                   r                                            h     c  c
-##       r           e                                t           2  c  o  o
-##       e     r  r  a  r                             o           a  o  n  n
-##       a  r  e  e  s  e                             b  b  b     n  n  t  t
-##       s  e  a  a  o  a  a              d  h        a  p  p     t  t  a  s
-##       1  a  s  s  n  s  r              i  y        c  _  _  n  a  a  n  t
-##       d  s  o  o  d  o  t  c           a  p        c  s  s  e  g  s  t  e
-##       i  1  n  n  i  n  h  a        d  b  l        o  t  t  w  o  p  i  r
-##       g  m  c  r  g  m  r  n     c  e  e  i        _  a  a  c  n  i  c  o
-##   O   e  u  i  e  e  u  t  c  c  o  p  t  p  h  i  i  g  g  o  i  r  o  i
-##   b   s  s  r  s  s  s  i  e  r  p  r  e  i  t  h  m  e  e  x  s  i  a  d
-##   s   t  c  c  p  t  c  s  r  f  d  n  s  d  n  d  p  2  1  2  t  n  g  s
+##  
+##              m
+##              c
+##              a       l     p
+##              i u n   o   h c                              r
+##              d r o h w   i t                      r       e
+##          r   s b n i i p p b                      e   r r a r
+##          a   e a m n n c o a                  r r a r e e s e
+##          c p l n e c c t v m                  e e s e a a o a   a
+##          e r f r t z z p z o     r    r    r  a a 1 a s s n s   r
+##          b i n u r i i o i r     e    e    e  s s d s o o d o   t a c
+##        r l p c r o p p v p e m   a    a    a  1 1 i 1 n n i n   h s a c
+##      m a k a _ 0 0 0 0 0 0 0 a   s    s    s  c r g m c r g m   r t n e
+##   O  a c o y i 6 6 6 6 6 6 6 j   o    o    o  i e e u i e e u c t h c b
+##   b  l e t e m 0 0 0 0 0 0 0 o   n    n    n  r s s s r s s s a i m e v
+##   s  e r h r p 9 9 9 9 9 9 9 r   1    2    3  c p t c c p t c m s a r d
 ## 
-##    1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-##    2  0  1  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  1  0  0  0  0
-##    3  0  1  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-##    4  0  1  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-##    5  0  0  0  0  0  1  1  0  0  0  0  0  0  0  0  1  0  0  0  0  0  0  0
-##    6  0  1  0  0  0  1  1  0  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0
-##    7  0  0  0  0  0  0  0  0  0  0  0  1  0  0  0  0  1  0  0  0  0  0  0
-##    8  0  0  0  0  0  0  0  1  0  0  0  0  0  0  0  0  1  0  0  0  0  0  0
-##    9  0  0  0  0  0  1  1  0  0  0  0  0  0  0  0  1  0  0  0  1  0  0  0
-##   10  0  0  0  0  0  1  1  0  0  0  0  1  1  1  0  0  0  1  0  0  1  0  0</code></pre>
+##    1 1 1 0 1 0 . . . . . . . 1 1060    .    . 0 0 0 0 0 0 0 0 0 0 0 0 0
+##    2 0 1 0 1 0 . . . . . . . 1 1945    .    . 0 0 0 1 0 0 0 1 0 0 0 0 0
+##    3 0 1 0 2 0 . . . . . . . 1 1925    .    . 0 0 0 1 0 0 0 1 0 0 0 0 0
+##    4 1 1 0 4 0 . . . . . . . 1 1960 1960    . 0 0 0 1 0 0 0 1 0 0 0 0 0
+##    5 1 1 0 1 0 . . . . . . . 2 2210 2900    . 0 0 0 0 0 0 0 1 0 1 0 0 0
+##    6 0 1 0 2 0 . . . . . . . 3 1920 1950 1950 0 0 0 1 0 0 0 1 0 1 0 0 0
+##    7 0 1 0 3 1 . . . . . . . 2 3320 1210    . 0 0 0 0 0 0 0 0 0 0 0 0 0
+##    8 0 1 0 1 0 . . . . . . . 1 1845 4520    . 0 0 0 0 0 0 0 0 0 0 0 1 0
+##    9 1 1 0 1 0 . . . . . . . 1 1220 1945    . 0 0 0 0 0 0 0 1 0 1 1 0 0
+##   10 1 1 0 1 0 . . . . . . . 5 3100 1950    . 0 0 0 0 0 0 0 1 0 1 0 0 0
+## 
+##                                                             c
+##                                                             o
+##                                                             n
+##                          m s s                              t
+##                        t u u u                              h     c c
+##                        o l r r        t                     2   c o o
+##                        t t g g        o             n     c a   o n n
+##                        c c f c        b b b b       e c   o n   n t t
+##              d h     o h h l h        a p p p       w o   n t   t a s
+##              i y     s r r a r        c _ _ _   n n n n c t a c a n t
+##              a p     t o o r o      b c s s p   s e s t o s g o s t e
+##            d b l     p n n e n  b   p o t t r   n w n n n t o n p i r
+##          c e e i     r _ _ _ _  p   d _ a a e c s c s s t a n t i c o
+##   O  c c o p t p h i s i i i i  s   i i g g h o a o a a a t i p r o i p
+##   b  r h p r e i t h i m m m m  y   a m e e t x i x i i h i s p i a d u
+##   s  f f d n s d n d s p p p p  s   s p 2 1 n 2 d 2 d d t n t i n g s d
+## 
+##    1 0 0 0 0 0 0 0 0 0 0 0 0 0 110 58 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0
+##    2 0 0 0 0 0 0 0 0 0 0 0 0 0 130 84 0 0 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0
+##    3 0 0 0 0 0 0 0 0 0 0 0 0 0 130 68 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0
+##    4 0 0 0 0 0 0 0 0 0 0 0 0 0 120 72 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0
+##    5 0 0 0 0 0 0 0 0 0 1 0 0 1 130 80 1 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0
+##    6 0 0 0 0 1 0 0 0 0 2 1 1 1 130 70 0 0 0 1 0 1 0 1 0 0 0 0 1 0 0 0 0
+##    7 0 0 0 0 1 0 0 0 0 1 0 0 1 165 86 0 1 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0
+##    8 0 0 0 0 0 0 0 0 0 1 0 0 0 164 90 0 1 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0
+##    9 0 0 0 0 0 0 0 0 0 2 1 0 0 114 70 1 0 0 0 0 1 0 1 0 0 0 1 0 0 0 0 0
+##   10 0 0 0 0 1 1 1 0 0 4 1 0 0 140 78 0 0 1 0 0 1 0 1 0 1 0 0 0 1 0 0 0</code></pre>
 </div>
 <div id="r" class="section level3">
 <h3><span class="header-section-number">1.2.2</span> R</h3>
@@ -313,11 +341,11 @@ class(ns) # check type of object</code></pre>
 No recognition of data set in prior chunk.-->
 <pre class="sas"><code>libname dat &quot;c:\temp&quot;;
 DATA dat.ns;
-   SET dat.nsaid008b;
+   SET dat.nsaid008;
    pbleed=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
                     .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
                     .02*raceblkoth- .3*newcox2 )));
-   call streaminit(1234);
+   call streaminit(1235); * Note: same seed as in g-comp_wboot.sas;
    bleed=rand(&quot;bernoulli&quot;,pbleed);   *simulate the observed outcome;
 run;
 
@@ -329,8 +357,8 @@ run;</code></pre>
 ##                                   Cumulative    Cumulative
 ## bleed    Frequency     Percent     Frequency      Percent
 ## ----------------------------------------------------------
-##     0        2591       89.90          2591        89.90  
-##     1         291       10.10          2882       100.00</code></pre>
+##     0        2619       90.87          2619        90.87  
+##     1         263        9.13          2882       100.00</code></pre>
 </div>
 <div id="r-1" class="section level3">
 <h3><span class="header-section-number">1.3.2</span> R</h3>
@@ -342,16 +370,17 @@ ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
 
 rbind(percent=round(prop.table(table(ns$bleed)),2),
       count=table(ns$bleed)) # quick and dirty way to get proportions</code></pre>
-<pre><code>##               0      1
-## percent    0.91   0.09
-## count   2618.00 264.00</code></pre>
+<pre><code>##              0     1
+## percent    0.9   0.1
+## count   2608.0 274.0</code></pre>
 </div>
 </div>
 <div id="what-is-ey1-ey0-causal-risk-difference-and-ey1ey0-causal-risk-ratio." class="section level2">
 <h2><span class="header-section-number">1.4</span> What is E[Y(1)]-E[Y(0)], causal risk difference, and E[Y(1)]/E[Y(0)], causal risk ratio.</h2>
 <div id="sas-2" class="section level3">
 <h3><span class="header-section-number">1.4.1</span> SAS</h3>
-<pre class="sas"><code>*Approach 2 - use the orginal dataset and add two predicted potential outcomes Y(1) and Y(2) as columns/variables;
+<pre class="sas"><code>
+*Approach 2 - use the orginal dataset and add two predicted potential outcomes Y(1) and Y(2) as columns/variables;
 libname dat &quot;c:\temp&quot;;
 
 DATA dat.nsg;
@@ -401,7 +430,11 @@ pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contst
                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
                       .02*ns$raceblkoth - 0.3)))
 
-mean(pbleed.1)-mean(pbleed.0) # causal risk difference</code></pre>
+mean(pbleed.1)</code></pre>
+<pre><code>## [1] 0.0750205</code></pre>
+<pre class="r"><code>mean(pbleed.0)</code></pre>
+<pre><code>## [1] 0.09507942</code></pre>
+<pre class="r"><code>mean(pbleed.1)-mean(pbleed.0) # causal risk difference</code></pre>
 <pre><code>## [1] -0.02005892</code></pre>
 <pre class="r"><code>mean(pbleed.1)/mean(pbleed.0) # causal risk ratio</code></pre>
 <pre><code>## [1] 0.7890299</code></pre>
@@ -485,7 +518,11 @@ run;</code></pre>
 </div>
 <div id="r-4" class="section level3">
 <h3><span class="header-section-number">1.6.2</span> R</h3>
-<pre class="r"><code>mean(pbleed.1[ns$contanticoag==1])-mean(pbleed.0[ns$contanticoag==1])</code></pre>
+<pre class="r"><code>mean(pbleed.1[ns$contanticoag==1])</code></pre>
+<pre><code>## [1] 0.2189069</code></pre>
+<pre class="r"><code>mean(pbleed.0[ns$contanticoag==1])</code></pre>
+<pre><code>## [1] 0.2666897</code></pre>
+<pre class="r"><code>mean(pbleed.1[ns$contanticoag==1]) - mean(pbleed.0[ns$contanticoag==1])</code></pre>
 <pre><code>## [1] -0.04778278</code></pre>
 </div>
 </div>
@@ -544,8 +581,11 @@ pbleed.0=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contst
 pbleed.1=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
                       .02*ns$raceblkoth - 0.3*newtreat)))
-
-mean(pbleed.1)-mean(pbleed.0)</code></pre>
+mean(pbleed.1)</code></pre>
+<pre><code>## [1] 0.09489705</code></pre>
+<pre class="r"><code>mean(pbleed.0)</code></pre>
+<pre><code>## [1] 0.09507942</code></pre>
+<pre class="r"><code>mean(pbleed.1) - mean(pbleed.0)</code></pre>
 <pre><code>## [1] -0.000182377</code></pre>
 </div>
 </div>
@@ -558,15 +598,15 @@ libname dat &quot;c:\temp&quot;;
 
 ods select parameterestimates;
 ods output parameterestimates=betas(keep=parameter estimate);
-proc genmod data = dat.ns desc ;
-    model bleed = contanticoag tobacco_imp contsteroids contaspirin arthrtis age male raceblkoth newcox2/link=logit dist=bin;
+proc genmod data = dat.nsg desc ;
+    model bleed = contanticoag tobacco_imp contsteroids contaspirin arthrtis age male raceblkoth newcox2 / link=logit dist=bin;
 run;
 
 proc transpose data=betas out=betas2(drop=beta11) prefix=beta; *this makes the set of gamma horizontal;
 run;
 
 data ns_p;
-   set dat.ns;
+   set dat.nsg;
    if _N_=1 then set betas2;
    pbleed_1=1/(1+exp(-(beta1 + beta2*contanticoag + beta3*tobacco_imp + beta4*contsteroids + 
                        beta5*contaspirin + beta6*arthrtis + beta7*age + beta8*male + 
@@ -597,16 +637,16 @@ run;</code></pre>
 ##                             Standard       Wald 95%             Wald
 ## Parameter     DF  Estimate     Error   Confidence Limits  Chi-Square  Pr &gt; ChiSq
 ## 
-## Intercept      1   -6.4750    0.3133   -7.0890   -5.8610      427.22      &lt;.0001
-## contanticoag   1    1.1414    0.6959   -0.2225    2.5053        2.69      0.1010
-## tobacco_imp    1    1.0828    0.1724    0.7449    1.4208       39.45      &lt;.0001
-## contsteroids   1    0.6673    0.6809   -0.6673    2.0019        0.96      0.3271
-## contaspirin    1   -0.1608    0.3194   -0.7868    0.4652        0.25      0.6146
-## arthrtis       1    0.7878    0.1353    0.5225    1.0530       33.89      &lt;.0001
-## age            1    0.0658    0.0046    0.0567    0.0749      200.12      &lt;.0001
-## male           1    0.3171    0.1348    0.0530    0.5813        5.54      0.0186
-## raceblkoth     1    0.2502    0.1628   -0.0689    0.5693        2.36      0.1244
-## newcox2        1   -0.4527    0.2397   -0.9226    0.0172        3.57      0.0590
+## Intercept      1   -6.1130    0.3121   -6.7246   -5.5013      383.69      &lt;.0001
+## contanticoag   1    0.2633    0.8199   -1.3436    1.8702        0.10      0.7481
+## tobacco_imp    1    0.7590    0.1857    0.3950    1.1230       16.70      &lt;.0001
+## contsteroids   1    0.7404    0.6672   -0.5674    2.0482        1.23      0.2672
+## contaspirin    1    0.9215    0.2603    0.4112    1.4317       12.53      0.0004
+## arthrtis       1    0.6639    0.1397    0.3901    0.9378       22.58      &lt;.0001
+## age            1    0.0604    0.0047    0.0512    0.0696      165.45      &lt;.0001
+## male           1    0.2435    0.1392   -0.0293    0.5163        3.06      0.0802
+## raceblkoth     1   -0.1702    0.1823   -0.5275    0.1872        0.87      0.3507
+## newcox2        1   -0.2703    0.2398   -0.7402    0.1996        1.27      0.2595
 ## Scale          0    1.0000    0.0000    1.0000    1.0000                        
 ## 
 ## NOTE: The scale parameter was held fixed.
@@ -617,8 +657,8 @@ run;</code></pre>
 ## 
 ## Variable       N            Mean         Std Dev         Minimum         Maximum
 ## --------------------------------------------------------------------------------
-## pbleed_1    2882       0.0730658       0.0900286       0.0031921       0.6356902
-## pbleed_0    2882       0.1044772       0.1178504       0.0050106       0.7329076
+## pbleed_1    2882       0.0749241       0.0866712       0.0042091       0.7190779
+## pbleed_0    2882       0.0932563       0.1025704       0.0055084       0.7703392
 ## --------------------------------------------------------------------------------
 ##  
 ##                                                                                 
@@ -628,7 +668,7 @@ run;</code></pre>
 ##                            upbleed_    upbleed_
 ## Obs    _TYPE_    _FREQ_        1           0           RD          RR
 ## 
-##  1        0       2882     0.073066     0.10448    -0.031411    0.69935</code></pre>
+##  1        0       2882     0.074924    0.093256    -0.018332    0.80342</code></pre>
 </div>
 <div id="r-6" class="section level3">
 <h3><span class="header-section-number">1.8.2</span> R</h3>
@@ -637,9 +677,9 @@ run;</code></pre>
 
 coef(glm.out) # show coefficients from fitted generalized linear model</code></pre>
 <pre><code>##  (Intercept) contanticoag  tobacco_imp contsteroids  contaspirin 
-##  -6.86650464   1.23099748   1.03692269   0.28673489   0.37225040 
+##  -6.83061411  -0.77786155   1.08024520   1.11851849   0.63368675 
 ##     arthrtis          age         male   raceblkoth      newcox2 
-##   0.64684675   0.07186027   0.35922778  -0.28377022  -0.13803245</code></pre>
+##   0.66826730   0.07157399   0.25287040   0.07478897  -0.30289319</code></pre>
 <p><strong>Predict outcome based on estimated coefficients from glm.out regression object</strong></p>
 <pre class="r"><code>ns.temp=ns
 ns.temp$newcox2=0
@@ -647,8 +687,12 @@ pbleed.0=predict(glm.out,newdata=ns.temp,type=&quot;response&quot;)
 ns.temp$newcox2=1
 pbleed.1=predict(glm.out,newdata=ns.temp,type=&quot;response&quot;)
 
-mean(pbleed.1)-mean(pbleed.0)</code></pre>
-<pre><code>## [1] -0.009410001</code></pre>
+mean(pbleed.1)</code></pre>
+<pre><code>## [1] 0.07687298</code></pre>
+<pre class="r"><code>mean(pbleed.0)</code></pre>
+<pre><code>## [1] 0.09734584</code></pre>
+<pre class="r"><code>mean(pbleed.1) - mean(pbleed.0)</code></pre>
+<pre><code>## [1] -0.02047286</code></pre>
 <hr />
 </div>
 </div>
