@@ -527,6 +527,11 @@ boot.ci(boot.out.rd,type="perc",conf=0.95)
 mean(boot.out.rd$t)
 ```
 
+```{r r-part13b}
+# plot density of bootstrap resamples
+plot(density(boot.out.rr$t))
+```
+
 ## Get risk ratio and 95 percent confidence intervals
 
 ### SAS
@@ -546,10 +551,15 @@ run;
 
 ### R
 
-```{r r-part1r}
+```{r r-part14}
 # compute confidence intervals using percentile method
 boot.ci(boot.out.rr,type="perc",conf=0.95)
 mean(boot.out.rr$t)
+```
+
+```{r r-part14b}
+# plot density of bootstrap resamples
+plot(density(boot.out.rr$t))
 ```
 
 ## Descriptives
