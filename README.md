@@ -13,7 +13,7 @@
 
 ---
 
-**Lecture code with SAS and R code + output (in html file format made in R markdown file, .Rmd)**
+**Lecture code in SAS and R + output (in html file format made in R markdown file, .Rmd)**
 
 [Lecture 3: G-computation with NAMCS data](http://unc-epid-722.github.io/2016/L03-gcomp.html) -- [.Rmd file](lectures/L03-gcomp/L03-gcomp.Rmd)
 
