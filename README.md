@@ -13,13 +13,17 @@
 
 ---
 
-**Lecture code (in R markdown format)**
+**Lecture code in SAS and R + output (in html file format made in R markdown file, .Rmd)**
 
 [Lecture 3: G-computation with NAMCS data](http://unc-epid-722.github.io/2016/L03-gcomp.html) -- [.Rmd file](lectures/L03-gcomp/L03-gcomp.Rmd)
 
 [Lecture 4: Propensity Score and Inverse-Probability of Treatment Weighted Estimators](http://unc-epid-722.github.io/2016/iptw-example.html) -- [.Rmd file](lectures/L04-iptw/iptw-example.Rmd)
 
 [Lecture 5: Bootstrap Estimation](http://unc-epid-722.github.io/2016/bootstrap.html) -- [.Rmd file](lectures/L05-bootstrap/bootstrap.Rmd)
+
+[Lecture 6: MLE](http://unc-epid-722.github.io/2016/mle.html) -- [.Rmd file](lectures/L06-mle/mle.Rmd)
+
+[Lecture 7: Bayes](http://unc-epid-722.github.io/2016/bayes.html) -- [.Rmd file](lectures/L07-bayes/bayes.Rmd)
 
 ---
 
