@@ -26,12 +26,12 @@ output:
 
 ```{r}
   #install.packages(c("knitr", "foreign", "tableone", "MCMCpack")) # Note: you only need to do this once. then only if you want updates.
-#  install.packages("data.table", "rms") # watch out, rms loads a lot of other packages
+#  install.packages("data.table", "rms") # Watch out, rms loads a lot of other packages. skipping for now.
   library(data.table)
   library(reshape2)
   library(survival)
   library(ggplot2)
-  library(rms)
+#  library(rms)
   library(muhaz)
   set.seed(123) # set seed so you get same results each time you run.
 ```
@@ -227,5 +227,5 @@ fmuhaz = muhaz(b$t, b$delta,
               max.time=0.5,
               bw.method="g")
 plot(fmuhaz, xlab="Years", ylab="h")
-# see arxiv.org/pdf/1509.03253
+# see arxiv.org/pdf/1509.03253 and http://bit.ly/1SGaqjV
 ```

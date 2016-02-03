@@ -31,7 +31,7 @@ output:
   require(tableone)
   require(ggplot2)
   require(MCMCpack) 
-  set.seed(123) # set seed so you get same results each time you run.
+  set.seed(123) # set seed so you get same results each time you run. Note, this seed in R will not give you same results as SAS seed.
 ```
 
 ```{r, echo=FALSE}
@@ -257,13 +257,21 @@ run; quit; run;
 
 #### R
 
+```{r}
+	set.seed(123456)
+```
+
+
 ```{r r-program4}
-  	vcov.1 = matrix( c(100, 0, 0, 0.125), nrow=2, byrow=T)
+	# for another comparison of SAS and R see http://www.r-bloggers.com/example-8-17-logistic-regression-via-mcmc/
+	
+  	precision = matrix( c(100^-1, 0, 0, 0.125^-1), nrow=2, byrow=T) # see documentation for MCMClogit package for the parameterization of the Normal prior on beta
+
     log.mcmc = MCMClogit(delta ~ idu, data=b,
                        burnin=500, mcmc=2000, 
-                       b0=c(0,0), B0=vcov.1)
+                       b0=c(0,0), B0=precision)
   	# see http://sas-and-r.blogspot.com/2010/12/example-817-logistic-regression-via.html
   	
-  	summary(log.mcmc) # results are not the same as SAS for a variety of factors? iterations too low?(from 1) number of burn-in iterations before the chains are saved (burnin), 2) number of iterations after the burn-in (mcmc)). Also, randomness in SAS and R. Can't replicate across different operating systems. Lastly, the example from the prior link also shows different results.
+  	summary(log.mcmc)
   	plot(log.mcmc)
 ```
