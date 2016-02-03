@@ -109,8 +109,6 @@ mean(cov1)
 mean(cov2)
 ```
 
-
-
 # Bootstrap Estimation of IPTW and G-comp estimators
 
 ## read in NAMCS data -- will need to correct the path
@@ -189,7 +187,7 @@ boot.ci(boot.out,type="perc",conf=0.95)
 boot.ci(boot.out,type="norm",conf=0.95)
 ```
 
-## Bootstrapping the G-comp esitmator
+## Bootstrapping the G-comp estimator
 
 
 ### G-computation wrapper function
@@ -227,7 +225,6 @@ plot(density(boot.out$t))
 boot.ci(boot.out,type="perc",conf=0.95)
 boot.ci(boot.out,type="norm",conf=0.95)
 ```
-
 
 ### how do we know if this bootstrap variance is correct?
 
