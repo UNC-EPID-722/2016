@@ -1,0 +1,269 @@
+---
+title: "Bayes"
+author: "UNC EPID 722: Dr. Steve Cole"
+date: "February 4, 2016"
+output:
+  html_document:
+   toc: true
+   toc_depth: 4 
+   theme: united
+   number_sections: true
+---
+
+***NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's programs titled, "program4.19jan16.sas". All R code below is adapted to the SAS code and written by Ann Von Holle.***
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=T, warning=FALSE, message=FALSE)
+```
+
+### Preliminaries
+
+#### Specify packages for R
+
+```{r}
+  #install.packages(c("knitr", "foreign", "tableone", "MCMCpack")) # Note: you only need to do this once. then only if you want updates.
+  require(foreign)
+#  require(plyr)
+  require(tableone)
+  require(ggplot2)
+  require(MCMCpack) 
+  set.seed(123) # set seed so you get same results each time you run.
+```
+
+```{r, echo=FALSE}
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp'  -ls 80 -ps 60  -nocenter -nodate" # see http://bit.ly/1QB4ZTb
+```
+
+### Read file
+
+#### SAS
+
+<!--Note: Use permanent data file b from SAS code in mle.Rmd file.-->
+```{r s-read, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=F}
+libname mle "c:\temp";
+%let dir = c:\temp;
+
+*Read ASCII file;
+data mle.b;
+	infile "&dir\hividu15dec15.dat"; 
+	input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
+run;
+```
+
+#### R
+
+Read the data (created in ../L06-mle/mle.Rmd).
+```{r read}
+#getwd() # get the working directory
+b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.
+```
+
+
+### Simplify to binary outcome, delta.
+
+#### SAS
+
+by IDU and overall
+
+```{r s-program1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+
+proc freq data=a; 
+	tables idu*delta;
+	title "Injection drug use by AIDS or death";
+run; quit;
+```
+
+#### R
+
+```{r r-program1}
+cat.vars = c("idu")
+t.one = CreateCatTable(data=b, vars=cat.vars, strata="delta", test=F)
+t.one
+```
+
+### Maximum Likelihood by generalized linear model
+
+#### SAS
+```{r s-program2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+
+*ML by genmod;
+proc genmod data=a desc;
+	model delta=idu/d=b;
+	ods select modelinfo modelfit parameterestimates;
+	title "ML by genmod procedure";
+run; quit;
+```
+
+#### R
+```{r r-program2}
+summary(glm(delta ~ idu, family = "binomial"(link = logit), data=b))
+```
+
+### Bayes by data augmentation, normal prior on b1, prior 95 pct CI 1/2, 2
+
+#### SAS
+```{r s-program3, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+
+data priorb1;
+	int=0;
+	or=exp(0);
+	v=.3536**2;
+	f=400; *f=2/v*s**2; *f set large to ensure asymptotics;
+	s=sqrt(f/(2/v));
+	pair=1; idu=1/s; delta=1; offset=-log(or)/s; output; idu=0; delta=0; offset=0; output;
+	pair=2; idu=0; delta=1; offset=0; output; idu=1/s; delta=0; offset=-log(or)/s; output;
+run;
+
+proc genmod data=priorb1 desc; 
+	freq f;
+	model delta=int idu/d=b noint offset=offset;
+	ods select modelinfo modelfit parameterestimates;
+	title "Prior for b1 by data augmentation";
+run;
+
+data a; 
+	set a;
+	int=1;
+	f=1;
+	offset=0;
+run;
+
+data both; 
+	set a priorb1;
+run;
+
+proc genmod data=both desc; 
+	freq f;
+	model delta=int idu/d=b noint offset=offset;
+	ods select modelinfo modelfit parameterestimates;
+	title "Posterior for b1 by data augmentation";
+run; quit;
+
+```
+
+
+#### R
+
+```{r r-program3a}
+int.0 = 0; or.0 = exp(0); v.0 = 0.3536^2; f.0 = 400; s.0 = sqrt(f.0/(2/v.0)) # set scalars 
+# f = 2/(v*s^2), f set large to ensure asymptotics
+
+combos = data.frame(rbind(c(pair=1, idu=1/s.0, delta=1),
+                          c(pair=1, idu=0, delta=0),
+                          c(pair=2, idu=0, delta=1),
+                          c(pair=2, idu=1/s.0, delta=0)
+                    ))
+
+priorb1 = data.frame(int=int.0, 
+                     or=or.0,
+                     v=v.0,
+                     f=f.0,
+                     s=s.0,
+                     combos,
+                     offset=0)
+priorb1
+```
+
+Prior for b1 by data augmentation
+
+```{r r-program3b}
+  glm.1 =  glm(delta ~ int + idu - 1 + offset(offset),
+               family="binomial"(link=logit),
+               weights = f, data=priorb1)
+  summary(glm.1)
+```
+
+Append priorb1 to the original data set, b
+
+```{r r-program3c}
+    b = within(b, {
+      int=1; f=1; offset=0
+    })
+    
+    test = b[, colnames(b) %in% c("int", "f", "offset",
+                                     "idu", "delta", "f")]
+    
+    reg.vars = c("int", "f", "offset", "idu", "delta", "f")
+    both = rbind(b[, colnames(b) %in% reg.vars],
+                 priorb1[colnames(priorb1) %in% reg.vars])
+    both$offset = 0
+    tail(both)
+```
+
+Generalized linear model with posterior for $\beta_1$ by data augmentation.
+
+```{r r-program3d}
+  glm.2 = glm(delta ~ int + idu - 1 + offset(offset),
+              family="binomial"(link=logit),
+              weights = f, data = both)
+    summary(glm.2)
+```
+
+
+### Bayes by MCMC
+
+#### SAS
+```{r s-program4, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=F}
+  %let dir=c:\temp;
+  libname mle "&dir.";
+  data a; set mle.b; run;
+
+data priors;
+	input _type_ $ _name_:$9. Intercept idu;
+	cards;
+	mean . 0   0
+	cov  Intercept 100 0
+	cov  idu	   0   0.125
+;
+run;
+proc print data=priors; run;
+
+*NOTE: having an issue running this in SAS batch mode with the bayes statement. Please refer to SAS program, "program4.19jan16.sas", run in SAS for output below.
+*	intercept mean = -0.2795 and 
+	idu mean = 0.7101;
+	
+
+	  ods listing gpath="&dir/";
+ods graphics on /reset=all imagename="Trace" imagefmt=jpeg height=8in width=8in;
+proc genmod data=a desc; 
+	model delta=idu/d=b;
+	bayes seed=123 nbi=500 nmc=2000 coeffprior=normal(input=priors);
+	ods select modelinfo postsummaries tadpanel;
+	ods output posteriorsample=post(keep=iteration idu);
+	title "Bayes by genmod procedure";
+
+*What is the probabuility that OR>1?;
+*What strength of null-prior would make this association not statistically significant?;
+*What strength of null-prior would make this point estimate not larger than 1.2?;
+*I did not include Bayes by rejection sampling, why not?;
+run; quit; run;
+```
+
+<!--NOTE: once you include this child html file all the R code chunks are right aligned. Can't figure out how to fix it-->
+
+```{r s-program4a, child="c:/temp/bayes-sas.html", echo=FALSE}
+```
+
+#### R
+
+```{r r-program4}
+  	vcov.1 = matrix( c(100, 0, 0, 0.125), nrow=2, byrow=T)
+    log.mcmc = MCMClogit(delta ~ idu, data=b,
+                       burnin=500, mcmc=2000, 
+                       b0=c(0,0), B0=vcov.1)
+  	# see http://sas-and-r.blogspot.com/2010/12/example-817-logistic-regression-via.html
+  	
+  	summary(log.mcmc) # results are not the same as SAS for a variety of factors? iterations too low?(from 1) number of burn-in iterations before the chains are saved (burnin), 2) number of iterations after the burn-in (mcmc)). Also, randomness in SAS and R. Can't replicate across different operating systems. Lastly, the example from the prior link also shows different results.
+  	plot(log.mcmc)
+```
