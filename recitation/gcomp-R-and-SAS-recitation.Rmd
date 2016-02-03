@@ -529,7 +529,7 @@ mean(boot.out.rd$t)
 
 ```{r r-part13b}
 # plot density of bootstrap resamples
-plot(density(boot.out.rr$t))
+plot(density(boot.out.rd$t))
 ```
 
 ## Get risk ratio and 95 percent confidence intervals
