@@ -8,9 +8,10 @@ output:
    toc_depth: 4 
    theme: united
    number_sections: true
+   css: style.css
 ---
 
-***NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's programs titled, "program4.19jan16.sas". All R code below is adapted to the SAS code and written by Ann Von Holle.***
+**NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's programs titled, "program4.19jan16.sas". All R code below is adapted to the SAS code and written by Ann Von Holle.**
 
 ```{r setup, echo=FALSE}
 # see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
@@ -63,7 +64,6 @@ Read the data (created in ../L06-mle/mle.Rmd).
 b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.
 ```
 
-
 ### Simplify to binary outcome, delta.
 
 #### SAS
@@ -105,7 +105,8 @@ run; quit;
 
 #### R
 ```{r r-program2}
-summary(glm(delta ~ idu, family = "binomial"(link = logit), data=b))
+glm.0 = glm(delta ~ idu, family = "binomial"(link = logit), data=b)
+summary(glm.0)
 ```
 
 ### Bayes by data augmentation, normal prior on b1, prior 95 pct CI 1/2, 2
@@ -124,6 +125,8 @@ data priorb1;
 	pair=1; idu=1/s; delta=1; offset=-log(or)/s; output; idu=0; delta=0; offset=0; output;
 	pair=2; idu=0; delta=1; offset=0; output; idu=1/s; delta=0; offset=-log(or)/s; output;
 run;
+
+proc print data=priorb1; run;
 
 proc genmod data=priorb1 desc; 
 	freq f;
@@ -166,33 +169,40 @@ combos = data.frame(rbind(c(pair=1, idu=1/s.0, delta=1),
                     ))
 
 priorb1 = data.frame(int=int.0, 
-                     or=or.0,
+                     or=or.0, # or and v variables are extra data. v=variance is set by subject matter knowledge.
                      v=v.0,
                      f=f.0,
-                     s=s.0,
+                     s=s.0, # using other info, f=2/(v*s^2), calculate s. s=sqrt(2/(f*v))?
                      combos,
                      offset=0)
+
 priorb1
 ```
 
 Prior for b1 by data augmentation
 
+<!--Note that the se for the b1 parameter matches that of the v.0 estimate above.-->
+
 ```{r r-program3b}
-  glm.1 =  glm(delta ~ int + idu - 1 + offset(offset),
+  glm.1 =  glm(delta ~ int + idu - 1 + offset(offset), #Note: whenever you have a null based prior you don't need an offset.
                family="binomial"(link=logit),
                weights = f, data=priorb1)
   summary(glm.1)
 ```
 
-Append priorb1 to the original data set, b
+**Note** that the standard error for the $\beta_1$ parameter, for **idu**, matches that of the sqrt(v.0) estimate, `r sqrt(v.0)`.
 
 ```{r r-program3c}
+  names(coef(glm.1))
+  coef(glm.1)[2]
+```
+
+Append priorb1 to the original data set, b
+
+```{r r-program3d}
     b = within(b, {
       int=1; f=1; offset=0
     })
-    
-    test = b[, colnames(b) %in% c("int", "f", "offset",
-                                     "idu", "delta", "f")]
     
     reg.vars = c("int", "f", "offset", "idu", "delta", "f")
     both = rbind(b[, colnames(b) %in% reg.vars],
@@ -203,12 +213,17 @@ Append priorb1 to the original data set, b
 
 Generalized linear model with posterior for $\beta_1$ by data augmentation.
 
-```{r r-program3d}
+<!-- b1 estimate pulled toward the prior. smaller se for b1 because more data.-->
+
+```{r r-program3e}
   glm.2 = glm(delta ~ int + idu - 1 + offset(offset),
               family="binomial"(link=logit),
               weights = f, data = both)
-    summary(glm.2)
+    
+  summary(glm.2)
 ```
+
+Note that the $\beta_1$ estimate, `r round(coef(glm.2)[2],4)`, is pulled from the estimated coefficient from the observed data, `r round(coef(glm.0)[2],4)`, toward the prior, log(or) = log(1) = 0. Also note that there is a smaller standard error for $\beta_1$ because there are more data points.
 
 
 ### Bayes by MCMC
@@ -227,12 +242,12 @@ data priors;
 	cov  idu	   0   0.125
 ;
 run;
+
 proc print data=priors; run;
 
 *NOTE: having an issue running this in SAS batch mode with the bayes statement. Please refer to SAS program, "program4.19jan16.sas", run in SAS for output below.
 *	intercept mean = -0.2795 and 
 	idu mean = 0.7101;
-	
 
 	  ods listing gpath="&dir/";
 ods graphics on /reset=all imagename="Trace" imagefmt=jpeg height=8in width=8in;
@@ -244,6 +259,15 @@ proc genmod data=a desc;
 	title "Bayes by genmod procedure";
 
 *What is the probabuility that OR>1?;
+
+	data post2; set post; if exp(idu)>1 then por=1; else por=0; run;
+	proc means data=post2; var iteration idu por; run; * Note: all draws have exp(idu) greater than 1;
+
+* Next try exp(idu)>2; * that is around 0.55;
+	
+	data post3; set post; if exp(idu)>2 then por=1; else por=0; run;
+	proc means data=post3; var iteration idu por; run; * Note: all draws have exp(idu) greater than 1;
+	
 *What strength of null-prior would make this association not statistically significant?;
 *What strength of null-prior would make this point estimate not larger than 1.2?;
 *I did not include Bayes by rejection sampling, why not?;
@@ -257,15 +281,13 @@ run; quit; run;
 
 #### R
 
-```{r}
-	set.seed(123456)
-```
-
+<!-- Note: these estimates for b1 (and se) are very similar to what you get for augmentation above-->
 
 ```{r r-program4}
 	# for another comparison of SAS and R see http://www.r-bloggers.com/example-8-17-logistic-regression-via-mcmc/
-	
+
   	precision = matrix( c(100^-1, 0, 0, 0.125^-1), nrow=2, byrow=T) # see documentation for MCMClogit package for the parameterization of the Normal prior on beta
+	# In this example, in data augmentation there was no information on variance.
 
     log.mcmc = MCMClogit(delta ~ idu, data=b,
                        burnin=500, mcmc=2000, 
@@ -275,3 +297,81 @@ run; quit; run;
   	summary(log.mcmc)
   	plot(log.mcmc)
 ```
+
+<!-- Suggestion: Go back to program 3 and change a parameter to match pe from Bayesian methods here. Penalizing likelihood w/ quadratic penalty. -->
+
+### Demo for offsets
+
+Offset: predictor variable with coefficient set to 1 (http://bit.ly/1THAKuX)
+
+Example of an offset = log Z in intercept-only logistic regression model:
+
+$$
+\begin{align*}
+  log(p/(1-p)) &= \beta_0 + log(Z) \\
+  log(p/(1-p)) - log(Z) &= \beta_0 \\
+  log( \frac{p/(1-p)}{Z} ) &= \beta_0 \\
+  \frac{p/(1-p)}{Z} &= exp(\beta_0) = log(odds)
+\end{align*}
+$$
+
+```{r}
+set.seed(1235)
+```
+
+#### Create some simulated data for logistic regression model
+```{r}
+  	num = 1000 # sample size
+  	beta.0 = 0.5; beta.1 = 1.3;  # model parameters
+  	x.1 = rnorm(num) # single covariate in model
+  	lp.1 = beta.0 + beta.1*x.1 # linear predictor
+  	plogis.1 = 1/(1+exp(-lp.1)); plogis.1[1] # probability of outcome
+  	#plogis.1 = plogis(lp.1); plogis.1[1] # shortcut function to get probability
+  	y.out = rbinom(num, 1, plogis.1) # generate random 0/1 based on probability
+  	table(y.out) # check values
+  	
+  	Z = 1.2
+  	offset.1 = log(Z); offset.1
+
+  	df.1 = data.frame(y.out, x.1, int=1, offset.1) # make data frame with simulated values
+```
+
+#### Run logistic model with no offset
+```{r}
+  	glm.0 = glm(y.out ~ x.1, 
+  	            family=binomial(link="logit"), 
+  	            data=df.1)
+  	coef(glm.0)
+
+```
+
+**Comment**:
+
+As expected, the estimated intercept from the simulated data, `r round(coef(glm.0)[1],4)`, is close (enough) to the specified $\beta_0$ parameter = `r beta.0`. The estimated coefficient for $\beta_1$, `r round(coef(glm.0)[2],4)`, from the simulated data is close to the specified $\beta_1$ parameter value in the simulation of `r beta.1`.
+
+#### Run logistic regression model with offset
+```{r}
+  	glm.1 = glm(y.out ~ -1 + int + x.1 + offset(offset.1), 
+  	            family=binomial(link="logit"), 
+  	            data=df.1)
+  	coef(glm.1)
+```
+
+**Comment**:
+
+***Model with offset (ignoring the $\beta_1$ term)***: 
+$$
+\begin{align*}
+log(p/(1-p)) = \beta_0^{\prime} + log(Z) \\
+\textrm{where p/(1-p) is from observed data and } exp(\beta_0) = `r round(exp(coef(glm.0)[1]),4)`. \\
+log(exp(`r round(coef(glm.0)[1],4)`)) &= `r round(coef(glm.1)[1],4)` + log(`r Z`)  \\
+log(`r round(exp(coef(glm.0)[1]),4)`) - log(`r Z`) &= `r round(coef(glm.1)[1],4)` \\ 
+log\left(\frac{`r round(exp(coef(glm.0)[1]),4)`}{`r Z`}\right) &= `r round(coef(glm.1)[1],4)`  \\
+log(`r round(exp(coef(glm.0)[1])/Z, 4)`) &= `r round(coef(glm.1)[1],4)` \\
+`r round(log(exp(coef(glm.0)[1])/Z),4)` &= `r round(coef(glm.1)[1],4)`
+\end{align*}
+$$
+
+Now you have added in an offset, offset.1 = log(Z) = log(`r Z`) = `r round(offset.1,4)`. Given the formula at the start of the offset section above, the adjusted odds should be $\frac{p/(1-p)}{Z}$ = $\frac{`r round(exp(coef(glm.0)[1]),4)`}{`r Z`}$ = `r round(exp(coef(glm.0)[1])/Z, 4)`. Then the intercept, log(odds) for the referent group of the x.1 variable, should be log(`r round(exp(coef(glm.0)[1])/Z,4)`) = `r round(log(exp(coef(glm.0)[1])/Z),4)`. The intercept for the model with the offset, glm.1, is that value, `r coef(glm.1)[1]`. Also, note that the coefficient for $\beta_1$ is the same across models with and without an offset.
+
+This example demonstrates that the offset Z adjusts the intercept of the observed data. In this example a Z>1 moves the intercept in the logisitic regression downward from `r round(coef(glm.0)[1],4)` to `r round(coef(glm.1)[1],4)`
