@@ -243,7 +243,7 @@ libname a "c:\temp";
 
 proc genmod data=a.ps_data desc;
 	class patcode;
-	model pud=newcox2 /dist=bin link=identity;
+	model bleed=newcox2 /dist=bin link=identity;
 	repeated subject=patcode / corr=ind;
 	weight iptw;
 run;
@@ -267,7 +267,7 @@ libname a "c:\temp";
 
 proc genmod data=a.ps_data desc;
 	class patcode;
-	model pud=newcox2 /dist=bin link=identity;
+	model bleed=newcox2 /dist=bin link=identity;
 	repeated subject=patcode / corr=ind;
 	weight smrw;
 run;
@@ -282,5 +282,3 @@ run;
 summary(geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns))
 
 ```
-
-
