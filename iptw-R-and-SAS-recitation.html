@@ -552,26 +552,25 @@ run;</code></pre>
 
 proc genmod data=a.ps_data desc;
     class patcode;
-    model pud=newcox2 /dist=bin link=identity;
+    model bleed=newcox2 /dist=bin link=identity;
     repeated subject=patcode / corr=ind;
     weight iptw;
 run;</code></pre>
 <pre><code>## The GENMOD Procedure
 ## 
-##                        Model Information
+##         Model Information
 ## 
-## Data Set                 A.PS_DATA                             
-## Distribution              Binomial                             
-## Link Function             Identity                             
-## Dependent Variable             pud    Peptic ulcer disease     
-##                                       (simulated outcome)      
-## Scale Weight Variable         iptw                             
+## Data Set                 A.PS_DATA
+## Distribution              Binomial
+## Link Function             Identity
+## Dependent Variable           bleed
+## Scale Weight Variable         iptw
 ## 
 ## 
 ## Number of Observations Read        2882
 ## Number of Observations Used        2882
 ## Sum of Weights                  5704.63
-## Number of Events                    264
+## Number of Events                    263
 ## Number of Trials                   2882
 ## 
 ## 
@@ -587,15 +586,15 @@ run;</code></pre>
 ##                        2005000380012 2005000400001 2005000460028 ...     
 ## 
 ## 
-##             Response Profile
+##              Response Profile
 ##  
-##  Ordered               Total       Total
-##    Value    pud    Frequency      Weight
+##  Ordered                 Total       Total
+##    Value    bleed    Frequency      Weight
 ## 
-##        1    1            264    510.5489
-##        2    0           2618    5194.081
+##        1    1              263     472.402
+##        2    0             2619    5232.228
 ## 
-## PROC GENMOD is modeling the probability that pud='1'.
+## PROC GENMOD is modeling the probability that bleed='1'.
 ## 
 ## 
 ##   Parameter Information
@@ -624,8 +623,8 @@ run;</code></pre>
 ## 
 ##   GEE Fit Criteria
 ## 
-## QIC         3461.0675
-## QICu        3440.9641
+## QIC         3270.4751
+## QICu        3252.2272
 ## 
 ## 
 ##              Analysis Of GEE Parameter Estimates
@@ -634,8 +633,8 @@ run;</code></pre>
 ##                    Standard   95% Confidence
 ## Parameter Estimate    Error       Limits            Z Pr &gt; |Z|
 ## 
-## Intercept   0.0940   0.0058   0.0827   0.1054   16.22   &lt;.0001
-## newcox2    -0.0092   0.0183  -0.0450   0.0266   -0.50   0.6148</code></pre>
+## Intercept   0.0942   0.0058   0.0829   0.1056   16.25   &lt;.0001
+## newcox2    -0.0231   0.0164  -0.0551   0.0090   -1.41   0.1585</code></pre>
 </div>
 <div id="r-5" class="section level3">
 <h3><span class="header-section-number">1.8.2</span> R</h3>
@@ -670,26 +669,25 @@ summary(geeglm(bleed~newcox2,family=gaussian, weight=iptw, id=patcode, data=ns))
 
 proc genmod data=a.ps_data desc;
     class patcode;
-    model pud=newcox2 /dist=bin link=identity;
+    model bleed=newcox2 /dist=bin link=identity;
     repeated subject=patcode / corr=ind;
     weight smrw;
 run;</code></pre>
 <pre><code>## The GENMOD Procedure
 ## 
-##                        Model Information
+##         Model Information
 ## 
-## Data Set                 A.PS_DATA                             
-## Distribution              Binomial                             
-## Link Function             Identity                             
-## Dependent Variable             pud    Peptic ulcer disease     
-##                                       (simulated outcome)      
-## Scale Weight Variable         smrw                             
+## Data Set                 A.PS_DATA
+## Distribution              Binomial
+## Link Function             Identity
+## Dependent Variable           bleed
+## Scale Weight Variable         smrw
 ## 
 ## 
 ## Number of Observations Read        2882
 ## Number of Observations Used        2882
 ## Sum of Weights                 480.7501
-## Number of Events                    264
+## Number of Events                    263
 ## Number of Trials                   2882
 ## 
 ## 
@@ -705,15 +703,15 @@ run;</code></pre>
 ##                        2005000380012 2005000400001 2005000460028 ...     
 ## 
 ## 
-##             Response Profile
+##              Response Profile
 ##  
-##  Ordered               Total       Total
-##    Value    pud    Frequency      Weight
+##  Ordered                 Total       Total
+##    Value    bleed    Frequency      Weight
 ## 
-##        1    1            264    59.11159
-##        2    0           2618    421.6385
+##        1    1              263    56.61518
+##        2    0             2619    424.1349
 ## 
-## PROC GENMOD is modeling the probability that pud='1'.
+## PROC GENMOD is modeling the probability that bleed='1'.
 ## 
 ## 
 ##   Parameter Information
@@ -742,8 +740,8 @@ run;</code></pre>
 ## 
 ##   GEE Fit Criteria
 ## 
-## QIC          359.7935
-## QICu         361.4712
+## QIC          349.3543
+## QICu         351.0317
 ## 
 ## 
 ##              Analysis Of GEE Parameter Estimates
@@ -752,8 +750,8 @@ run;</code></pre>
 ##                    Standard   95% Confidence
 ## Parameter Estimate    Error       Limits            Z Pr &gt; |Z|
 ## 
-## Intercept   0.1375   0.0089   0.1201   0.1550   15.44   &lt;.0001
-## newcox2    -0.0292   0.0220  -0.0722   0.0138   -1.33   0.1834</code></pre>
+## Intercept   0.1355   0.0089   0.1181   0.1528   15.29   &lt;.0001
+## newcox2    -0.0355   0.0213  -0.0772   0.0063   -1.67   0.0957</code></pre>
 </div>
 <div id="r-6" class="section level3">
 <h3><span class="header-section-number">1.9.2</span> R</h3>
