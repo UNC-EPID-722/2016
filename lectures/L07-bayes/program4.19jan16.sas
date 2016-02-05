@@ -100,12 +100,21 @@ proc print data=priors; run;
 *ods graphics on / reset=all imagename="Trace" imagefmt=jpeg height=8in width=8in;
 proc genmod data=a desc; 
 	model delta=idu/d=b;
-	bayes seed=123 nbi=500 nmc=2000 coeffprior=normal(input=priors);
+	bayes seed=1234 nbi=500 nmc=2000 coeffprior=normal(input=priors);
 	ods select modelinfo postsummaries tadpanel;
 	ods output posteriorsample=post(keep=iteration idu);
 	title "Bayes by genmod procedure";
 
 *What is the probabuility that OR>1?;
+
+	data post2; set post; if exp(idu)>1 then por=1; else por=0; run;
+	proc means data=post2; var iteration idu por; run; * Note: all draws have exp(idu) greater than 1;
+
+* Next try exp(idu)>2; * that is around 0.55;
+	
+	data post3; set post; if exp(idu)>2 then por=1; else por=0; run;
+	proc means data=post3; var iteration idu por; run; * Note: all draws have exp(idu) greater than 1;
+	
 *What strength of null-prior would make this association not statistically significant?;
 *What strength of null-prior would make this point estimate not larger than 1.2?;
 *I did not include Bayes by rejection sampling, why not?;

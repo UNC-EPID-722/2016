@@ -5,7 +5,8 @@ options nocenter pagesize=60 linesize=80 nodate pageno=1;
 dm log "clear;" continue; dm out "clear;" continue;
 
 *Set a directory pointer;
-%LET dir = D:\dropbox\Cole\Teaching\EPID722\2016;
+*%LET dir = D:\dropbox\Cole\Teaching\EPID722\2016;
+%let dir=c:\temp;
 
 *Read excel data file;
 proc import out=a datafile="&dir\hividu.csv" dbms=csv replace; getnames=yes;
@@ -42,6 +43,12 @@ data _null_; set b;
 	file "&dir\hividu15dec15.dat"; 
 	put id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
 
+* Export so I can read in R. Important if I want to compare ids;
+proc export data=b 
+   outfile='c:\temp\hividu15dec15.csv'
+   dbms=csv
+   replace;
+run;
 
 /**************
 ** CODEBOOK

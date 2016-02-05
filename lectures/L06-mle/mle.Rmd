@@ -101,7 +101,7 @@ proc means data=mle.b; var _numeric_; run;
 Read the data.
 ```{r}
 #getwd() # get the working directory
-a = read.csv("../../data/hividu.csv", header=T) # read in data. relative to the working directory go up however many levels and into 'data' folder to read data. 
+a = read.csv("../data/hividu.csv", header=T) # read in data. relative to the working directory go up however many levels and into 'data' folder to read data. 
 #a = read.csv("../data/hividu.csv", header=T) # Ignore. only for local run checking.
 
 # Instead of "../../data/hividu.csv, can specify full path of data location. For example a path could be "c:\temp\hividu.csv"
@@ -112,7 +112,7 @@ colnames(a) = tolower(colnames(a)) # make all column names lower case
 ```
 
 Data handling.
-```{r r-program1}
+```{r r-program1, eval=FALSE}
 
 a$u = runif(nrow(a)) # new random id
 a = a[order(a$u),] # order by random id
@@ -147,6 +147,7 @@ str(b) # check
 summary(b[,keep.vars]) 
 
 write.csv(b, "c:/temp/hividu15dec15.csv") # write data to comma delimited file.
+# NOTE: I will use the hividu15dec15.csv file from SAS so I can match the id's assigned by random numbers in my checks.
 ```
 
 ## Program 2: Table 1 and Table 2
