@@ -1,0 +1,286 @@
+---
+title: "EPID 722 recitation, 2016/02/08"
+author: "EPID 722 2016"
+date: "February 1, 2016"
+output: 
+  html_document:
+   toc: true
+   toc_depth: 3
+   theme: united
+   number_sections: true
+---
+
+**NOTE: ALL SAS and R code below copied from EPID 722 lecture material from 2016. R code based on Alan Brookhart's programs titled, "iptw_example.R" and "iptw_example.sas"**
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+# IPTW
+
+## Preliminaries
+
+### Specify packages for R
+
+```{r, echo=T, message=FALSE, warning=FALSE}
+  #install.packages("geepack", "ggplot2") # Note: only install once.
+require(foreign)
+library(boot)
+library(geepack)
+library(ggplot2)
+#library(foreach)
+set.seed(101) # set seed so you get same results each time you run. Note: no seed in original Gcomp.R program.
+```
+
+```{r, echo=FALSE}
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp'  -ls 80 -ps 60  -nocenter -nodate -nofmterr" # see http://bit.ly/1QB4ZTb
+```
+
+## Read in NAMCS data -- will need to correct the path
+
+### R
+
+```{r}
+#getwd() # get the working directory
+ns=read.dta("../data/nsaid008.dta") # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
+# Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008.dta
+```
+
+### SAS
+
+```{r read1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=F}
+libname a "c:\temp"; # set library containing the permanent SAS data set, nsaid008.sas7bdat.
+```
+
+## Simulate outcome using logistic regression
+
+### SAS
+<!-- Note: I have to put libname in each SAS chunk because this is running it in batch mode.
+No recognition of data set in prior chunk.-->
+
+```{r s-part1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+
+/*  compute prob of bleed from known model, simulate outcome using logistic regression  */
+
+DATA a.ns;
+   call streaminit(1235);
+   SET a.nsaid008;
+   pbleed=1/(1+exp(-(-6.75 + .6*contanticoag + 1*tobacco_imp + .5*contsteroids + 
+                    .2*contaspirin + .7*arthrtis + .07*age + .3*male + 
+                    .02*raceblkoth- .3*newcox2 )));
+   bleed=rand("bernoulli",pbleed);   *simulate the observed outcome;
+run;
+
+```
+
+### R
+
+```{r r-part1}
+# Simulate outcome using logistic regression 
+
+ns$pbleed=1/(1+exp(-(-6.75 + .6*ns$contanticoag + 1*ns$tobacco_imp + .5*ns$contsteroids + 
+                       .2*ns$contaspirin + .7*ns$arthrtis + .07*ns$age + .3*ns$male + 
+                       .02*ns$raceblkoth- .3*ns$newcox2 )))
+
+ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
+```
+
+## Estimate the (unknown) propensity score, and plot the density by treatment group
+
+### SAS
+
+```{r s-part2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+
+/* create propensity score model */
+
+proc logistic data=a.ns descending;
+class newcox2 year;
+ model newcox2 = male arthrtis contsteroids contanticoag contaspirin tobacco_imp
+				 raceblkoth age ;
+ output out=ps_data predicted=ps;
+run;
+
+
+/* Creating PS treatment groups for plotting */
+
+DATA ps_data;
+	set ps_data;
+	if newcox2 = 1 then treated_ps = ps;
+		ELSE treated_ps = .;
+	if newcox2 = 0 then untreated_ps = ps;
+		else untreated_ps = .;
+run;
+				 
+/* compute inverse-probability of treatment weight and SMR weight */
+
+data a.ps_data;
+	set ps_data;
+	if newcox2=1 then ps_exp=ps; else ps_unexp=ps;
+	iptw=(newcox2/ps) + (1-newcox2)/(1-ps);
+	smrw=newcox2+(1-newcox2)*ps/(1-ps);
+run;
+
+```
+
+### R
+
+```{r r-part2}
+glm.out=glm(newcox2~contanticoag+tobacco_imp+contsteroids+diabetes+contaspirin+arthrtis+age+male+raceblkoth,family=binomial,data=ns)
+ns$ps=predict(glm.out,type="response")
+
+# compute IPTW and SMRW weights
+
+ns$iptw=ns$newcox2/ns$ps+(1-ns$newcox2)/(1-ns$ps)
+ns$smrw=ns$newcox2+(1-ns$newcox2)*ns$ps/(1-ns$ps)
+```
+
+## Plots
+
+### SAS
+
+```{r s-part3, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+
+/* Plot the overlap of the PS distributions by treatment group */
+
+PROC KDE DATA=a.ps_data;
+	UNIVAR untreated_ps treated_ps / PLOTS=densityoverlay;
+	TITLE "Propensity score distributions by treatment group";
+RUN;
+```
+
+### R
+
+```{r r-part3}
+# Estimate the (unknown) propensity score, and plot the density by treatment group
+
+glm.out=glm(newcox2~contanticoag+tobacco_imp+contsteroids+diabetes+contaspirin+arthrtis+age+male+raceblkoth,family=binomial,data=ns)
+ns$ps=predict(glm.out,type="response")
+
+plot(density(ns$ps[ns$newcox2==0]),lty=1,main="Propensity Score Distribution")
+lines(density(ns$ps[ns$newcox2==1]),lty=2)
+legend("right",c("newcox2==0","newcox2==1"),lty=c(1,2),box.col=NA)
+
+ggplot(data=ns,aes(x=ps,group=factor(newcox2), fill=factor(newcox2)))+
+  geom_histogram(aes(y=..density..),alpha = 0.75,binwidth=0.01, 
+                 position = position_dodge(width=0.005))+theme_bw()
+```
+
+## IPT weighted table 1
+
+### SAS
+
+```{r s-part4, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+
+/* IPT weighted table 1 */
+
+proc means data=a.ps_data mean;
+	class newcox2;
+	var male arthrtis contsteroids contanticoag contaspirin tobacco_imp
+				 raceblkoth age ;
+		weight iptw;
+run;
+```
+
+### R
+
+```{r r-part4, eval=FALSE}
+
+# Table 1
+covs=c("male","age","diabetes","arthrtis","copd",
+       "reas1digest","tobacco_imp","contsteroids")
+ret=foreach(var=covs,.combine="rbind") %do%
+  c(mean(ns[ns$newcox2==0,var]),mean(ns[ns$newcox2==1,var]))
+row.names(ret)<-covs
+colnames(ret)<-c("Old NSAIDS","Cox-2 Sel NSAIDs")
+round(ret,2)
+
+# Compute Table 1 statistics for IPTW sample
+ret=foreach(var=covs,.combine="rbind") %do%
+  c(sum(ns[,var]*ns$iptw*ns$newcox2),sum(ns[,var]*ns$iptw*(1-ns$newcox2)))/nrow(ns)
+row.names(ret)<-covs
+colnames(ret)<-c("Old NSAIDS","Cox-2 Sel NSAIDs")
+round(ret,2)
+
+# Unweighted regression, crude
+summary(glm(bleed~newcox2,data=ns))
+
+```
+
+## SMR weighted table 1
+
+### SAS
+
+```{r s-part5, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+
+/* SMR weighted table 1 */
+
+proc means data=a.ps_data mean;
+	class newcox2;
+	var male arthrtis contsteroids contanticoag contaspirin tobacco_imp
+				 raceblkoth age ;
+		weight smrw;
+run;
+```
+
+
+## Estimate causal risk difference in the population using IPT-weighted linear regression
+
+### SAS
+
+```{r s-part6, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+				 
+/* estimate causal risk difference in the population using IPT-weighted linear regression */
+
+proc genmod data=a.ps_data desc;
+	class patcode;
+	model pud=newcox2 /dist=bin link=identity;
+	repeated subject=patcode / corr=ind;
+	weight iptw;
+run;
+```
+
+### R
+```{r r-part6}
+# IPT weighted, use GEE for SE
+summary(geeglm(bleed~newcox2,family=gaussian, weight=iptw, id=patcode, data=ns))
+```
+
+
+## Estimate causal risk difference in the population using SMR-weighted linear regression
+
+### SAS
+
+```{r s-part7, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+				 
+/* estimate causal risk difference in the population using SMR-weighted linear regression */
+
+proc genmod data=a.ps_data desc;
+	class patcode;
+	model pud=newcox2 /dist=bin link=identity;
+	repeated subject=patcode / corr=ind;
+	weight smrw;
+run;
+```
+
+
+### R
+
+```{r r-part7}
+
+# SMR weighted, use GEE for SE
+summary(geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns))
+
+```
+
+
