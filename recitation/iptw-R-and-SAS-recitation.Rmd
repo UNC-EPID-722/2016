@@ -31,13 +31,13 @@ require(foreign)
 library(boot)
 library(geepack)
 library(ggplot2)
-#library(foreach)
+library(foreach)
 set.seed(101) # set seed so you get same results each time you run. Note: no seed in original Gcomp.R program.
 ```
 
 ```{r, echo=FALSE}
 saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
-sasopts <- "-nosplash -log 'c:\\temp'  -ls 80 -ps 60  -nocenter -nodate -nofmterr" # see http://bit.ly/1QB4ZTb
+sasopts <- "-nosplash -log 'c:\\temp'  -ls 80 -ps 70  -nocenter -nodate -nofmterr" # see http://bit.ly/1QB4ZTb
 ```
 
 ## Read in NAMCS data -- will need to correct the path
@@ -147,13 +147,20 @@ ns$smrw=ns$newcox2+(1-ns$newcox2)*ns$ps/(1-ns$ps)
 ```{r s-part3, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 libname a "c:\temp";
 
+ods listing gpath="c:\\temp";
+ods graphics on / reset=all imagename="iptw_sas1" imagefmt=jpeg height=8in width=8in;
+
 /* Plot the overlap of the PS distributions by treatment group */
 
 PROC KDE DATA=a.ps_data;
 	UNIVAR untreated_ps treated_ps / PLOTS=densityoverlay;
 	TITLE "Propensity score distributions by treatment group";
 RUN;
+ods graphics off;
+
 ```
+
+![](c:\temp\iptw_sas1.jpeg)
 
 ### R
 
@@ -191,7 +198,7 @@ run;
 
 ### R
 
-```{r r-part4, eval=FALSE}
+```{r r-part4}
 
 # Table 1
 covs=c("male","age","diabetes","arthrtis","copd",
@@ -241,6 +248,7 @@ libname a "c:\temp";
 				 
 /* estimate causal risk difference in the population using IPT-weighted linear regression */
 
+ods select GEEEmpPEst geemodinfo;
 proc genmod data=a.ps_data desc;
 	class patcode;
 	model bleed=newcox2 /dist=bin link=identity;
@@ -265,6 +273,7 @@ libname a "c:\temp";
 				 
 /* estimate causal risk difference in the population using SMR-weighted linear regression */
 
+ods select GEEEmpPEst geemodinfo;
 proc genmod data=a.ps_data desc;
 	class patcode;
 	model bleed=newcox2 /dist=bin link=identity;
