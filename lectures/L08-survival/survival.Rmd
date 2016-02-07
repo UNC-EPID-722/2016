@@ -2,6 +2,8 @@
 title: "Survival"
 author: "UNC EPID 722: Dr. Steve Cole"
 date: "February 9, 2016"
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
 output:
   html_document:
    toc: true
@@ -25,14 +27,18 @@ output:
 #### Specify packages for R
 
 ```{r}
-  #install.packages(c("knitr", "foreign", "tableone", "MCMCpack")) # Note: you only need to do this once. then only if you want updates.
-#  install.packages("data.table", "rms") # Watch out, rms loads a lot of other packages. skipping for now.
+#getwd() # use this to find relative directory for bib1.bib file above.
+
+    #install.packages(c("knitr", "foreign", "tableone", "MCMCpack", "pspline")) # Note: you only need to do this once. then only if you want updates. 
+#  install.packages("data.table", "rms", "mgcv") # Watch out, rms loads a lot of other packages. skipping for now.
   library(data.table)
   library(reshape2)
   library(survival)
   library(ggplot2)
 #  library(rms)
   library(muhaz)
+  library(pspline)
+  library(mgcv)
   set.seed(123) # set seed so you get same results each time you run.
 ```
 
@@ -112,9 +118,15 @@ proc phreg data=a noprint;
 	model t*delta(0)=;
 	baseline out=b survival=s stderr=se/method=pl; *output survival function and se;
 	output out=c(keep=t n) atrisk=n/method=pl; *output numbers in risk sets;
-proc sort data=c nodups; by t; *order times;
-data c; set c; by t; if first.t; *keep distinct times;
+run;
+
+proc sort data=c nodups; by t; *order times; run;
+
+data c; set c; by t; if first.t; *keep distinct times; run;
+
 data d; merge b c; by t; if t=0 then n=1164; if s>.; *merge keeping event times;
+run;
+
 data mle.d;
 	set d;
 	r=1-s;
@@ -141,7 +153,6 @@ proc sgplot data=mle.d noautolegend;
 	step x=t y=lo/lineattrs=(color=black pattern=dot);
 	step x=t y=hi/lineattrs=(color=black pattern=dot);
 	run; quit;
-
 ```
 
 ![](c:\temp\Survival.jpeg) <!-- Add in the Survival.jpeg from SAS program above...-->
@@ -151,7 +162,21 @@ proc sgplot data=mle.d noautolegend;
 ```{r r-part2}
 s.1 = survfit(Surv(t, delta) ~ 1, data=b)
 
-summary(s.1)
+#names(summary(s.1))
+sum.surv = summary(s.1)
+
+d = data.frame(
+  t = sum.surv$time,
+  n = sum.surv$n.risk,
+  r = 1-sum.surv$surv,
+  s = sum.surv$surv,
+  n.event = sum.surv$n.event,
+  n.censor = sum.surv$n.censor, 
+  se = sum.surv$std.err,
+  se2 = sum.surv$surv*sqrt((1-sum.surv$surv)/sum.surv$n.risk) # Peto se
+)
+
+head(d)
 
 plot(s.1, lwd=1.5, 
      fun = function(y) 1-y ,
@@ -166,10 +191,21 @@ plot(s.1, lwd=1.5,
 
 ### Hazard
 
+See Appendix A, p2430, of assigned reading [@cole_survival_2010] for estimate of hazard, $h(t)$,
+
+\[
+  h_k = \frac{Y_k}{N_k \Delta_k}
+\]
+
+where $\Delta_k = R_k - R_{k-1}$ and $R_0=0$ and $R_k$ is observed event time at rank $k$.
+
+
+The cumulative hazard, $H(t)$ is estimated as $H^{KM}_t = -log(S^{KM}(t))$.
+
 #### SAS
 
 <!--Note: Use permanent data file b from SAS code in mle.Rmd file.-->
-```{r s-part3, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+```{r s-part3a, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 libname mle "c:\temp";
 %let dir = c:\temp;
 data d; set mle.d; run;
@@ -177,7 +213,7 @@ data d; set mle.d; run;
 *Some other pieces;
 proc sort data=d; 
 	by descending s;
-data d; 
+data mle.d; 
 	set d; 
 	by descending s;
 	retain chm1 0 sm1 1 tm1 0;
@@ -192,40 +228,132 @@ data d;
 	output;
 	chm1=ch; sm1=s; tm1=t;
 	drop chm1 sm1 tm1;
-proc print data=d noobs; 
+run;
+
+proc print data=mle.d noobs; 
 	title2 "Hazard function";
 	var t y n deltat h;
+run;
+```
 
-*ods listing gpath="Y:\\Cole\\Teaching\\EPID722\\2016\\";
-ods listing gpath="c:\\temp";
-ods graphics/reset imagename="Hazard" imagefmt=jpeg height=8in width=8in;
-proc sgplot data=d noautolegend;
-	xaxis values=(0 to .5 by .1);
-	loess x=t y=h/smooth=.6;
-	pbspline x=t y=h/lineattrs=(color=red) nomarkers;
+
+For variance of the cumulative hazard function, $H(t)$, see Appendix B section at top of second column, page 2430, of assigned reading [@cole_survival_2010].
+
+According to Appendix A (p 2430),
+
+* $Y_k$ is the number of individuals who died at each of the ranked times $R_k$.
+
+* $N_k$ is the number of individuals at-risk for mortality while under observation at distrinct ranked event time $R_k$ for $k = 1, \ldots, D^{\prime}$.
+
+Variance for cumulative hazard:
+
+\[
+  V\left(H^{KM}(t)\right) = \displaystyle\sum_{k:R_k $leq$ t} \frac{Y_k}{N_k (N_k - Y_k)}
+\]
+
+Variance for survival function, $S^{KM}(t)$:
+
+\[
+  V\left(S^{KM}(t)\right) = S^{KM}(t)^2 \times \displaystyle\sum_{(k:R_k \leq  t)} \frac{Y_k}{N_k(N_k-Y_k)}
+\]
+
+```{r s-part3b, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+data d; set mle.d; run;
 
 data d; 
-	set d;
+	set mle.d;
 	by descending s;
 	retain v 0;
 	v=v+y/(n*(n-y));
 	se3=sqrt(s**2*v); *se by hand;
 	ch=-log(s);
 	output;
+run;
+
 proc print data=d noobs; 
 	title2 "Standard error by hand";
 	var t ch s se se3;
 run;
 ```
 
-![](c:\temp\Hazard.jpeg) <!-- Add in the Hazard.jpeg from SAS program above...-->
 
 #### R
 
-```{r r-part3}
+```{r r-part3a}
+d.rev = rbind(c(t=0, n=d$n[1], r=NA, s=NA, n.event=0, n.censor=NA, se=NA, se2=NA),
+              d) # add a time origin point here.
+
+d.rev$delta.t = c(0,diff(as.matrix(d.rev$t))) # get delta t
+d.rev$h = with(d.rev, n.event / (n*delta.t))
+
+some.vars = c("t", "n.event", "n", "delta.t", "h")
+head(d.rev[,some.vars]) # check with SAS numbers
+
+```
+
+Standard error by hand
+
+```{r r-part3b}
+d.rev = within(d.rev, {
+  sum.1 = with(d.rev, n.event / (n*(n-n.event)))
+  v = with(d.rev, cumsum(sum.1))
+  se3 = with(d.rev, sqrt(s^2*v))
+  ch = -log(s)
+})
+
+head(d.rev[,c("t", "ch", "s", "se", "se3")])
+
+```
+
+### Plots
+
+#### SAS
+
+```{r s-part4, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+
+*ods listing gpath="Y:\\Cole\\Teaching\\EPID722\\2016\\";
+ods listing gpath="c:\\temp";
+ods graphics/reset imagename="Hazard" imagefmt=jpeg height=8in width=8in;
+proc sgplot data=mle.d noautolegend;
+	xaxis values=(0 to .5 by .1);
+	loess x=t y=h/smooth=.6;
+	pbspline x=t y=h/lineattrs=(color=red) nomarkers;
+run; quit;
+```
+
+![](c:\temp\Hazard.jpeg) <!-- Add in the Hazard.jpeg from SAS program above...-->
+
+---
+
+#### R
+
+Plot hazards using muhaz function
+
+```{r r-part4a}
 fmuhaz = muhaz(b$t, b$delta,
               max.time=0.5,
               bw.method="g")
 plot(fmuhaz, xlab="Years", ylab="h")
 # see arxiv.org/pdf/1509.03253 and http://bit.ly/1SGaqjV
+#haz.dat = data.frame(t=fmuhaz$est.grid, h=fmuhaz$haz.est) # extract out hazard estimates from muhaz object to data frame
 ```
+
+---
+
+Plot of hazards from manually calculated hazards
+```{r r-part4b}
+p.haz = ggplot(data = d.rev, aes(x=t, y=h)) + 
+  geom_point() +
+  stat_smooth(method="loess", colour="blue", se=F) +
+#  stat_smooth(method = 'gam', colour = 'red', se = F, formula = y ~ s(x, bs='ps')) #note: this part not working for some reason, see http://bit.ly/1W2MO8B
+  theme_bw()
+
+p.haz
+```
+
+
+## References
