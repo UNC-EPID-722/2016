@@ -88,20 +88,24 @@ img {
 <li><a href="#sas-3"><span class="toc-section-number">1.5.1</span> SAS</a></li>
 <li><a href="#r-3"><span class="toc-section-number">1.5.2</span> R</a></li>
 </ul></li>
-<li><a href="#ipt-weighted-table-1"><span class="toc-section-number">1.6</span> IPT weighted table 1</a><ul>
+<li><a href="#explore-table-1"><span class="toc-section-number">1.6</span> Explore Table 1</a><ul>
 <li><a href="#sas-4"><span class="toc-section-number">1.6.1</span> SAS</a></li>
 <li><a href="#r-4"><span class="toc-section-number">1.6.2</span> R</a></li>
 </ul></li>
-<li><a href="#smr-weighted-table-1"><span class="toc-section-number">1.7</span> SMR weighted table 1</a><ul>
+<li><a href="#ipt-weighted-table-1"><span class="toc-section-number">1.7</span> IPT weighted table 1</a><ul>
 <li><a href="#sas-5"><span class="toc-section-number">1.7.1</span> SAS</a></li>
+<li><a href="#r-5"><span class="toc-section-number">1.7.2</span> R</a></li>
 </ul></li>
-<li><a href="#estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression"><span class="toc-section-number">1.8</span> Estimate causal risk difference in the population using IPT-weighted linear regression</a><ul>
+<li><a href="#smr-weighted-table-1"><span class="toc-section-number">1.8</span> SMR weighted table 1</a><ul>
 <li><a href="#sas-6"><span class="toc-section-number">1.8.1</span> SAS</a></li>
-<li><a href="#r-5"><span class="toc-section-number">1.8.2</span> R</a></li>
 </ul></li>
-<li><a href="#estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression"><span class="toc-section-number">1.9</span> Estimate causal risk difference in the population using SMR-weighted linear regression</a><ul>
+<li><a href="#estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression"><span class="toc-section-number">1.9</span> Estimate causal risk difference in the population using IPT-weighted linear regression</a><ul>
 <li><a href="#sas-7"><span class="toc-section-number">1.9.1</span> SAS</a></li>
 <li><a href="#r-6"><span class="toc-section-number">1.9.2</span> R</a></li>
+</ul></li>
+<li><a href="#estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression"><span class="toc-section-number">1.10</span> Estimate causal risk difference in the population using SMR-weighted linear regression</a><ul>
+<li><a href="#sas-8"><span class="toc-section-number">1.10.1</span> SAS</a></li>
+<li><a href="#r-7"><span class="toc-section-number">1.10.2</span> R</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -120,6 +124,7 @@ library(boot)
 library(geepack)
 library(ggplot2)
 library(foreach)
+library(tableone)
 set.seed(101) # set seed so you get same results each time you run. Note: no seed in original Gcomp.R program.</code></pre>
 </div>
 </div>
@@ -129,7 +134,8 @@ set.seed(101) # set seed so you get same results each time you run. Note: no see
 <h3><span class="header-section-number">1.2.1</span> R</h3>
 <pre class="r"><code>#getwd() # get the working directory
 ns=read.dta(&quot;../data/nsaid008.dta&quot;) # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
-# Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008.dta</code></pre>
+# Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008.dta
+#ns=read.dta(&quot;c:/temp/nsaid008.dta&quot;)</code></pre>
 </div>
 <div id="sas" class="section level3">
 <h3><span class="header-section-number">1.2.2</span> SAS</h3>
@@ -169,6 +175,15 @@ ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)</code></pre>
 </div>
 <div id="estimate-the-unknown-propensity-score-and-plot-the-density-by-treatment-group" class="section level2">
 <h2><span class="header-section-number">1.4</span> Estimate the (unknown) propensity score, and plot the density by treatment group</h2>
+<p>Notation for IPTW starting from slide 6 of 32 of IPTW lecture notes, propensityscores.pdf:</p>
+<p><span class="math">\[
+  Pr(X=1 \mid C) = expit(\beta_0 + \beta_1 age + \beta_2 sex + \beta_3 CHD + \ldots)
+\]</span></p>
+<p>and</p>
+<p>IPTW estimator:</p>
+<p>In treated: <span class="math">\(\frac{1}{PS(C)}\)</span> and <span class="math">\(\frac{1}{1-PS(C)}\)</span> in untreated patients.</p>
+<p>SMRW:</p>
+<p>In treated=1 and <span class="math">\(\frac{PS(C)}{1-PS(C)}\)</span> in untreated patients.</p>
 <div id="sas-2" class="section level3">
 <h3><span class="header-section-number">1.4.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
@@ -181,7 +196,6 @@ class newcox2 year;
                  raceblkoth age ;
  output out=ps_data predicted=ps;
 run;
-
 
 /* Creating PS treatment groups for plotting */
 
@@ -393,10 +407,98 @@ legend(&quot;right&quot;,c(&quot;newcox2==0&quot;,&quot;newcox2==1&quot;),lty=c(
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAk1BMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrY5ycw6AAA6OpA6kLY6kNs9tLY+tbc/tbc/ztJAz9NmAABmOgBmOpBmZjpmZmZmkJBmtv9/f3+QOgCQkNuQ2/+2ZgC225C2/7a2/9u2///MzMzbkDrbtmbb/7bb///l5eXzkov5l5D6mJL6+vr/tmb/25D//7b//9v///8qIHW/AAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3d62Ij17GYUVqxM0cnSuLIuSiKmcRhIp1jc6R5/6cLAALNJkEONwtde1io9f0RVbyAWzN7qYFuADdfJEmhbr71LyBJVQOoJAUDqCQFA6gkBQOoJAUDqCQFA6gkBQOoJAUDqCQFA6gkBQOoJAUDqCQFA6gkBQOoJAWbA+h/l/TRm2LBlTUJ0Cm3cuof/5h6c6d+/Sa3+o0W+21W22qxs1cL0EgA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEAA3awWu2wJoOkBtEDXCujfH5t1sy122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogQC6WS122RJA0wNogTYA9P7mh4cPfv/55qE//fLsSwCaVitTWi0WoBW6HNDffjwBuvsIoLNrZUqrxQK0QhcDulfzCOjn78/kPAbQtFqZ0mqxAK3QpYB+/v5mAfT+5tMrXwXQtFqZ0mqxAK3QhYDe3tz88S8nQO9OH5wF0LRamdJqsQCt0GWA7o4/f/j955Obt3/46ytfB9C0WpnSarEArdCFgP7zL18WQH/78bv/tT+N9ML9eICm1cqUVosFaIUuPwu/AHp4OHTfd39bfvoxgKbVypRWiwVohTYE9P54/dLt42VMC6C/zu5fHpt+21LBABppQ0Dvjoeeu8FPz77GEWharQ7KWi3WEWiFNgR06fbsYVCAptXKlFaL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" title alt width="672" /></p>
 </div>
 </div>
-<div id="ipt-weighted-table-1" class="section level2">
-<h2><span class="header-section-number">1.6</span> IPT weighted table 1</h2>
+<div id="explore-table-1" class="section level2">
+<h2><span class="header-section-number">1.6</span> Explore Table 1</h2>
 <div id="sas-4" class="section level3">
 <h3><span class="header-section-number">1.6.1</span> SAS</h3>
+<pre class="sas"><code>libname a &quot;c:\temp&quot;;
+
+/* explore data, table 1 */
+
+proc means data=a.ns mean;
+    class newcox2;
+    var male arthrtis contsteroids contanticoag contaspirin tobacco_imp
+                 raceblkoth age ;
+run;</code></pre>
+<pre><code>## The MEANS Procedure
+## 
+##    New NSAID
+##    user/rcvd
+##        Cox-2
+##    selective      N
+##         only    Obs   Variable       Label
+## --------------------------------------------------------------------------------
+##            0   2642   male           Pt is male                                 
+##                       arthrtis       Does patient now have - Arthritis          
+##                       contsteroids   Continuing adrenal cortical steroids       
+##                       contanticoag   Continuing anticoagulant                   
+##                       contaspirin    Continuing aspirin                         
+##                       tobacco_imp    Pt uses tobacco (imputed for lab exercises)
+##                       raceblkoth     Race Black/Other                           
+##                       age            Patient age in years                       
+## 
+##            1    240   male           Pt is male                                 
+##                       arthrtis       Does patient now have - Arthritis          
+##                       contsteroids   Continuing adrenal cortical steroids       
+##                       contanticoag   Continuing anticoagulant                   
+##                       contaspirin    Continuing aspirin                         
+##                       tobacco_imp    Pt uses tobacco (imputed for lab exercises)
+##                       raceblkoth     Race Black/Other                           
+##                       age            Patient age in years                       
+## --------------------------------------------------------------------------------
+## 
+##    New NSAID
+##    user/rcvd
+##        Cox-2
+##    selective      N
+##         only    Obs   Variable               Mean
+## -------------------------------------------------
+##            0   2642   male              0.4125662
+##                       arthrtis          0.3001514
+##                       contsteroids      0.0049205
+##                       contanticoag      0.0034065
+##                       contaspirin       0.0314156
+##                       tobacco_imp       0.1502650
+##                       raceblkoth        0.2119606
+##                       age              47.2956094
+## 
+##            1    240   male              0.4166667
+##                       arthrtis          0.4666667
+##                       contsteroids      0.0208333
+##                       contanticoag      0.0083333
+##                       contaspirin       0.0375000
+##                       tobacco_imp       0.1791667
+##                       raceblkoth        0.1958333
+##                       age              53.4291667
+## -------------------------------------------------</code></pre>
+</div>
+<div id="r-4" class="section level3">
+<h3><span class="header-section-number">1.6.2</span> R</h3>
+<pre class="r"><code>t.1 = CreateTableOne(vars=c(&quot;male&quot;, &quot;arthrtis&quot;, &quot;contsteroids&quot;,
+                            &quot;containticoag&quot;, &quot;contaspirin&quot;, &quot;tobacco_imp&quot;,
+                            &quot;raceblkoth&quot;, &quot;age&quot;),
+                     strata = c(&quot;newcox2&quot;), 
+                     data = ns,
+                     test=F)</code></pre>
+<pre><code>## Warning in ModuleReturnVarsExist(vars, data): The data frame does not have:
+## containticoag Dropped</code></pre>
+<pre class="r"><code>print(t.1)#, #nonnormal=c(&quot;contanticoag&quot;))</code></pre>
+<pre><code>##                           Stratified by newcox2
+##                            0             1            
+##   n                         2642           240        
+##   male (mean (sd))          0.41 (0.49)   0.42 (0.49) 
+##   arthrtis (mean (sd))      0.30 (0.46)   0.47 (0.50) 
+##   contsteroids (mean (sd))  0.00 (0.07)   0.02 (0.14) 
+##   contaspirin (mean (sd))   0.03 (0.17)   0.04 (0.19) 
+##   tobacco_imp (mean (sd))   0.15 (0.36)   0.18 (0.38) 
+##   raceblkoth (mean (sd))    0.21 (0.41)   0.20 (0.40) 
+##   age (mean (sd))          47.30 (16.64) 53.43 (15.72)</code></pre>
+</div>
+</div>
+<div id="ipt-weighted-table-1" class="section level2">
+<h2><span class="header-section-number">1.7</span> IPT weighted table 1</h2>
+<div id="sas-5" class="section level3">
+<h3><span class="header-section-number">1.7.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
 
 /* IPT weighted table 1 */
@@ -458,9 +560,69 @@ run;</code></pre>
 ##                       raceblkoth        0.2124116
 ##                       age              49.1229179
 ## -------------------------------------------------</code></pre>
+<p>Unweighted regression, crude</p>
+<pre class="sas"><code>libname a &quot;c:\temp&quot;;
+
+/* unweighted regression, crude */
+
+proc genmod data=a.ps_data desc;
+    model bleed=newcox2 / dist=bin link=identity;
+run; quit;
+</code></pre>
+<pre><code>## The GENMOD Procedure
+## 
+##        Model Information
+## 
+## Data Set              A.PS_DATA
+## Distribution           Binomial
+## Link Function          Identity
+## Dependent Variable        bleed
+## 
+## 
+## Number of Observations Read        2882
+## Number of Observations Used        2882
+## Number of Events                    263
+## Number of Trials                   2882
+## 
+## 
+##        Response Profile
+##  
+##  Ordered                 Total
+##    Value    bleed    Frequency
+## 
+##        1    1              263
+##        2    0             2619
+## 
+## PROC GENMOD is modeling the probability that bleed='1'.
+## 
+## 
+##              Criteria For Assessing Goodness Of Fit
+##  
+## Criterion                     DF           Value        Value/DF
+## 
+## Log Likelihood                         -880.1440                
+## Full Log Likelihood                    -880.1440                
+## AIC (smaller is better)                1764.2881                
+## AICC (smaller is better)               1764.2923                
+## BIC (smaller is better)                1776.2206                
+## 
+## 
+## Algorithm converged.                                                       
+## 
+## 
+##              Analysis Of Maximum Likelihood Parameter Estimates
+##  
+##                          Standard       Wald 95%             Wald
+## Parameter  DF  Estimate     Error   Confidence Limits  Chi-Square  Pr &gt; ChiSq
+## 
+## Intercept   1    0.0905    0.0056    0.0795    0.1014      262.77      &lt;.0001
+## newcox2     1    0.0095    0.0202   -0.0300    0.0490        0.22      0.6360
+## Scale       0    1.0000    0.0000    1.0000    1.0000                        
+## 
+## NOTE: The scale parameter was held fixed.</code></pre>
 </div>
-<div id="r-4" class="section level3">
-<h3><span class="header-section-number">1.6.2</span> R</h3>
+<div id="r-5" class="section level3">
+<h3><span class="header-section-number">1.7.2</span> R</h3>
 <pre class="r"><code># Table 1
 covs=c(&quot;male&quot;,&quot;age&quot;,&quot;diabetes&quot;,&quot;arthrtis&quot;,&quot;copd&quot;,
        &quot;reas1digest&quot;,&quot;tobacco_imp&quot;,&quot;contsteroids&quot;)
@@ -520,9 +682,9 @@ summary(glm(bleed~newcox2,data=ns))</code></pre>
 </div>
 </div>
 <div id="smr-weighted-table-1" class="section level2">
-<h2><span class="header-section-number">1.7</span> SMR weighted table 1</h2>
-<div id="sas-5" class="section level3">
-<h3><span class="header-section-number">1.7.1</span> SAS</h3>
+<h2><span class="header-section-number">1.8</span> SMR weighted table 1</h2>
+<div id="sas-6" class="section level3">
+<h3><span class="header-section-number">1.8.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
 
 /* SMR weighted table 1 */
@@ -587,9 +749,9 @@ run;</code></pre>
 </div>
 </div>
 <div id="estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression" class="section level2">
-<h2><span class="header-section-number">1.8</span> Estimate causal risk difference in the population using IPT-weighted linear regression</h2>
-<div id="sas-6" class="section level3">
-<h3><span class="header-section-number">1.8.1</span> SAS</h3>
+<h2><span class="header-section-number">1.9</span> Estimate causal risk difference in the population using IPT-weighted linear regression</h2>
+<div id="sas-7" class="section level3">
+<h3><span class="header-section-number">1.9.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
                  
 /* estimate causal risk difference in the population using IPT-weighted linear regression */
@@ -622,8 +784,8 @@ run;</code></pre>
 ## Intercept   0.0942   0.0058   0.0829   0.1056   16.25   &lt;.0001
 ## newcox2    -0.0231   0.0164  -0.0551   0.0090   -1.41   0.1585</code></pre>
 </div>
-<div id="r-5" class="section level3">
-<h3><span class="header-section-number">1.8.2</span> R</h3>
+<div id="r-6" class="section level3">
+<h3><span class="header-section-number">1.9.2</span> R</h3>
 <pre class="r"><code># IPT weighted, use GEE for SE
 summary(geeglm(bleed~newcox2,family=gaussian, weight=iptw, id=patcode, data=ns))</code></pre>
 <pre><code>## 
@@ -646,9 +808,9 @@ summary(geeglm(bleed~newcox2,family=gaussian, weight=iptw, id=patcode, data=ns))
 </div>
 </div>
 <div id="estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression" class="section level2">
-<h2><span class="header-section-number">1.9</span> Estimate causal risk difference in the population using SMR-weighted linear regression</h2>
-<div id="sas-7" class="section level3">
-<h3><span class="header-section-number">1.9.1</span> SAS</h3>
+<h2><span class="header-section-number">1.10</span> Estimate causal risk difference in the population using SMR-weighted linear regression</h2>
+<div id="sas-8" class="section level3">
+<h3><span class="header-section-number">1.10.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
                  
 /* estimate causal risk difference in the population using SMR-weighted linear regression */
@@ -681,8 +843,8 @@ run;</code></pre>
 ## Intercept   0.1355   0.0089   0.1181   0.1528   15.29   &lt;.0001
 ## newcox2    -0.0355   0.0213  -0.0772   0.0063   -1.67   0.0957</code></pre>
 </div>
-<div id="r-6" class="section level3">
-<h3><span class="header-section-number">1.9.2</span> R</h3>
+<div id="r-7" class="section level3">
+<h3><span class="header-section-number">1.10.2</span> R</h3>
 <pre class="r"><code># SMR weighted, use GEE for SE
 summary(geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns))</code></pre>
 <pre><code>## 
