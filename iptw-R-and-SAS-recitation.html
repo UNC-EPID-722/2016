@@ -98,14 +98,22 @@ img {
 </ul></li>
 <li><a href="#smr-weighted-table-1"><span class="toc-section-number">1.8</span> SMR weighted table 1</a><ul>
 <li><a href="#sas-6"><span class="toc-section-number">1.8.1</span> SAS</a></li>
+<li><a href="#r-6"><span class="toc-section-number">1.8.2</span> R</a></li>
 </ul></li>
-<li><a href="#estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression"><span class="toc-section-number">1.9</span> Estimate causal risk difference in the population using IPT-weighted linear regression</a><ul>
+<li><a href="#unweighted-regression-crude"><span class="toc-section-number">1.9</span> Unweighted regression, crude</a><ul>
 <li><a href="#sas-7"><span class="toc-section-number">1.9.1</span> SAS</a></li>
-<li><a href="#r-6"><span class="toc-section-number">1.9.2</span> R</a></li>
+<li><a href="#r-7"><span class="toc-section-number">1.9.2</span> R</a></li>
 </ul></li>
-<li><a href="#estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression"><span class="toc-section-number">1.10</span> Estimate causal risk difference in the population using SMR-weighted linear regression</a><ul>
+<li><a href="#estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression"><span class="toc-section-number">1.10</span> Estimate causal risk difference in the population using IPT-weighted linear regression</a><ul>
 <li><a href="#sas-8"><span class="toc-section-number">1.10.1</span> SAS</a></li>
-<li><a href="#r-7"><span class="toc-section-number">1.10.2</span> R</a></li>
+<li><a href="#r-8"><span class="toc-section-number">1.10.2</span> R</a></li>
+</ul></li>
+<li><a href="#estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression"><span class="toc-section-number">1.11</span> Estimate causal risk difference in the population using SMR-weighted linear regression</a><ul>
+<li><a href="#sas-9"><span class="toc-section-number">1.11.1</span> SAS</a></li>
+<li><a href="#r-9"><span class="toc-section-number">1.11.2</span> R</a></li>
+</ul></li>
+<li><a href="#appendix-normal-approximation-to-the-binomial-distribution."><span class="toc-section-number">1.12</span> Appendix: Normal approximation to the binomial distribution.</a><ul>
+<li><a href="#r-10"><span class="toc-section-number">1.12.1</span> R</a></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -123,8 +131,9 @@ require(foreign)
 library(boot)
 library(geepack)
 library(ggplot2)
-library(foreach)
+library(foreach) 
 library(tableone)
+library(survey)
 set.seed(101) # set seed so you get same results each time you run. Note: no seed in original Gcomp.R program.</code></pre>
 </div>
 </div>
@@ -409,6 +418,7 @@ legend(&quot;right&quot;,c(&quot;newcox2==0&quot;,&quot;newcox2==1&quot;),lty=c(
 </div>
 <div id="explore-table-1" class="section level2">
 <h2><span class="header-section-number">1.6</span> Explore Table 1</h2>
+<p>Note that there are differences between treatment groups when comparing statistics for selected covariates. The treated group is older, uses more tobacco, and has a higher proportion reporting arthritis.</p>
 <div id="sas-4" class="section level3">
 <h3><span class="header-section-number">1.6.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
@@ -560,66 +570,6 @@ run;</code></pre>
 ##                       raceblkoth        0.2124116
 ##                       age              49.1229179
 ## -------------------------------------------------</code></pre>
-<p>Unweighted regression, crude</p>
-<pre class="sas"><code>libname a &quot;c:\temp&quot;;
-
-/* unweighted regression, crude */
-
-proc genmod data=a.ps_data desc;
-    model bleed=newcox2 / dist=binomial link=identity;
-run; quit;
-</code></pre>
-<pre><code>## The GENMOD Procedure
-## 
-##        Model Information
-## 
-## Data Set              A.PS_DATA
-## Distribution           Binomial
-## Link Function          Identity
-## Dependent Variable        bleed
-## 
-## 
-## Number of Observations Read        2882
-## Number of Observations Used        2882
-## Number of Events                    263
-## Number of Trials                   2882
-## 
-## 
-##        Response Profile
-##  
-##  Ordered                 Total
-##    Value    bleed    Frequency
-## 
-##        1    1              263
-##        2    0             2619
-## 
-## PROC GENMOD is modeling the probability that bleed='1'.
-## 
-## 
-##              Criteria For Assessing Goodness Of Fit
-##  
-## Criterion                     DF           Value        Value/DF
-## 
-## Log Likelihood                         -880.1440                
-## Full Log Likelihood                    -880.1440                
-## AIC (smaller is better)                1764.2881                
-## AICC (smaller is better)               1764.2923                
-## BIC (smaller is better)                1776.2206                
-## 
-## 
-## Algorithm converged.                                                       
-## 
-## 
-##              Analysis Of Maximum Likelihood Parameter Estimates
-##  
-##                          Standard       Wald 95%             Wald
-## Parameter  DF  Estimate     Error   Confidence Limits  Chi-Square  Pr &gt; ChiSq
-## 
-## Intercept   1    0.0905    0.0056    0.0795    0.1014      262.77      &lt;.0001
-## newcox2     1    0.0095    0.0202   -0.0300    0.0490        0.22      0.6360
-## Scale       0    1.0000    0.0000    1.0000    1.0000                        
-## 
-## NOTE: The scale parameter was held fixed.</code></pre>
 </div>
 <div id="r-5" class="section level3">
 <h3><span class="header-section-number">1.7.2</span> R</h3>
@@ -655,55 +605,19 @@ round(ret,2)</code></pre>
 ## reas1digest        0.05             0.03
 ## tobacco_imp        0.15             0.15
 ## contsteroids       0.01             0.01</code></pre>
-<pre class="r"><code># Unweighted regression, crude
-summary(glm(bleed~newcox2, family=gaussian(link=&quot;identity&quot;), data=ns))</code></pre>
-<pre><code>## 
-## Call:
-## glm(formula = bleed ~ newcox2, family = gaussian(link = &quot;identity&quot;), 
-##     data = ns)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -0.1167  -0.0969  -0.0969  -0.0969   0.9031  
-## 
-## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  0.09690    0.00580  16.707   &lt;2e-16 ***
-## newcox2      0.01977    0.02010   0.984    0.325    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for gaussian family taken to be 0.08886385)
-## 
-##     Null deviance: 256.01  on 2881  degrees of freedom
-## Residual deviance: 255.93  on 2880  degrees of freedom
-## AIC: 1206.4
-## 
-## Number of Fisher Scoring iterations: 2</code></pre>
-<pre class="r"><code>summary(glm(bleed~newcox2, family=binomial(link=&quot;identity&quot;), data=ns))</code></pre>
-<pre><code>## 
-## Call:
-## glm(formula = bleed ~ newcox2, family = binomial(link = &quot;identity&quot;), 
-##     data = ns)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -0.4981  -0.4515  -0.4515  -0.4515   2.1606  
-## 
-## Coefficients:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept) 0.096896   0.005755  16.836   &lt;2e-16 ***
-## newcox2     0.019770   0.021506   0.919    0.358    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 1855.3  on 2881  degrees of freedom
-## Residual deviance: 1854.3  on 2880  degrees of freedom
-## AIC: 1858.3
-## 
-## Number of Fisher Scoring iterations: 2</code></pre>
+<p><strong>Note</strong> that the weighted distribution of the covariates is now similar to the entire population.</p>
+<p>Distribution of the covariates for the entire sample:</p>
+<pre><code>##                           
+##                            Overall      
+##   n                         2882        
+##   male (mean (sd))          0.41 (0.49) 
+##   arthrtis (mean (sd))      0.31 (0.46) 
+##   contsteroids (mean (sd))  0.01 (0.08) 
+##   contanticoag (mean (sd))  0.00 (0.06) 
+##   contaspirin (mean (sd))   0.03 (0.18) 
+##   tobacco_imp (mean (sd))   0.15 (0.36) 
+##   raceblkoth (mean (sd))    0.21 (0.41) 
+##   age (mean (sd))          47.81 (16.65)</code></pre>
 </div>
 </div>
 <div id="smr-weighted-table-1" class="section level2">
@@ -772,11 +686,152 @@ run;</code></pre>
 ##                       age              53.4291667
 ## -------------------------------------------------</code></pre>
 </div>
+<div id="r-6" class="section level3">
+<h3><span class="header-section-number">1.8.2</span> R</h3>
+<pre class="r"><code>my.smrw &lt;- svydesign(id=~patcode, data = ns, weight = ~smrw)
+names(ns)</code></pre>
+<pre><code>##  [1] &quot;year&quot;             &quot;phycode&quot;          &quot;patcode&quot;         
+##  [4] &quot;msa&quot;              &quot;region&quot;           &quot;northeast&quot;       
+##  [7] &quot;midwest&quot;          &quot;south&quot;            &quot;west&quot;            
+## [10] &quot;spec&quot;             &quot;specr&quot;            &quot;speccat&quot;         
+## [13] &quot;pcdoc&quot;            &quot;surgspec&quot;         &quot;medspec&quot;         
+## [16] &quot;cvdspec&quot;          &quot;mddo&quot;             &quot;do&quot;              
+## [19] &quot;age&quot;              &quot;male&quot;             &quot;racer&quot;           
+## [22] &quot;raceblkoth&quot;       &quot;pripayer&quot;         &quot;mcaidselfnc_imp&quot; 
+## [25] &quot;urbanrur0609&quot;     &quot;nonmetro0609&quot;     &quot;hinczip0609&quot;     
+## [28] &quot;lowinczip0609&quot;    &quot;pctpov0609&quot;       &quot;hipovzip0609&quot;    
+## [31] &quot;pctbamore0609&quot;    &quot;major&quot;            &quot;reason1&quot;         
+## [34] &quot;reason2&quot;          &quot;reason3&quot;          &quot;reas1circ&quot;       
+## [37] &quot;reas1resp&quot;        &quot;reas1digest&quot;      &quot;reas1musc&quot;       
+## [40] &quot;reasoncirc&quot;       &quot;reasonresp&quot;       &quot;reasondigest&quot;    
+## [43] &quot;reasonmusc&quot;       &quot;cam&quot;              &quot;arthrtis&quot;        
+## [46] &quot;asthma&quot;           &quot;cancer&quot;           &quot;cebvd&quot;           
+## [49] &quot;crf&quot;              &quot;chf&quot;              &quot;copd&quot;            
+## [52] &quot;deprn&quot;            &quot;diabetes&quot;         &quot;hyplipid&quot;        
+## [55] &quot;htn&quot;              &quot;ihd&quot;              &quot;ostprsis&quot;        
+## [58] &quot;totchron_imp&quot;     &quot;multchron_imp&quot;    &quot;surgflare_imp&quot;   
+## [61] &quot;surgchron_imp&quot;    &quot;bpsys&quot;            &quot;bpdias&quot;          
+## [64] &quot;tobacco_imp&quot;      &quot;bp_stage2&quot;        &quot;bp_stage1&quot;       
+## [67] &quot;bp_prehtn&quot;        &quot;cox2&quot;             &quot;nsnsaid&quot;         
+## [70] &quot;newcox2&quot;          &quot;newnsnsaid&quot;       &quot;contnsaid&quot;       
+## [73] &quot;contaht&quot;          &quot;contstatin&quot;       &quot;conth2antagonist&quot;
+## [76] &quot;contppi&quot;          &quot;contaspirin&quot;      &quot;contanticoag&quot;    
+## [79] &quot;contsteroids&quot;     &quot;pud&quot;              &quot;pbleed&quot;          
+## [82] &quot;bleed&quot;            &quot;ps&quot;               &quot;iptw&quot;            
+## [85] &quot;smrw&quot;</code></pre>
+<pre class="r"><code>t.1.smrw = svyCreateTableOne(vars=c(&quot;male&quot;, &quot;arthrtis&quot;, &quot;contsteroids&quot;,
+                            &quot;contanticoag&quot;, &quot;contaspirin&quot;, &quot;tobacco_imp&quot;,
+                            &quot;raceblkoth&quot;, &quot;age&quot;),
+                     strata = c(&quot;newcox2&quot;),
+                     data=my.smrw,
+                     test=F)
+print(t.1.smrw)#, #nonnormal=c(&quot;contanticoag&quot;))</code></pre>
+<pre><code>##                           Stratified by newcox2
+##                            0              1             
+##   n                        240.97         240.00        
+##   male (mean (sd))           0.42 (0.49)    0.42 (0.49) 
+##   arthrtis (mean (sd))       0.47 (0.50)    0.47 (0.50) 
+##   contsteroids (mean (sd))   0.02 (0.15)    0.02 (0.14) 
+##   contanticoag (mean (sd))   0.01 (0.09)    0.01 (0.09) 
+##   contaspirin (mean (sd))    0.04 (0.19)    0.04 (0.19) 
+##   tobacco_imp (mean (sd))    0.18 (0.38)    0.18 (0.38) 
+##   raceblkoth (mean (sd))     0.20 (0.40)    0.20 (0.40) 
+##   age (mean (sd))           53.60 (16.94)  53.43 (15.72)</code></pre>
+<p><strong>Note</strong> that the weighted distribution of the covariates is now similar to the treated sample.</p>
+<p>Distribution of the covariates for the treated sample:</p>
+<pre><code>##                           
+##                            Overall      
+##   n                          240        
+##   male (mean (sd))          0.42 (0.49) 
+##   arthrtis (mean (sd))      0.47 (0.50) 
+##   contsteroids (mean (sd))  0.02 (0.14) 
+##   contanticoag (mean (sd))  0.01 (0.09) 
+##   contaspirin (mean (sd))   0.04 (0.19) 
+##   tobacco_imp (mean (sd))   0.18 (0.38) 
+##   raceblkoth (mean (sd))    0.20 (0.40) 
+##   age (mean (sd))          53.43 (15.72)</code></pre>
 </div>
-<div id="estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression" class="section level2">
-<h2><span class="header-section-number">1.9</span> Estimate causal risk difference in the population using IPT-weighted linear regression</h2>
+</div>
+<div id="unweighted-regression-crude" class="section level2">
+<h2><span class="header-section-number">1.9</span> Unweighted regression, crude</h2>
 <div id="sas-7" class="section level3">
 <h3><span class="header-section-number">1.9.1</span> SAS</h3>
+<pre class="sas"><code>libname a &quot;c:\temp&quot;;
+
+/* unweighted regression, crude */
+
+proc genmod data=a.ps_data desc;
+    model bleed=newcox2 / dist=binomial link=identity;
+run; quit;</code></pre>
+<pre><code>## The GENMOD Procedure
+## 
+##        Model Information
+## 
+## Data Set              A.PS_DATA
+## Distribution           Binomial
+## Link Function          Identity
+## Dependent Variable        bleed
+## 
+## 
+## Number of Observations Read        2882
+## Number of Observations Used        2882
+## Number of Events                    263
+## Number of Trials                   2882
+## 
+## 
+##        Response Profile
+##  
+##  Ordered                 Total
+##    Value    bleed    Frequency
+## 
+##        1    1              263
+##        2    0             2619
+## 
+## PROC GENMOD is modeling the probability that bleed='1'.
+## 
+## 
+##              Criteria For Assessing Goodness Of Fit
+##  
+## Criterion                     DF           Value        Value/DF
+## 
+## Log Likelihood                         -880.1440                
+## Full Log Likelihood                    -880.1440                
+## AIC (smaller is better)                1764.2881                
+## AICC (smaller is better)               1764.2923                
+## BIC (smaller is better)                1776.2206                
+## 
+## 
+## Algorithm converged.                                                       
+## 
+## 
+##              Analysis Of Maximum Likelihood Parameter Estimates
+##  
+##                          Standard       Wald 95%             Wald
+## Parameter  DF  Estimate     Error   Confidence Limits  Chi-Square  Pr &gt; ChiSq
+## 
+## Intercept   1    0.0905    0.0056    0.0795    0.1014      262.77      &lt;.0001
+## newcox2     1    0.0095    0.0202   -0.0300    0.0490        0.22      0.6360
+## Scale       0    1.0000    0.0000    1.0000    1.0000                        
+## 
+## NOTE: The scale parameter was held fixed.</code></pre>
+</div>
+<div id="r-7" class="section level3">
+<h3><span class="header-section-number">1.9.2</span> R</h3>
+<pre class="r"><code># Unweighted regression, crude
+coef(summary(glm(bleed~newcox2, family=gaussian(link=&quot;identity&quot;), data=ns)))</code></pre>
+<pre><code>##               Estimate  Std. Error    t value     Pr(&gt;|t|)
+## (Intercept) 0.09689629 0.005799575 16.7074819 6.975154e-60
+## newcox2     0.01977038 0.020097291  0.9837334 3.253293e-01</code></pre>
+<pre class="r"><code>coef(summary(glm(bleed~newcox2, family=binomial(link=&quot;identity&quot;), data=ns)))</code></pre>
+<pre><code>##               Estimate  Std. Error    z value     Pr(&gt;|z|)
+## (Intercept) 0.09689629 0.005755141 16.8364750 1.318612e-63
+## newcox2     0.01977038 0.021506273  0.9192841 3.579470e-01</code></pre>
+</div>
+</div>
+<div id="estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression" class="section level2">
+<h2><span class="header-section-number">1.10</span> Estimate causal risk difference in the population using IPT-weighted linear regression</h2>
+<div id="sas-8" class="section level3">
+<h3><span class="header-section-number">1.10.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
                  
 /* estimate causal risk difference in the population using IPT-weighted linear regression */
@@ -785,6 +840,15 @@ ods select GEEEmpPEst geemodinfo;
 proc genmod data=a.ps_data desc;
     class patcode;
     model bleed=newcox2 /dist=bin link=identity;
+    repeated subject=patcode / corr=ind;
+    weight iptw;
+run;
+
+/* Note you get same results regardless of distribution. */
+ods select GEEEmpPEst geemodinfo;
+proc genmod data=a.ps_data desc;
+    class patcode;
+    model bleed=newcox2 /dist=normal link=identity;
     repeated subject=patcode / corr=ind;
     weight iptw;
 run;</code></pre>
@@ -807,35 +871,49 @@ run;</code></pre>
 ## Parameter Estimate    Error       Limits            Z Pr &gt; |Z|
 ## 
 ## Intercept   0.0942   0.0058   0.0829   0.1056   16.25   &lt;.0001
+## newcox2    -0.0231   0.0164  -0.0551   0.0090   -1.41   0.1585
+##  
+##                                                                                 
+##  
+## The GENMOD Procedure
+## 
+##                 GEE Model Information
+## 
+## Correlation Structure                     Independent
+## Subject Effect                  patcode (2882 levels)
+## Number of Clusters                               2882
+## Correlation Matrix Dimension                        1
+## Maximum Cluster Size                                1
+## Minimum Cluster Size                                1
+## 
+## 
+##              Analysis Of GEE Parameter Estimates
+##               Empirical Standard Error Estimates
+##  
+##                    Standard   95% Confidence
+## Parameter Estimate    Error       Limits            Z Pr &gt; |Z|
+## 
+## Intercept   0.0942   0.0058   0.0829   0.1056   16.25   &lt;.0001
 ## newcox2    -0.0231   0.0164  -0.0551   0.0090   -1.41   0.1585</code></pre>
 </div>
-<div id="r-6" class="section level3">
-<h3><span class="header-section-number">1.9.2</span> R</h3>
+<div id="r-8" class="section level3">
+<h3><span class="header-section-number">1.10.2</span> R</h3>
 <pre class="r"><code># IPT weighted, use GEE for SE
-summary(geeglm(bleed~newcox2, family=gaussian, weight=iptw, id=patcode, data=ns))</code></pre>
-<pre><code>## 
-## Call:
-## geeglm(formula = bleed ~ newcox2, family = gaussian, data = ns, 
-##     weights = iptw, id = patcode)
-## 
-##  Coefficients:
-##              Estimate   Std.err    Wald Pr(&gt;|W|)    
-## (Intercept)  0.101398  0.006001 285.477   &lt;2e-16 ***
-## newcox2     -0.022217  0.016505   1.812    0.178    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Estimated Scale Parameters:
-##             Estimate  Std.err
-## (Intercept)  0.08214 0.006876
-## 
-## Correlation: Structure = independenceNumber of clusters:   2882   Maximum cluster size: 1</code></pre>
+coef(summary(geeglm(bleed~newcox2, family=gaussian, weight=iptw, id=patcode, data=ns)))</code></pre>
+<pre><code>##               Estimate    Std.err       Wald  Pr(&gt;|W|)
+## (Intercept)  0.1013983 0.00600130 285.476795 0.0000000
+## newcox2     -0.0222170 0.01650539   1.811836 0.1782881</code></pre>
+<pre class="r"><code>coef(summary(geeglm(bleed~newcox2, family=binomial(link=&quot;identity&quot;), weight=iptw, id=patcode, data=ns))) # note that you get same results</code></pre>
+<pre><code>## Warning: non-integer #successes in a binomial glm!</code></pre>
+<pre><code>##               Estimate    Std.err       Wald  Pr(&gt;|W|)
+## (Intercept)  0.1013983 0.00600130 285.476795 0.0000000
+## newcox2     -0.0222170 0.01650539   1.811836 0.1782881</code></pre>
 </div>
 </div>
 <div id="estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression" class="section level2">
-<h2><span class="header-section-number">1.10</span> Estimate causal risk difference in the population using SMR-weighted linear regression</h2>
-<div id="sas-8" class="section level3">
-<h3><span class="header-section-number">1.10.1</span> SAS</h3>
+<h2><span class="header-section-number">1.11</span> Estimate causal risk difference in the population using SMR-weighted linear regression</h2>
+<div id="sas-9" class="section level3">
+<h3><span class="header-section-number">1.11.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
                  
 /* estimate causal risk difference in the population using SMR-weighted linear regression */
@@ -868,27 +946,47 @@ run;</code></pre>
 ## Intercept   0.1355   0.0089   0.1181   0.1528   15.29   &lt;.0001
 ## newcox2    -0.0355   0.0213  -0.0772   0.0063   -1.67   0.0957</code></pre>
 </div>
-<div id="r-7" class="section level3">
-<h3><span class="header-section-number">1.10.2</span> R</h3>
+<div id="r-9" class="section level3">
+<h3><span class="header-section-number">1.11.2</span> R</h3>
 <pre class="r"><code># SMR weighted, use GEE for SE
-summary(geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns))</code></pre>
-<pre><code>## 
-## Call:
-## geeglm(formula = bleed ~ newcox2, family = gaussian, data = ns, 
-##     weights = smrw, id = patcode)
-## 
-##  Coefficients:
-##             Estimate  Std.err   Wald Pr(&gt;|W|)    
-## (Intercept)  0.15076  0.00926 265.24   &lt;2e-16 ***
-## newcox2     -0.03409  0.02270   2.26     0.13    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Estimated Scale Parameters:
-##             Estimate Std.err
-## (Intercept)    0.116 0.00858
-## 
-## Correlation: Structure = independenceNumber of clusters:   2882   Maximum cluster size: 1</code></pre>
+coef(summary(geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns)))</code></pre>
+<pre><code>##                Estimate     Std.err       Wald  Pr(&gt;|W|)
+## (Intercept)  0.15075815 0.009256837 265.238368 0.0000000
+## newcox2     -0.03409148 0.022695532   2.256374 0.1330653</code></pre>
+<pre class="r"><code>coef(summary(geeglm(bleed~newcox2, family=binomial(link = &quot;identity&quot;), weight=smrw, id=patcode, data=ns)))</code></pre>
+<pre><code>## Warning: non-integer #successes in a binomial glm!</code></pre>
+<pre><code>##                Estimate     Std.err       Wald  Pr(&gt;|W|)
+## (Intercept)  0.15075815 0.009256837 265.238368 0.0000000
+## newcox2     -0.03409148 0.022695532   2.256374 0.1330653</code></pre>
+</div>
+</div>
+<div id="appendix-normal-approximation-to-the-binomial-distribution." class="section level2">
+<h2><span class="header-section-number">1.12</span> Appendix: Normal approximation to the binomial distribution.</h2>
+<p>Bleed is a binomially distribution variable with <span class="math">\(bleed \sim bin(n,p)\)</span> and <span class="math">\(p = Pr(X=k) = \dbinom{n}{k} p^k (1-p)^{n-k}\)</span>.</p>
+<p>The count of X bleeds in a group of <span class="math">\(n\)</span> observations with a probability of <span class="math">\(p\)</span> follows an approximately normal distribution for large values of n courtesy of the Central Limit Theorem, with <span class="math">\(\hat{p} \textrm{ approximately } \sim N\left(p, \displaystyle\frac{p(1-p)}{n}\right)\)</span>.</p>
+<!--* $n$: the number of people in the sample with a treatment (newcox2=1) = 240.-->
+<ul>
+<li><span class="math">\(p\)</span>, the proportion with bleeding (see table below).
+<ul>
+<li><span class="math">\(\hat p_{treatment}\)</span> = 11.7 when weighted by SMRW</li>
+<li><span class="math">\(\hat p_{no treatment}\)</span> = 15.1 when weighted by SMRW</li>
+<li><span class="math">\(\hat p_{treatment} - \hat p_{no treatment}\)</span> = 15.1 - 11.7 = 3.4</li>
+</ul></li>
+</ul>
+<p>See <a href="http://www.stat.yale.edu/Courses/1997-98/101/binom.htm">this link</a> for info on Normal approximation of Binomial distribution.</p>
+<div id="r-10" class="section level3">
+<h3><span class="header-section-number">1.12.1</span> R</h3>
+<p>Proportion of bleeding in sample by treatment status (newcox2)</p>
+<pre class="r"><code>app.smrw = svyCreateTableOne(vars=c(&quot;bleed&quot;),
+                     strata = c(&quot;newcox2&quot;),
+                     factorVars = c(&quot;bleed&quot;),
+                     data=my.smrw,
+                     test=F)
+print(app.smrw)</code></pre>
+<pre><code>##                Stratified by newcox2
+##                 0             1            
+##   n             241.0         240.0        
+##   bleed = 1 (%)  36.3 (15.1)   28.0 (11.7)</code></pre>
 </div>
 </div>
 </div>
