@@ -375,3 +375,4 @@ $$
 Now you have added in an offset, offset.1 = log(Z) = log(`r Z`) = `r round(offset.1,4)`. Given the formula at the start of the offset section above, the adjusted odds should be $\frac{p/(1-p)}{Z}$ = $\frac{`r round(exp(coef(glm.0)[1]),4)`}{`r Z`}$ = `r round(exp(coef(glm.0)[1])/Z, 4)`. Then the intercept, log(odds) for the referent group of the x.1 variable, should be log(`r round(exp(coef(glm.0)[1])/Z,4)`) = `r round(log(exp(coef(glm.0)[1])/Z),4)`. The intercept for the model with the offset, glm.1, is that value, `r coef(glm.1)[1]`. Also, note that the coefficient for $\beta_1$ is the same across models with and without an offset.
 
 This example demonstrates that the offset Z adjusts the intercept of the observed data. In this example a Z>1 moves the intercept in the logisitic regression downward from `r round(coef(glm.0)[1],4)` to `r round(coef(glm.1)[1],4)`
+

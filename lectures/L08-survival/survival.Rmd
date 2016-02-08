@@ -12,7 +12,7 @@ output:
    number_sections: true
 ---
 
-***NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's programs titled, "program6.25jan16.sas". R code below is an  adaptation to the SAS code written by Ann Von Holle.***
+***NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's programs titled, "program5.25jan16.sas". R code below is an  adaptation to the SAS code written by Ann Von Holle.***
 
 ```{r setup, echo=FALSE}
 # see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
@@ -30,7 +30,7 @@ output:
 #getwd() # use this to find relative directory for bib1.bib file above.
 
     #install.packages(c("knitr", "foreign", "tableone", "MCMCpack", "pspline")) # Note: you only need to do this once. then only if you want updates. 
-#  install.packages("data.table", "rms", "mgcv") # Watch out, rms loads a lot of other packages. skipping for now.
+#  install.packages("data.table", "rms", "mgcv", "pspline") # Watch out, rms loads a lot of other packages. skipping for now.
   library(data.table)
   library(reshape2)
   library(survival)
@@ -193,6 +193,18 @@ plot(s.1, lwd=1.5,
 
 See Appendix A, p2430, of assigned reading [@cole_survival_2010] for estimate of hazard, $h(t)$,
 
+First, the Kaplan-Meier estimator for the survival function, $S(t)$:
+
+\[
+  S^{KM}(t) = \displaystyle\prod_{k:R_k \leq t} \frac{1-Y_k}{N_k}
+\],
+
+where "the product is taken over all ordered events up to time t".
+
+* $Y_k$ is the number of individuals who died at each of the ranked times $R_k$.
+
+* $N_k$ is the number of individuals at-risk for mortality while under observation at distinct ranked event time $R_k$ for $k = 1, \ldots, D^{\prime}$.
+
 \[
   h_k = \frac{Y_k}{N_k \Delta_k}
 \]
@@ -241,14 +253,10 @@ For variance of the cumulative hazard function, $H(t)$, see Appendix B section a
 
 According to Appendix A (p 2430),
 
-* $Y_k$ is the number of individuals who died at each of the ranked times $R_k$.
-
-* $N_k$ is the number of individuals at-risk for mortality while under observation at distrinct ranked event time $R_k$ for $k = 1, \ldots, D^{\prime}$.
-
 Variance for cumulative hazard:
 
 \[
-  V\left(H^{KM}(t)\right) = \displaystyle\sum_{k:R_k $leq$ t} \frac{Y_k}{N_k (N_k - Y_k)}
+  V\left(H^{KM}(t)\right) = \displaystyle\sum_{k:R_k \leq t} \frac{Y_k}{N_k (N_k - Y_k)}
 \]
 
 Variance for survival function, $S^{KM}(t)$:
