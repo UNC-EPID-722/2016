@@ -25,6 +25,8 @@
 
 [Lecture 7: Bayes](http://unc-epid-722.github.io/2016/bayes.html) -- [.Rmd file](lectures/L07-bayes/bayes.Rmd)
 
+[Lecture 8: Survival](http://unc-epid-722.github.io/2016/survival.html) -- [.Rmd file](lectures/L08-bayes/survival.Rmd)
+
 ---
 
 **Recitation**
