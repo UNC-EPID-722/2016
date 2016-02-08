@@ -32,6 +32,7 @@ library(boot)
 library(geepack)
 library(ggplot2)
 library(foreach)
+library(tableone)
 set.seed(101) # set seed so you get same results each time you run. Note: no seed in original Gcomp.R program.
 ```
 
@@ -48,6 +49,7 @@ sasopts <- "-nosplash -log 'c:\\temp'  -ls 80 -ps 70  -nocenter -nodate -nofmter
 #getwd() # get the working directory
 ns=read.dta("../data/nsaid008.dta") # read in data. relative to the working directory go up 1 level and into 'data' folder to read data. 
 # Otherwise specify full path of data location. for example a path could be c:\temp\nsaid008.dta
+#ns=read.dta("c:/temp/nsaid008.dta")
 ```
 
 ### SAS
@@ -92,6 +94,25 @@ ns$bleed=rbinom(size=1,n=nrow(ns),p=ns$pbleed)
 
 ## Estimate the (unknown) propensity score, and plot the density by treatment group
 
+Notation for IPTW starting from slide 6 of 32 of IPTW lecture notes, propensityscores.pdf:
+
+\[
+  Pr(X=1 \mid C) = expit(\beta_0 + \beta_1 age + \beta_2 sex + \beta_3 CHD + \ldots)
+\]
+
+and
+
+IPTW estimator:
+
+In treated: $\frac{1}{PS(C)}$ and
+$\frac{1}{1-PS(C)}$ in untreated patients.
+
+SMRW:
+
+In treated=1 and
+$\frac{PS(C)}{1-PS(C)}$ in untreated patients.
+
+
 ### SAS
 
 ```{r s-part2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
@@ -105,7 +126,6 @@ class newcox2 year;
 				 raceblkoth age ;
  output out=ps_data predicted=ps;
 run;
-
 
 /* Creating PS treatment groups for plotting */
 
@@ -179,11 +199,38 @@ ggplot(data=ns,aes(x=ps,group=factor(newcox2), fill=factor(newcox2)))+
                  position = position_dodge(width=0.005))+theme_bw()
 ```
 
+## Explore Table 1
+
+### SAS
+
+```{r s-part3-extra, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+
+/* explore data, table 1 */
+
+proc means data=a.ns mean;
+	class newcox2;
+	var male arthrtis contsteroids contanticoag contaspirin tobacco_imp
+				 raceblkoth age ;
+run;
+```
+
+### R
+```{r r-part3-extra}
+t.1 = CreateTableOne(vars=c("male", "arthrtis", "contsteroids",
+                            "containticoag", "contaspirin", "tobacco_imp",
+                            "raceblkoth", "age"),
+                     strata = c("newcox2"), 
+                     data = ns,
+                     test=F)
+print(t.1)#, #nonnormal=c("contanticoag"))
+```
+
 ## IPT weighted table 1
 
 ### SAS
 
-```{r s-part4, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+```{r s-part4a, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 libname a "c:\temp";
 
 /* IPT weighted table 1 */
@@ -194,6 +241,18 @@ proc means data=a.ps_data mean;
 				 raceblkoth age ;
 		weight iptw;
 run;
+```
+
+Unweighted regression, crude
+```{r s-part4b, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname a "c:\temp";
+
+/* unweighted regression, crude */
+
+proc genmod data=a.ps_data desc;
+	model bleed=newcox2 / dist=bin link=identity;
+run; quit;
+
 ```
 
 ### R
