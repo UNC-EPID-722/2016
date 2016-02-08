@@ -566,7 +566,7 @@ run;</code></pre>
 /* unweighted regression, crude */
 
 proc genmod data=a.ps_data desc;
-    model bleed=newcox2 / dist=bin link=identity;
+    model bleed=newcox2 / dist=binomial link=identity;
 run; quit;
 </code></pre>
 <pre><code>## The GENMOD Procedure
@@ -656,10 +656,11 @@ round(ret,2)</code></pre>
 ## tobacco_imp        0.15             0.15
 ## contsteroids       0.01             0.01</code></pre>
 <pre class="r"><code># Unweighted regression, crude
-summary(glm(bleed~newcox2,data=ns))</code></pre>
+summary(glm(bleed~newcox2, family=gaussian(link=&quot;identity&quot;), data=ns))</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = bleed ~ newcox2, data = ns)
+## glm(formula = bleed ~ newcox2, family = gaussian(link = &quot;identity&quot;), 
+##     data = ns)
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
@@ -677,6 +678,30 @@ summary(glm(bleed~newcox2,data=ns))</code></pre>
 ##     Null deviance: 256.01  on 2881  degrees of freedom
 ## Residual deviance: 255.93  on 2880  degrees of freedom
 ## AIC: 1206.4
+## 
+## Number of Fisher Scoring iterations: 2</code></pre>
+<pre class="r"><code>summary(glm(bleed~newcox2, family=binomial(link=&quot;identity&quot;), data=ns))</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = bleed ~ newcox2, family = binomial(link = &quot;identity&quot;), 
+##     data = ns)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.4981  -0.4515  -0.4515  -0.4515   2.1606  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) 0.096896   0.005755  16.836   &lt;2e-16 ***
+## newcox2     0.019770   0.021506   0.919    0.358    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1855.3  on 2881  degrees of freedom
+## Residual deviance: 1854.3  on 2880  degrees of freedom
+## AIC: 1858.3
 ## 
 ## Number of Fisher Scoring iterations: 2</code></pre>
 </div>
@@ -787,7 +812,7 @@ run;</code></pre>
 <div id="r-6" class="section level3">
 <h3><span class="header-section-number">1.9.2</span> R</h3>
 <pre class="r"><code># IPT weighted, use GEE for SE
-summary(geeglm(bleed~newcox2,family=gaussian, weight=iptw, id=patcode, data=ns))</code></pre>
+summary(geeglm(bleed~newcox2, family=gaussian, weight=iptw, id=patcode, data=ns))</code></pre>
 <pre><code>## 
 ## Call:
 ## geeglm(formula = bleed ~ newcox2, family = gaussian, data = ns, 
