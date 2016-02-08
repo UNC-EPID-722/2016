@@ -33,11 +33,8 @@
 
 [Day 1 Survey](http://unc-epid-722.github.io/2016/20160125-survey.html) -- [.Rmd file](surveys/20160125-survey.Rmd)
 
---
-
 [Day 2 (2016-02-01): g-comp R and SAS review](http://unc-epid-722.github.io/2016/gcomp-R-and-SAS-recitation.html) -- [.Rmd file producing code](recitation/gcomp-R-and-SAS-recitation.Rmd)
 
---
 [Day 3 (2016-02-08): IPTW R and SAS review](http://unc-epid-722.github.io/2016/iptw-R-and-SAS-recitation.html) -- [.Rmd file](recitation/http://unc-epid-722.github.io/2016/iptw-R-and-SAS-recitation.Rmd)
 
 
