@@ -104,11 +104,11 @@ img {
 <li><a href="#sas-7"><span class="toc-section-number">1.9.1</span> SAS</a></li>
 <li><a href="#r-7"><span class="toc-section-number">1.9.2</span> R</a></li>
 </ul></li>
-<li><a href="#estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression"><span class="toc-section-number">1.10</span> Estimate causal risk difference in the population using IPT-weighted linear regression</a><ul>
+<li><a href="#estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression"><span class="toc-section-number">1.10</span> Estimate causal risk difference in the population using <strong>IPT-weighted</strong> linear regression</a><ul>
 <li><a href="#sas-8"><span class="toc-section-number">1.10.1</span> SAS</a></li>
 <li><a href="#r-8"><span class="toc-section-number">1.10.2</span> R</a></li>
 </ul></li>
-<li><a href="#estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression"><span class="toc-section-number">1.11</span> Estimate causal risk difference in the population using SMR-weighted linear regression</a><ul>
+<li><a href="#estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression"><span class="toc-section-number">1.11</span> Estimate causal risk difference in the population using <strong>SMR-weighted</strong> linear regression</a><ul>
 <li><a href="#sas-9"><span class="toc-section-number">1.11.1</span> SAS</a></li>
 <li><a href="#r-9"><span class="toc-section-number">1.11.2</span> R</a></li>
 </ul></li>
@@ -818,18 +818,20 @@ run; quit;</code></pre>
 <div id="r-7" class="section level3">
 <h3><span class="header-section-number">1.9.2</span> R</h3>
 <pre class="r"><code># Unweighted regression, crude
-coef(summary(glm(bleed~newcox2, family=gaussian(link=&quot;identity&quot;), data=ns)))</code></pre>
+m.1 = glm(bleed~newcox2, family=gaussian(link=&quot;identity&quot;), data=ns)
+coef(summary(m.1))</code></pre>
 <pre><code>##               Estimate  Std. Error    t value     Pr(&gt;|t|)
 ## (Intercept) 0.09689629 0.005799575 16.7074819 6.975154e-60
 ## newcox2     0.01977038 0.020097291  0.9837334 3.253293e-01</code></pre>
-<pre class="r"><code>coef(summary(glm(bleed~newcox2, family=binomial(link=&quot;identity&quot;), data=ns)))</code></pre>
+<pre class="r"><code>coef(summary(update(m.1, family=binomial(link=&quot;identity&quot;))))</code></pre>
 <pre><code>##               Estimate  Std. Error    z value     Pr(&gt;|z|)
 ## (Intercept) 0.09689629 0.005755141 16.8364750 1.318612e-63
 ## newcox2     0.01977038 0.021506273  0.9192841 3.579470e-01</code></pre>
+<p><em>Interpretation</em>: The coefficient for <strong>newcox2</strong>, 0.0198, suggests that there are 1.98 more cases of bleeding per 100 people in the treated group (newcox2=1) compared to the untreated group. Note this is the crude model with no adjustment in this model.</p>
 </div>
 </div>
 <div id="estimate-causal-risk-difference-in-the-population-using-ipt-weighted-linear-regression" class="section level2">
-<h2><span class="header-section-number">1.10</span> Estimate causal risk difference in the population using IPT-weighted linear regression</h2>
+<h2><span class="header-section-number">1.10</span> Estimate causal risk difference in the population using <strong>IPT-weighted</strong> linear regression</h2>
 <div id="sas-8" class="section level3">
 <h3><span class="header-section-number">1.10.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
@@ -898,20 +900,22 @@ run;</code></pre>
 </div>
 <div id="r-8" class="section level3">
 <h3><span class="header-section-number">1.10.2</span> R</h3>
-<pre class="r"><code># IPT weighted, use GEE for SE
-coef(summary(geeglm(bleed~newcox2, family=gaussian, weight=iptw, id=patcode, data=ns)))</code></pre>
+<pre class="r"><code>m.2 = geeglm(bleed~newcox2, family=gaussian, weight=iptw, id=patcode, data=ns)
+# IPT weighted, use GEE for SE
+coef(summary(m.2))</code></pre>
 <pre><code>##               Estimate    Std.err       Wald  Pr(&gt;|W|)
 ## (Intercept)  0.1013983 0.00600130 285.476795 0.0000000
 ## newcox2     -0.0222170 0.01650539   1.811836 0.1782881</code></pre>
-<pre class="r"><code>coef(summary(geeglm(bleed~newcox2, family=binomial(link=&quot;identity&quot;), weight=iptw, id=patcode, data=ns))) # note that you get same results</code></pre>
+<pre class="r"><code>coef(summary(update(m.2, family=binomial(link=&quot;identity&quot;)))) # note that you get same results</code></pre>
 <pre><code>## Warning: non-integer #successes in a binomial glm!</code></pre>
 <pre><code>##               Estimate    Std.err       Wald  Pr(&gt;|W|)
 ## (Intercept)  0.1013983 0.00600130 285.476795 0.0000000
 ## newcox2     -0.0222170 0.01650539   1.811836 0.1782881</code></pre>
+<p><strong>Interpretation</strong>: The coefficient for <strong>newcox2</strong>, -0.0222, suggests that there are -2.22 fewer cases of bleeding per 100 people in the treated group (newcox2=1) compared to the untreated group in the entire study population.</p>
 </div>
 </div>
 <div id="estimate-causal-risk-difference-in-the-population-using-smr-weighted-linear-regression" class="section level2">
-<h2><span class="header-section-number">1.11</span> Estimate causal risk difference in the population using SMR-weighted linear regression</h2>
+<h2><span class="header-section-number">1.11</span> Estimate causal risk difference in the population using <strong>SMR-weighted</strong> linear regression</h2>
 <div id="sas-9" class="section level3">
 <h3><span class="header-section-number">1.11.1</span> SAS</h3>
 <pre class="sas"><code>libname a &quot;c:\temp&quot;;
@@ -949,15 +953,17 @@ run;</code></pre>
 <div id="r-9" class="section level3">
 <h3><span class="header-section-number">1.11.2</span> R</h3>
 <pre class="r"><code># SMR weighted, use GEE for SE
-coef(summary(geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns)))</code></pre>
+m.3 = geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns)
+coef(summary(m.3))</code></pre>
 <pre><code>##                Estimate     Std.err       Wald  Pr(&gt;|W|)
 ## (Intercept)  0.15075815 0.009256837 265.238368 0.0000000
 ## newcox2     -0.03409148 0.022695532   2.256374 0.1330653</code></pre>
-<pre class="r"><code>coef(summary(geeglm(bleed~newcox2, family=binomial(link = &quot;identity&quot;), weight=smrw, id=patcode, data=ns)))</code></pre>
+<pre class="r"><code>coef(summary(update(m.3, family=binomial(link = &quot;identity&quot;))))</code></pre>
 <pre><code>## Warning: non-integer #successes in a binomial glm!</code></pre>
 <pre><code>##                Estimate     Std.err       Wald  Pr(&gt;|W|)
 ## (Intercept)  0.15075815 0.009256837 265.238368 0.0000000
 ## newcox2     -0.03409148 0.022695532   2.256374 0.1330653</code></pre>
+<p><em>Interpretation</em>: The coefficient for <strong>newcox2</strong>, -0.0341, suggests that there are -3.41 fewer cases of bleeding per 100 people in the treated group (newcox2=1) compared to the untreated group in the population “whose distribution of risk factors” <span class="citation">(1)</span> is equal to that for the treated patients only.</p>
 </div>
 </div>
 <div id="appendix-normal-approximation-to-the-binomial-distribution." class="section level2">
@@ -987,6 +993,10 @@ print(app.smrw)</code></pre>
 ##                 0             1            
 ##   n             241.0         240.0        
 ##   bleed = 1 (%)  36.3 (15.1)   28.0 (11.7)</code></pre>
+<div class="references">
+<h3>References</h3>
+<p>1. Kurth T. Results of Multivariable Logistic Regression, Propensity Matching, Propensity Adjustment, and Propensity-based Weighting under Conditions of Nonuniform Effect. <em>Am. J. Epidemiol.</em> [electronic article]. 2005;163(3):262–270. (<a href="http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwj047" class="uri">http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwj047</a>)</p>
+</div>
 </div>
 </div>
 </div>
