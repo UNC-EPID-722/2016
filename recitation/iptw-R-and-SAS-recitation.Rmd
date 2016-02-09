@@ -2,6 +2,8 @@
 title: "EPID 722 recitation, 2016/02/08"
 author: "EPID 722 2016"
 date: "February 1, 2016"
+csl: ../american-journal-of-epidemiology.csl
+bibliography: ../bib1.bib
 output: 
   html_document:
    toc: true
@@ -340,11 +342,14 @@ run; quit;
 
 ```{r 4-part5b}
 # Unweighted regression, crude
-coef(summary(glm(bleed~newcox2, family=gaussian(link="identity"), data=ns)))
-coef(summary(glm(bleed~newcox2, family=binomial(link="identity"), data=ns)))
+m.1 = glm(bleed~newcox2, family=gaussian(link="identity"), data=ns)
+coef(summary(m.1))
+coef(summary(update(m.1, family=binomial(link="identity"))))
 ```
 
-## Estimate causal risk difference in the population using IPT-weighted linear regression
+*Interpretation*: The coefficient for **newcox2**, `r round(coef(m.1)[2],4)`, suggests that there are `r 100*round(coef(m.1)[2],4)` more cases of bleeding per 100 people in the treated group (newcox2=1) compared to the untreated group. Note this is the crude model with no adjustment in this model.
+
+## Estimate causal risk difference in the population using **IPT-weighted** linear regression
 
 ### SAS
 
@@ -373,13 +378,15 @@ run;
 
 ### R
 ```{r r-part6}
+m.2 = geeglm(bleed~newcox2, family=gaussian, weight=iptw, id=patcode, data=ns)
 # IPT weighted, use GEE for SE
-coef(summary(geeglm(bleed~newcox2, family=gaussian, weight=iptw, id=patcode, data=ns)))
-coef(summary(geeglm(bleed~newcox2, family=binomial(link="identity"), weight=iptw, id=patcode, data=ns))) # note that you get same results
+coef(summary(m.2))
+coef(summary(update(m.2, family=binomial(link="identity")))) # note that you get same results
 ```
 
+**Interpretation**: The coefficient for **newcox2**, `r round(coef(m.2)[2],4)`, suggests that there are `r 100*round(coef(m.2)[2],4)` fewer cases of bleeding per 100 people in the treated group (newcox2=1) compared to the untreated group in the entire study population.
 
-## Estimate causal risk difference in the population using SMR-weighted linear regression
+## Estimate causal risk difference in the population using **SMR-weighted** linear regression
 
 ### SAS
 
@@ -403,10 +410,14 @@ run;
 ```{r r-part7}
 
 # SMR weighted, use GEE for SE
-coef(summary(geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns)))
-coef(summary(geeglm(bleed~newcox2, family=binomial(link = "identity"), weight=smrw, id=patcode, data=ns)))
+m.3 = geeglm(bleed~newcox2, family=gaussian, weight=smrw, id=patcode, data=ns)
+coef(summary(m.3))
+coef(summary(update(m.3, family=binomial(link = "identity"))))
 
 ```
+
+*Interpretation*: The coefficient for **newcox2**, `r round(coef(m.3)[2],4)`, suggests that there are `r 100*round(coef(m.3)[2],4)` fewer cases of bleeding per 100 people in the treated group (newcox2=1) compared to the untreated group in the population "whose distribution of risk factors" [@kurth_results_2005] is equal to that for the treated patients only.
+
 
 ## Appendix: Normal approximation to the binomial distribution.
 
@@ -437,3 +448,4 @@ app.smrw = svyCreateTableOne(vars=c("bleed"),
 print(app.smrw)
 ```
 
+### References
