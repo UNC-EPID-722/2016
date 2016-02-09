@@ -119,7 +119,7 @@ mean(pbleed.1)</code></pre>
 <pre><code>## [1] 0.09507942</code></pre>
 <pre class="r"><code>mean(pbleed.1)-mean(pbleed.0)</code></pre>
 <pre><code>## [1] -0.02005892</code></pre>
-<p>If you were to do a trial you would reduce the risk of bleeding by 2.005892 percent.</p>
+<p>If you conducted a randomized trial in this context you would expect 2.006 fewer cases of bleeding per 100 people in the treated group (newcox2=1) compared to the untreated group (assuming all relavant conditions hold true, including “positivity, well-defined exposures, correctly specified models, and no unmeasured confounding or selection bias” <span class="citation">(1)</span>).</p>
 </div>
 <div id="what-is-ey1ey0-the-true-causal-risk-ratio" class="section level1">
 <h1>What is E[Y(1)]/E[Y(0)], the true causal risk ratio?</h1>
@@ -237,7 +237,7 @@ summary(m.unwt)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 2</code></pre>
 <pre class="r"><code>coef.unwt = coef(m.unwt)</code></pre>
-<p>In unweighted model, the coefficient for the treatment in the model, 0.0197704 suggests that risk of bleeding is increased by 2 percent.</p>
+<p>In unweighted model, the coefficient for the treatment in the model, 0.0197704 suggests that the treated group (newcox2=1) had 1.977 additional cases of bleeding (bleed=1) per 100 people compared to the untreated group.</p>
 </div>
 <div id="ipt-weighted-to-get-se-correct-must-bootstrap-or-use-gee" class="section level1">
 <h1>IPT weighted, to get SE correct must bootstrap or use GEE</h1>
@@ -296,6 +296,10 @@ summary(m.smrw)</code></pre>
 ## Number of Fisher Scoring iterations: 2</code></pre>
 <pre class="r"><code>coef.smrw = coef(m.smrw)</code></pre>
 <p>Estimate for effect, -0.0339554, now even larger than the iptw, -0.021981, because standardized to sicker patients who could benefit more from treatment.</p>
+<div class="references">
+<h2>References</h2>
+<p>1. Buchanan AL, Hudgens MG, Cole SR, et al. Worth the Weight: Using Inverse Probability Weighted Cox Models in AIDS Research. <em>AIDS Res. Hum. Retroviruses</em> [electronic article]. 2014;30(12):1170–1177. (<a href="http://online.liebertpub.com/doi/abs/10.1089/aid.2014.0037" class="uri">http://online.liebertpub.com/doi/abs/10.1089/aid.2014.0037</a>)</p>
+</div>
 </div>
 
 
