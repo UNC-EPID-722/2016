@@ -1,0 +1,364 @@
+---
+title: "IPW Cox"
+author: "UNC EPID 722: Dr. Steve Cole"
+date: "February 11, 2016"
+output:
+  html_document:
+   toc: true
+   toc_depth: 4 
+   theme: united
+   number_sections: true
+---
+
+***NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's program titled, "program7.1feb16.sas". R code below is an  adaptation to the SAS code written by Ann Von Holle.***
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=T, warning=FALSE, message=FALSE)
+```
+
+## Preliminaries
+
+### Specify packages for R
+
+```{r}
+  #install.packages(c("knitr", "foreign", "tableone", "MCMCpack", "ipw")) # Note: you only need to do this once. then only if you want updates.
+#  install.packages("data.table", "rms") # Watch out, rms loads a lot of other packages. skipping for now.
+  library(data.table)
+  library(reshape2)
+  library(survival)
+  library(ggplot2)
+#  library(rms)
+  library(muhaz)
+  library(tableone)
+  require(ipw)
+  set.seed(123) # set seed so you get same results each time you run.
+```
+
+```{r, echo=FALSE}
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp' -ls 80 -ps 60  -nocenter -nodate" # see http://bit.ly/1QB4ZTb
+```
+
+## Read file 
+
+### SAS
+
+<!--Note: Use permanent data file b from SAS code in mle.Rmd file.-->
+```{r s-read, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=F}
+libname mle "c:\temp";
+%let dir = c:\temp;
+
+* Read ASCII file;
+data mle.b;
+	infile "&dir\hividu15dec15.dat"; 
+	input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
+run;
+```
+
+### R
+
+Read the data (created in ../L06-mle/mle.Rmd).
+```{r read}
+#getwd() # get the working directory
+b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.
+```
+
+## Look at data
+
+### SAS
+
+<!--Note: Use permanent data file b from SAS code in mle.Rmd file.-->
+```{r s-part1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+data a; set mle.b; run;
+
+proc means data=a n mean sum min max; 
+	var delta t drop idu white age cd4;
+	title "Time from 12/6/95 to AIDS or death in WIHS";
+run;
+
+```
+
+### R
+
+```{r}
+var.list = c("delta", "t", "drop", "idu", "white", "age", "cd4")
+
+summary(b[,var.list])
+
+t.1 = CreateTableOne(data=b[,var.list]) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html
+print(t.1, nonnormal=var.list)
+```
+
+
+## Crude Cox model
+
+### SAS
+
+```{r s-part2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+data a; set mle.b; run;
+
+*Crude Cox model;
+proc phreg data=a;
+	model t*delta(0)=idu/rl ties=efron;
+	*default is ties=breslow, ties=efron is better;
+	ods select modelinfo fitstatistics parameterestimates;
+	*this ods statement makes the print out nicer;
+	title "Crude Cox model";
+run; quit;
+
+```
+
+
+### R
+
+```{r r-part2}
+s.1 = coxph(Surv(t, delta) ~ idu, data=b, ties = "efron")
+summary(s.1)
+```
+
+
+## Adjusted Cox model
+
+### SAS
+
+```{r s-part3, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+data a; set mle.b; run;
+
+
+*Adjusted Cox model;
+proc phreg data=a;
+	model t*delta(0)=idu age white cd4/rl ties=efron;
+	ods select modelinfo fitstatistics parameterestimates;
+	title "Adjusted Cox model";
+run; quit;
+```
+
+### R
+
+```{r r-part3}
+s.2 = update(s.1, formula = Surv(t, delta) ~ idu + age + white + cd4)
+summary(s.2)
+```
+
+## Note: I am skipping the calculate crude Cox model by hand part
+
+## IP-weighted Cox model
+
+### Confounding weights
+
+#### SAS
+
+```{r s-part4, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+data a; set mle.b; run;
+
+*Confounding weights;
+proc logistic data=a desc noprint; model idu=; output out=n p=n;
+proc logistic data=a desc noprint; model idu=white age cd4; output out=d p=d;
+run;
+
+data mle.c; merge a n d;
+	if idu then w=n/d;
+	else w=(1-n)/(1-d);
+	label n= d=;
+	drop _level_;
+run; quit;
+```
+
+```{r r-part4}
+
+ipw.idu = ipwpoint(
+  exposure = idu,
+  family = "binomial",
+  link = "logit",
+  numerator = ~ 1,
+  denominator = ~ white + age + cd4, # note if numerator unspecified the default is 1
+  data=b)
+
+ipw.idu$ipw.weights[1:10]
+```
+
+### IP-censoring weights
+
+#### SAS
+
+```{r s-part5, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+
+*IP-censoring weights;
+data c; set mle.c; retain z 1; run;
+
+proc univariate data=c noprint; where drop=1; var t;
+	output out=q pctlpts=20 40 60 80 pctlpre=p;
+
+data q; set q; p0=0; p100=10; z=1;
+
+data e; merge c q; by z;
+	array j{6} p0 p20 p40 p60 p80 p100;
+	do k=1 to 5;
+		in=j(k);
+		if j(k)<t<=j(k+1) then do; 
+			out=t; 
+			delta2=delta; *make a time-varying event indicator;
+			_drop=drop; *make a time-varying drop indicator;
+			output; 
+		end;
+		else if j(k+1)<t then do; out=j(k+1); delta2=0; _drop=0; output; end;
+	end;
+proc sort data=e; by id in;
+run;
+
+proc logistic data=e noprint; 
+	class in/param=ref desc; 
+	model _drop=in;
+	output out=nm2(keep=id _drop nm2 in out) prob=nm2;
+run;
+
+proc logistic data=e noprint; 	
+	class in/param=ref desc; 
+	model _drop=in idu white age cd4;
+	output out=dn2(keep=id _drop dn2 in out) prob=dn2;
+run;
+
+proc sort data=nm2; by id in; 
+proc sort data=dn2; by id in; 
+
+data mle.f; merge e nm2 dn2; by id in; retain num den;
+	if first.id then do; num=1; den=1; end;
+	num=num*nm2;
+	den=den*dn2;
+	if _drop then w2=(1-num)/(1-den); else w2=num/den;
+	w3=w*w2;
+	label nm2= dn2=;
+run;
+
+proc means data=mle.f; 
+	var w w2 w3 num den;
+	title "IP-weights";
+	run;
+```	
+
+
+```{r r-part5}
+# Set up the data frame with counting process style data
+b$replicate=0
+b.dt = data.table(b)
+nrow(b.dt)
+quantile(b.dt[b.dt$drop==1, with=T]$t, probs=c(0.20, 0.40, 0.60, 0.80), type=3)
+# try to get quantiles as close to SAS as possible
+# documentation for quantile function in R says type 3
+
+split.1 = function(i){
+    quint = c(0, max(b$t), 
+              as.numeric(quantile(b.dt[b.dt$replicate==i & 
+                                         b.dt$drop==1, with=T]$t,
+                                  probs=c(0.20, 0.40, 0.60, 0.80), type=3)))
+    survSplit(data=b.dt[b.dt$replicate==i,], 
+              cut=as.numeric(quint), 
+              end="t", 
+              start="time0", 
+              event="delta")
+  }
+
+split.dat = split.1(0) # Replicate 0 is the observed data.
+
+# fix the drop variable
+split.dat = split.dat[order(split.dat$id),] # order so I can check in SAS
+first <- c(TRUE, diff(split.dat$id) !=0) #first id for each subject
+head(first)
+last <- c(first[-1], TRUE) #last id
+head(last)
+split.dat$drop.rev = ifelse(last & split.dat$drop==1, 1, 0) 
+table(split.dat$drop.rev) # now matches 127 drops in SAS data
+
+split.dat[split.dat$replicate==0,][1:10,] # check results
+
+# Use the reconfigured data to get censoring weights from ipw package.
+
+ipw.cens.weights = ipwtm(
+  exposure = drop.rev,
+  family = "binomial",
+  link = "logit",
+  numerator = ~ factor(time0),
+  denominator = ~ factor(time0) + idu  + white + age + cd4,
+  id = id,
+  tstart = time0,
+  timevar = t,
+  type = "first",
+  data=split.dat)
+
+ipw.cens.weights$ipw.weights[1:10]
+```
+
+### Check crude model is same with counting process data input
+
+#### SAS
+
+```{r s-part6, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+
+*Check crude model is same with counting-process data input;
+proc phreg data=mle.f;
+	model (in,out)*delta2(0)=idu/rl ties=efron;
+	ods select modelinfo fitstatistics parameterestimates;
+	title "Check crude model";
+run; quit;
+```
+
+#### R
+
+```{r r-part6}
+s.3 = coxph(Surv(time0, t, delta) ~ idu, data=split.dat, ties = "efron")
+summary(s.3)
+
+coef(summary(s.1)) # Coefficients from analysis at start.
+```
+
+### IP-weighted Cox model, with counting process data input. Use robust variance.
+
+#### SAS
+
+```{r s-part7, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+
+*IP-weighted Cox model, with counting-process data input;
+*Use robust variance;
+proc phreg data=mle.f covs;
+	id id;
+	model (in,out)*delta2(0)=idu/rl ties=efron;
+	weight w3;
+	ods select modelinfo fitstatistics parameterestimates;
+	title "IP-weighted Cox model";
+
+run; quit; run;
+```
+
+```{r r-part6}
+# Make a combo of the ipw and censor weights for weight in cox ph
+x = data.frame(wt1 = ipw.idu$ipw.weights, id = b$id)
+head(x)
+y = data.frame(wt2 = ipw.cens.weights$ipw.weights, id = split.dat$id)
+head(y)
+
+wts = merge(x, y,
+            by="id", all.x=T) # left outer join
+head(wts)
+
+s.4 = coxph(Surv(time0, t, delta) ~ idu + cluster(id),
+                data = split.dat, 
+                weights = wts$wt1*wts$wt2,
+                ties="efron")
+summary(s.4)
+```
