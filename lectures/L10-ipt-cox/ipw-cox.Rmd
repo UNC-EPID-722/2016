@@ -1,7 +1,7 @@
 ---
 title: "IPW Cox"
 author: "UNC EPID 722: Dr. Steve Cole"
-date: "February 11, 2016"
+date: "February 16, 2016"
 csl: ../../american-journal-of-epidemiology.csl
 bibliography: ../../bib1.bib
 output:
@@ -348,7 +348,7 @@ data mle.f; merge e nm2 dn2; by id in; retain num den;
 	if first.id then do; num=1; den=1; end;
 	num=num*nm2;
 	den=den*dn2;
-	if _drop then w2=(1-num)/(1-den); else w2=num/den;
+  if _drop then w2=(1-num)/(1-den); else w2=num/den;
 	w3=w*w2;
 	label nm2= dn2=;
 run;
