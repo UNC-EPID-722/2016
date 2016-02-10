@@ -25,7 +25,9 @@
 
 [Lecture 7: Bayes](http://unc-epid-722.github.io/2016/bayes.html) -- [.Rmd file](lectures/L07-bayes/bayes.Rmd)
 
-[Lecture 8: Survival](http://unc-epid-722.github.io/2016/survival.html) -- [.Rmd file](lectures/L08-bayes/survival.Rmd)
+[Lecture 8: Survival](http://unc-epid-722.github.io/2016/survival.html) -- [.Rmd file](lectures/L08-survival/survival.Rmd)
+
+[Lecture 9: IP-weighted survival](http://unc-epid-722.github.io/2016/iptw-survival.html) -- [.Rmd file](lectures/L09-iptw-survival/iptw-survival.Rmd)
 
 ---
 
