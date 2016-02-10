@@ -2,6 +2,8 @@
 title: "IPW Cox"
 author: "UNC EPID 722: Dr. Steve Cole"
 date: "February 11, 2016"
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
 output:
   html_document:
    toc: true
@@ -146,11 +148,115 @@ run; quit;
 ### R
 
 ```{r r-part3}
-s.2 = update(s.1, formula = Surv(t, delta) ~ idu + age + white + cd4)
-summary(s.2)
+s.2 = update(s.1, formula = Surv(t, delta) ~ idu + age + white + cd4) # add confounder to crude model in s.1
+coef(summary(s.2))
 ```
 
-## Note: I am skipping the calculate crude Cox model by hand part
+## Calculate crude Cox model by hand
+
+### SAS
+
+```{r s-part3a, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+libname mle "c:\temp";
+%let dir = c:\temp;
+data a; set mle.b; run;
+
+*Get Breslow estimators of survival functions for each treatment group;
+proc phreg data=a noprint;
+	model t*delta(0)=;
+	strata idu;
+	baseline out=b survival=s/method=pl;
+	output out=c(keep=idu t n) atrisk=n/method=pl;
+*Merge together survival data with numbers at risk;
+proc sort data=b;
+	by idu descending s;
+proc sort data=c nodups; by idu t;
+data c; set c; by idu t; if first.t;
+data d; merge b c; by idu t; if s>.;
+run;
+
+*Calculate the log hazard functions;
+*This is a fairly complicated program, but largely repeats last session;
+data d(drop=chm1 sm1 tm1) avg(keep=avg0 avg1);
+	set d end=end; 
+	by idu descending s;
+	retain chm1 0 sm1 1 tm1 0 sum0 0 sum1 0 count0 0 count1 0;
+	if t=0 then do; 
+		d=0; chm1=0; sm1=1; tm1=0; n=.;
+	end;
+	deltat=t-tm1; 
+	if s>0 then ch=-log(s);
+	y=round((ch-chm1)*n,1);
+	if deltat>0 then h=y/(n*deltat);
+	label n=;
+	logh=log(h);
+	if idu=0 and logh>. then do; count0=count0+y; sum0=sum0+logh; end;
+	else if idu=1 and logh>. then do; count1=count1+y; sum1=sum1+logh; end;
+	output d;
+	chm1=ch; sm1=s; tm1=t;
+	if end then do; avg0=sum0/count0; avg1=sum1/count1; output avg; end;
+run;
+
+ods listing gpath="&dir";
+ods graphics/reset imagename="Hazards" imagefmt=jpeg height=8in width=8in;
+proc sgplot data=d noautolegend;
+	title "log hazard functions";
+	loess x=t y=logh/smooth=.6 group=idu;
+run;
+```
+
+![](c:\temp\Hazards.jpeg) <!-- Add in the Survival.jpeg from SAS program above...-->
+
+
+### R
+
+```{r r-part3a}
+
+est.1 = survfit(Surv(t, delta) ~ 1 + strata(idu), data=b)
+sum.surv = summary(est.1)
+
+d = with(sum.surv, {
+  data.frame( t=time,
+              n=n.risk,
+              r = 1-surv,
+              s=surv,
+              n.event = n.event,
+              n.censor = n.censor,
+              se = std.err,
+              se2 = surv*sqrt((1-surv)/n.risk),
+              idu = strata)
+})
+d$idu = ifelse(d$idu=="strata(idu)=idu=0", 0, 1)
+head(d)
+table(d$idu) # check
+
+d.rev = rbind(
+  c(t=0, n=d$n[1], r=NA, s=NA, n.event=0, n.censor=NA, se=NA, se2=NA, idu=0),
+  c(t=0, n=d$n[1], r=NA, s=NA, n.event=0, n.censor=NA, se=NA, se2=NA, idu=1),
+  d)# add a time origin point here for each strata.
+
+# use data.table package to get time diff by strata. see http://bit.ly/1PV1wPn
+d.rev.dt = data.table(d.rev)
+setkey(d.rev.dt, idu)
+d.rev.dt[, delta.t:= c(0,diff(as.matrix(t))), by=idu][,h:= n.event / (n*delta.t)]
+
+some.vars = c("t", "n.event", "n", "delta.t", "h", "idu")
+head(d.rev.dt[,some.vars, with=F]) # check with SAS numbers
+
+p.haz = ggplot(data = d.rev.dt, aes(x=t, y=log(h), group=factor(idu), colour=factor(idu))) + 
+  geom_point() +
+  stat_smooth(method="loess", se=F) +
+  scale_x_continuous(breaks = c(0,2,4,6,8,10)) +
+  theme_bw() + 
+  scale_colour_manual(values=c("blue", "red"), 
+                      name="IDU", 
+                      breaks=c(0,1), labels=c("non-user", "user")) +
+  ggtitle("log hazard functions") +
+  theme(text = element_text(size=20))
+
+p.haz
+
+```
 
 ## IP-weighted Cox model
 
@@ -174,6 +280,7 @@ data mle.c; merge a n d;
 	label n= d=;
 	drop _level_;
 run; quit;
+proc print data=mle.c(obs=10); run;
 ```
 
 ```{r r-part4}
@@ -202,8 +309,10 @@ data c; set mle.c; retain z 1; run;
 
 proc univariate data=c noprint; where drop=1; var t;
 	output out=q pctlpts=20 40 60 80 pctlpre=p;
+run;
 
 data q; set q; p0=0; p100=10; z=1;
+proc print data=q; run; * check quantiles to compare with R;
 
 data e; merge c q; by z;
 	array j{6} p0 p20 p40 p60 p80 p100;
@@ -250,16 +359,17 @@ proc means data=mle.f;
 	run;
 ```	
 
+#### R
 
 ```{r r-part5}
 # Set up the data frame with counting process style data
 b$replicate=0
 b.dt = data.table(b)
-nrow(b.dt)
-quantile(b.dt[b.dt$drop==1, with=T]$t, probs=c(0.20, 0.40, 0.60, 0.80), type=3)
 # try to get quantiles as close to SAS as possible
 # documentation for quantile function in R says type 3
+quantile(b.dt[b.dt$drop==1, with=T]$t, probs=c(0.20, 0.40, 0.60, 0.80), type=3) # check these quantiles with SAS. Close.
 
+# function that can be used with replicates if you bootstrap. no boostrap in this example.
 split.1 = function(i){
     quint = c(0, max(b$t), 
               as.numeric(quantile(b.dt[b.dt$replicate==i & 
@@ -269,17 +379,15 @@ split.1 = function(i){
               cut=as.numeric(quint), 
               end="t", 
               start="time0", 
-              event="delta")
+              event="delta") #survSplit function from the survival package will create a counting process style data frame for you.
   }
 
 split.dat = split.1(0) # Replicate 0 is the observed data.
 
-# fix the drop variable
+# IMPORTANT: Fix the drop variable. Only want the drop status (if =1) to show at last record
 split.dat = split.dat[order(split.dat$id),] # order so I can check in SAS
 first <- c(TRUE, diff(split.dat$id) !=0) #first id for each subject
-head(first)
 last <- c(first[-1], TRUE) #last id
-head(last)
 split.dat$drop.rev = ifelse(last & split.dat$drop==1, 1, 0) 
 table(split.dat$drop.rev) # now matches 127 drops in SAS data
 
@@ -300,6 +408,18 @@ ipw.cens.weights = ipwtm(
   data=split.dat)
 
 ipw.cens.weights$ipw.weights[1:10]
+
+# Make a combo of the ipw and censor weights for weight in cox ph
+x = data.frame(wt1 = ipw.idu$ipw.weights, id = b$id); #head(x)
+y = data.frame(wt2 = ipw.cens.weights$ipw.weights, id = split.dat$id); #head(y)
+
+wts = merge(x, y,
+            by="id", all.x=T) # left outer join
+#head(wts)
+wts$wt3 = with(wts, wt1*wt2)
+
+summary(wts[,c("wt1", "wt2", "wt3")])
+
 ```
 
 ### Check crude model is same with counting process data input
@@ -345,20 +465,19 @@ proc phreg data=mle.f covs;
 run; quit; run;
 ```
 
-```{r r-part6}
-# Make a combo of the ipw and censor weights for weight in cox ph
-x = data.frame(wt1 = ipw.idu$ipw.weights, id = b$id)
-head(x)
-y = data.frame(wt2 = ipw.cens.weights$ipw.weights, id = split.dat$id)
-head(y)
+#### R
 
-wts = merge(x, y,
-            by="id", all.x=T) # left outer join
-head(wts)
-
+```{r r-part7}
 s.4 = coxph(Surv(time0, t, delta) ~ idu + cluster(id),
                 data = split.dat, 
-                weights = wts$wt1*wts$wt2,
+                weights = wts$wt3,
                 ties="efron")
 summary(s.4)
 ```
+
+#### References
+
+---
+nocite: | 
+  @buchanan_worth_2014
+...
