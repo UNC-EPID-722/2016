@@ -119,7 +119,7 @@ img {
 #  library(rms)
   library(muhaz)
   library(tableone)
-  require(ipw)
+  require(ipw) 
   require(plyr)
   require(survey)
   set.seed(123) # set seed so you get same results each time you run.</code></pre>
@@ -132,7 +132,6 @@ img {
 <!--Note: Use permanent data file b from SAS code in mle.Rmd file.-->
 <pre class="sas"><code>libname mle &quot;c:\temp&quot;;
 %let dir = c:\temp;
-
 
 *Read ASCII file;
 data mle.a;
@@ -148,11 +147,19 @@ data mle.a;
     *Make a pseudorecord weight;
     w=1;
 run;
+
+data b;
+    infile &quot;&amp;dir\hividu15dec15.dat&quot;; 
+    input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
+run;
+
+* Export to .csv for use in R;
+proc export data=b outfile=&quot;c:\temp\hividu15dec15.csv&quot; dbms=csv replace; run;
 </code></pre>
 </div>
 <div id="r" class="section level3">
 <h3><span class="header-section-number">0.2.2</span> R</h3>
-<p>Read the data (created in ../L06-mle/mle.Rmd).</p>
+<p>Read the data (created in the SAS program above).</p>
 <pre class="r"><code>#getwd() # get the working directory
 a = read.csv(&quot;c:/temp/hividu15dec15.csv&quot;, header=T) # read in data.
 
@@ -589,13 +596,13 @@ nrow(b) # check numbers with SAS</code></pre>
 <pre><code>## [1] 15574</code></pre>
 <pre class="r"><code># descriptives
 head(b)</code></pre>
-<pre><code>##        t delta   art drop id idu white age cd4 agegp w sample
-## 1  2.245     1    NA    0  1   1     0  44 376     3 1      1
-## 2  1.213     1    NA    0  2   1     1  32 392     2 1      1
-## 3 10.000     0 1.224    0  3   0     0  44 181     3 1      1
-## 4  1.240     1    NA    0  4   1     0  35 526     2 1      1
-## 5  7.871     1    NA    0  5   1     1  46 386     3 1      1
-## 6  6.593     1 2.207    0  6   0     1  29 285     1 1      1</code></pre>
+<pre><code>##   id idu white age cd4 drop delta   art      t agegp w sample
+## 1  1   1     0  44 376    0     1    NA  2.245     3 1      1
+## 2  2   1     1  32 392    0     1    NA  1.213     2 1      1
+## 3  3   0     0  44 181    0     0 1.224 10.000     3 1      1
+## 4  4   1     0  35 526    0     1    NA  1.240     2 1      1
+## 5  5   1     1  46 386    0     1    NA  7.871     3 1      1
+## 6  6   0     1  29 285    0     1 2.207  6.593     1 1      1</code></pre>
 <pre class="r"><code>CreateTableOne(data = b, 
                vars = c(&quot;white&quot;, &quot;agegp&quot;),
                strata = &quot;sample&quot;,

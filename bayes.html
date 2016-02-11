@@ -126,11 +126,16 @@ img {
 data mle.b;
     infile &quot;&amp;dir\hividu15dec15.dat&quot;; 
     input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
-run;</code></pre>
+run;
+
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile=&quot;c:\temp\hividu15dec15.csv&quot; dbms=csv replace; run;
+</code></pre>
 </div>
 <div id="r" class="section level4">
 <h4><span class="header-section-number">0.0.2.2</span> R</h4>
-<p>Read the data (created in ../L06-mle/mle.Rmd).</p>
+<p>Read the data (created in the SAS program above).</p>
 <pre class="r"><code>#getwd() # get the working directory
 b = read.csv(&quot;c:/temp/hividu15dec15.csv&quot;, header=T) # read in data.</code></pre>
 </div>
@@ -171,7 +176,9 @@ run; quit;</code></pre>
 ##          |  28.55 |  46.98 |
 ## ---------+--------+--------+
 ## Total         585      579     1164
-##             50.26    49.74   100.00</code></pre>
+##             50.26    49.74   100.00
+## 
+## Frequency Missing = 14410</code></pre>
 </div>
 <div id="r-1" class="section level4">
 <h4><span class="header-section-number">0.0.3.2</span> R</h4>
@@ -456,13 +463,13 @@ priorb1</code></pre>
                  priorb1[colnames(priorb1) %in% reg.vars])
     both$offset = 0
     tail(both)</code></pre>
-<pre><code>##      delta       idu offset   f int
-## 1163     1 0.0000000      0   1   1
-## 1164     0 0.0000000      0   1   1
-## 1165     1 0.1999736      0 400   0
-## 1166     0 0.0000000      0 400   0
-## 1167     1 0.0000000      0 400   0
-## 1168     0 0.1999736      0 400   0</code></pre>
+<pre><code>##            idu delta offset   f int
+## 1163 0.0000000     1      0   1   1
+## 1164 0.0000000     0      0   1   1
+## 1165 0.1999736     1      0 400   0
+## 1166 0.0000000     0      0 400   0
+## 1167 0.0000000     1      0 400   0
+## 1168 0.1999736     0      0 400   0</code></pre>
 <p>Generalized linear model with posterior for <span class="math">\(\beta_1\)</span> by data augmentation.</p>
 <!-- b1 estimate pulled toward the prior. smaller se for b1 because more data.-->
 <pre class="r"><code>  glm.2 = glm(delta ~ int + idu - 1 + offset(offset),

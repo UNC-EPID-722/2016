@@ -127,16 +127,20 @@ data mle.b;
     infile &quot;&amp;dir\hividu15dec15.dat&quot;; 
     input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
     if t&gt;.5 then do; t=.5; delta=0; end;
-run;</code></pre>
+run;
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile=&quot;c:\temp\hividu15dec15.csv&quot; dbms=csv replace; run;
+</code></pre>
 </div>
 <div id="r" class="section level4">
 <h4><span class="header-section-number">0.0.2.2</span> R</h4>
-<p>Read the data (created in ../L06-mle/mle.Rmd).</p>
+<p>Read the data (created in the SAS program above).</p>
 <pre class="r"><code>#getwd() # get the working directory
 b = read.csv(&quot;c:/temp/hividu15dec15.csv&quot;, header=T) # read in data.
 summary(b$delta)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.0000  0.0000  0.0000  0.4974  1.0000  1.0000</code></pre>
+## 0.00000 0.00000 0.00000 0.06271 0.00000 1.00000</code></pre>
 <pre class="r"><code>b = within(b, {
   delta = ifelse(t&gt;0.5, 0, delta)
   t = ifelse(t&gt;0.5, 0.5, t)

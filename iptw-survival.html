@@ -138,19 +138,23 @@ img {
 data mle.b;
     infile &quot;&amp;dir\hividu15dec15.dat&quot;; 
     input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
-run;</code></pre>
+run;
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile=&quot;c:\temp\hividu15dec15.csv&quot; dbms=csv replace; run;
+</code></pre>
 </div>
 <div id="r" class="section level4">
 <h4><span class="header-section-number">0.0.2.2</span> R</h4>
-<p>Read the data (created in ../L06-mle/mle.Rmd).</p>
+<p>Read the data (created in the SAS program above).</p>
 <pre class="r"><code>#getwd() # get the working directory
 b = read.csv(&quot;c:/temp/hividu15dec15.csv&quot;, header=T) # read in data.
 summary(b$delta)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##  0.0000  0.0000  0.0000  0.4974  1.0000  1.0000</code></pre>
 <pre class="r"><code>b[b$id==1,]</code></pre>
-<pre><code>##       t delta art drop id idu white age cd4
-## 1 2.245     1  NA    0  1   1     0  44 376</code></pre>
+<pre><code>##   id idu white age cd4 drop delta art     t
+## 1  1   1     0  44 376    0     1  NA 2.245</code></pre>
 </div>
 </div>
 <div id="look-at-data" class="section level3">
@@ -376,13 +380,13 @@ b.dt[, `:=`(nm = plogis(predict(glm(idu ~ 1, family=&quot;binomial&quot;(link=&q
      by = replicate][, w1:= ifelse(idu==1, nm/dn, (1-nm)/(1-dn))] # add new columns to the data.table b.dt
 
 head(b.dt) </code></pre>
-<pre><code>##         t delta   art drop id idu white age cd4 replicate        nm
-## 1:  2.245     1    NA    0  1   1     0  44 376         0 0.3771478
-## 2:  1.213     1    NA    0  2   1     1  32 392         0 0.3771478
-## 3: 10.000     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 4:  1.240     1    NA    0  4   1     0  35 526         0 0.3771478
-## 5:  7.871     1    NA    0  5   1     1  46 386         0 0.3771478
-## 6:  6.593     1 2.207    0  6   0     1  29 285         0 0.3771478
+<pre><code>##    id idu white age cd4 drop delta   art      t replicate        nm
+## 1:  1   1     0  44 376    0     1    NA  2.245         0 0.3771478
+## 2:  2   1     1  32 392    0     1    NA  1.213         0 0.3771478
+## 3:  3   0     0  44 181    0     0 1.224 10.000         0 0.3771478
+## 4:  4   1     0  35 526    0     1    NA  1.240         0 0.3771478
+## 5:  5   1     1  46 386    0     1    NA  7.871         0 0.3771478
+## 6:  6   0     1  29 285    0     1 2.207  6.593         0 0.3771478
 ##           dn        w1
 ## 1: 0.5443055 0.6928972
 ## 2: 0.2613618 1.4430101
@@ -609,17 +613,17 @@ proc print data=mle.f(obs=25) noobs;
   df.split &lt;- list.split # Combine all vectors into a data.frame
   df.split = df.split[order( df.split$id),] # order so I can check in SAS
   df.split[df.split$replicate==0,][1:10,] # check with results in SAS</code></pre>
-<pre><code>##            t delta   art drop id idu white age cd4 replicate        nm
-## 1165  1.6156     0    NA    0  1   1     0  44 376         0 0.3771478
-## 2329  2.2450     1    NA    0  1   1     0  44 376         0 0.3771478
-## 1166  1.2130     1    NA    0  2   1     1  32 392         0 0.3771478
-## 1167  1.6156     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 2331  3.4770     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 3495  5.7666     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 4659  7.3840     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 5823 10.0000     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 1168  1.2400     1    NA    0  4   1     0  35 526         0 0.3771478
-## 1169  1.6156     0    NA    0  5   1     1  46 386         0 0.3771478
+<pre><code>##      id idu white age cd4 drop delta   art       t replicate        nm
+## 1165  1   1     0  44 376    0     0    NA  1.6156         0 0.3771478
+## 2329  1   1     0  44 376    0     1    NA  2.2450         0 0.3771478
+## 1166  2   1     1  32 392    0     1    NA  1.2130         0 0.3771478
+## 1167  3   0     0  44 181    0     0 1.224  1.6156         0 0.3771478
+## 2331  3   0     0  44 181    0     0 1.224  3.4770         0 0.3771478
+## 3495  3   0     0  44 181    0     0 1.224  5.7666         0 0.3771478
+## 4659  3   0     0  44 181    0     0 1.224  7.3840         0 0.3771478
+## 5823  3   0     0  44 181    0     0 1.224 10.0000         0 0.3771478
+## 1168  4   1     0  35 526    0     1    NA  1.2400         0 0.3771478
+## 1169  5   1     1  46 386    0     0    NA  1.6156         0 0.3771478
 ##             dn        w1  time0
 ## 1165 0.5443055 0.6928972 0.0000
 ## 2329 0.5443055 0.6928972 1.6156
@@ -657,13 +661,13 @@ proc print data=mle.f(obs=25) noobs;
   # see http://stackoverflow.com/questions/11308754/add-multiple-columns-to-r-data-table-in-one-function-call
   df.split.dt[, num.do:= cumprod(nm2), by=list(replicate, id)][, den.do:=cumprod(dn2), by=list(replicate, id)] 
   head(df.split.dt)</code></pre>
-<pre><code>##     out.t delta   art drop id idu white age cd4 replicate        nm
-## 1: 1.6156     0    NA    0  1   1     0  44 376         0 0.3771478
-## 2: 2.2450     1    NA    0  1   1     0  44 376         0 0.3771478
-## 3: 1.2130     1    NA    0  2   1     1  32 392         0 0.3771478
-## 4: 1.6156     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 5: 3.4770     0 1.224    0  3   0     0  44 181         0 0.3771478
-## 6: 5.7666     0 1.224    0  3   0     0  44 181         0 0.3771478
+<pre><code>##    id idu white age cd4 drop delta   art  out.t replicate        nm
+## 1:  1   1     0  44 376    0     0    NA 1.6156         0 0.3771478
+## 2:  1   1     0  44 376    0     1    NA 2.2450         0 0.3771478
+## 3:  2   1     1  32 392    0     1    NA 1.2130         0 0.3771478
+## 4:  3   0     0  44 181    0     0 1.224 1.6156         0 0.3771478
+## 5:  3   0     0  44 181    0     0 1.224 3.4770         0 0.3771478
+## 6:  3   0     0  44 181    0     0 1.224 5.7666         0 0.3771478
 ##           dn        w1   in.t       nm2       dn2    num.do    den.do
 ## 1: 0.5443055 0.6928972 0.0000 0.9776632 0.9896079 0.9776632 0.9896079
 ## 2: 0.5443055 0.6928972 1.6156 0.9724972 0.9877205 0.9507748 0.9774560
