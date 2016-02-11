@@ -36,7 +36,7 @@ output:
 #  library(rms)
   library(muhaz)
   library(tableone)
-  require(ipw)
+  require(ipw) 
   require(plyr)
   require(survey)
   set.seed(123) # set seed so you get same results each time you run.
@@ -56,7 +56,6 @@ sasopts <- "-nosplash -log 'c:\\temp' -ls 80 -ps 60  -nocenter -nodate" # see ht
 libname mle "c:\temp";
 %let dir = c:\temp;
 
-
 *Read ASCII file;
 data mle.a;
 	infile "&dir\hividu15dec15.dat"; 
@@ -72,11 +71,19 @@ data mle.a;
 	w=1;
 run;
 
+data b;
+	infile "&dir\hividu15dec15.dat"; 
+	input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
+run;
+
+* Export to .csv for use in R;
+proc export data=b outfile="c:\temp\hividu15dec15.csv" dbms=csv replace; run;
+
 ```
 
 ### R
 
-Read the data (created in ../L06-mle/mle.Rmd).
+Read the data (created in the SAS program above).
 ```{r read}
 #getwd() # get the working directory
 a = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.

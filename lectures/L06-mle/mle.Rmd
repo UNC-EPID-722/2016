@@ -146,8 +146,6 @@ b = a[,colnames(a) %in% keep.vars]
 str(b) # check
 summary(b[,keep.vars]) 
 
-write.csv(b, "c:/temp/hividu15dec15.csv") # write data to comma delimited file.
-# NOTE: I will use the hividu15dec15.csv file from SAS so I can match the id's assigned by random numbers in my checks.
 ```
 
 ## Program 2: Table 1 and Table 2

@@ -54,11 +54,16 @@ data mle.b;
 	infile "&dir\hividu15dec15.dat"; 
 	input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
 run;
+
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile="c:\temp\hividu15dec15.csv" dbms=csv replace; run;
+
 ```
 
 #### R
 
-Read the data (created in ../L06-mle/mle.Rmd).
+Read the data (created in the SAS program above).
 ```{r read}
 #getwd() # get the working directory
 b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.

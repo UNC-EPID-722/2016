@@ -59,11 +59,15 @@ data mle.b;
 	infile "&dir\hividu15dec15.dat"; 
 	input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
 run;
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile="c:\temp\hividu15dec15.csv" dbms=csv replace; run;
+
 ```
 
 ### R
 
-Read the data (created in ../L06-mle/mle.Rmd).
+Read the data (created in the SAS program above). 
 ```{r read}
 #getwd() # get the working directory
 b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.
@@ -255,7 +259,6 @@ p.haz = ggplot(data = d.rev.dt, aes(x=t, y=log(h), group=factor(idu), colour=fac
   theme(text = element_text(size=20))
 
 p.haz
-
 ```
 
 ## IP-weighted Cox model
@@ -276,7 +279,7 @@ run;
 
 data mle.c; merge a n d;
 	if idu then w=n/d;
-	else w=(1-n)/(1-d);
+	else w = (1-n)/(1-d);
 	label n= d=;
 	drop _level_;
 run; quit;
@@ -451,18 +454,27 @@ coef(summary(s.1)) # Coefficients from analysis at start.
 #### SAS
 
 ```{r s-part7, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+
 libname mle "c:\temp";
+data f; set mle.f; run;
+
+proc means data=f;
+ var id in out delta2 idu w3;
+run;
 
 *IP-weighted Cox model, with counting-process data input;
 *Use robust variance;
-proc phreg data=mle.f covs;
+/*
+proc phreg data=f covs;
 	id id;
 	model (in,out)*delta2(0)=idu/rl ties=efron;
 	weight w3;
 	ods select modelinfo fitstatistics parameterestimates;
 	title "IP-weighted Cox model";
+run; quit;
+*/
+proc print data=mle.f(obs=10); run;
 
-run; quit; run;
 ```
 
 #### R
