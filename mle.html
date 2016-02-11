@@ -185,14 +185,17 @@ data _null_; set mle.b;
 run; quit; run;
 
 proc contents data=mle.b; run;
-proc means data=mle.b; var _numeric_; run;</code></pre>
+proc means data=mle.b; var _numeric_; run;
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile=&quot;c:\temp\hividu15dec15.csv&quot; dbms=csv replace; run;</code></pre>
 <pre><code>## The CONTENTS Procedure
 ## 
 ## Data Set Name        MLE.B                         Observations          1164
 ## Member Type          DATA                          Variables             9   
 ## Engine               V9                            Indexes               0   
-## Created              02/03/2016 08:53:51           Observation Length    72  
-## Last Modified        02/03/2016 08:53:51           Deleted Observations  0   
+## Created              02/11/2016 16:22:02           Observation Length    72  
+## Last Modified        02/11/2016 16:22:02           Deleted Observations  0   
 ## Protection                                         Compressed            NO  
 ## Data Set Type                                      Sorted                NO  
 ## Label                                                                        
@@ -275,22 +278,9 @@ class(a) # check type of object</code></pre>
 <p>Data handling.</p>
 <pre class="r"><code>a$u = runif(nrow(a)) # new random id
 a = a[order(a$u),] # order by random id
-head(a) # check</code></pre>
-<pre><code>##             t eventtype ageatfda baseidu black cd4nadir arv dth     tarv
-## 478 1.4948665         1       24       0     1       99   1   1 1.494867
-## 74  0.3997262         2       32       1     0      500   1   1 5.500342
-## 740 2.7351129         1       27       0     1      620   1   0 2.735113
-## 718 2.5845311         1       40       0     0      547   1   0 2.584531
-## 911 4.3559206         1       30       0     1      516   1   0 4.355921
-## 831 3.4715948         2       34       1     0      462   0   1 3.471595
-##       taidsdth newid            u
-## 478  6.2997947   478 0.0004653491
-## 74   0.3997262    74 0.0006247733
-## 740 10.4394251   740 0.0011916284
-## 718 10.8117728   718 0.0036842276
-## 911 10.3655031   911 0.0038963431
-## 831  3.4715948   831 0.0041069405</code></pre>
-<pre class="r"><code>a = within(a, {
+head(a) # check
+
+a = within(a, {
   art = round(ifelse(eventtype==1, tarv, NA), 3) # no missing eventtype. round to 3 decimal places
   delta = ifelse(eventtype==2, 1,
                  ifelse(eventtype==1 &amp; dth==1, 1,
@@ -310,95 +300,13 @@ head(a) # check</code></pre>
   cd4 = cd4nadir
   }) # rename variables
 
-summary(a)</code></pre>
-<pre><code>##        t            eventtype      ageatfda        baseidu      
-##  Min.   : 0.003   Min.   :0.0   Min.   :17.00   Min.   :0.0000  
-##  1st Qu.: 2.117   1st Qu.:1.0   1st Qu.:31.00   1st Qu.:0.0000  
-##  Median : 6.735   Median :1.0   Median :36.00   Median :0.0000  
-##  Mean   : 6.091   Mean   :1.2   Mean   :36.44   Mean   :0.3771  
-##  3rd Qu.:10.000   3rd Qu.:2.0   3rd Qu.:41.00   3rd Qu.:1.0000  
-##  Max.   :10.000   Max.   :2.0   Max.   :73.00   Max.   :1.0000  
-##                                                                 
-##      black           cd4nadir           arv             dth       
-##  Min.   :0.0000   Min.   :   0.0   Min.   :0.000   Min.   :0.000  
-##  1st Qu.:0.0000   1st Qu.: 212.8   1st Qu.:1.000   1st Qu.:0.000  
-##  Median :1.0000   Median : 348.5   Median :1.000   Median :1.000  
-##  Mean   :0.5773   Mean   : 393.6   Mean   :0.762   Mean   :0.512  
-##  3rd Qu.:1.0000   3rd Qu.: 516.2   3rd Qu.:1.000   3rd Qu.:1.000  
-##  Max.   :1.0000   Max.   :1933.0   Max.   :1.000   Max.   :1.000  
-##                                                                   
-##       tarv             taidsdth             newid       
-##  Min.   : 0.01095   Min.   : 0.002738   Min.   :   1.0  
-##  1st Qu.: 1.27584   1st Qu.: 2.117043   1st Qu.: 291.8  
-##  Median : 2.22177   Median : 6.735113   Median : 582.5  
-##  Mean   : 3.39914   Mean   : 6.305807   Mean   : 582.5  
-##  3rd Qu.: 4.50240   3rd Qu.:10.472279   3rd Qu.: 873.2  
-##  Max.   :10.81451   Max.   :10.817248   Max.   :1164.0  
-##                                                         
-##        u                  cd4              age            white       
-##  Min.   :0.0004653   Min.   :   0.0   Min.   :17.00   Min.   :0.0000  
-##  1st Qu.:0.2593812   1st Qu.: 212.8   1st Qu.:31.00   1st Qu.:0.0000  
-##  Median :0.4896324   Median : 348.5   Median :36.00   Median :0.0000  
-##  Mean   :0.4963191   Mean   : 393.6   Mean   :36.44   Mean   :0.4227  
-##  3rd Qu.:0.7427056   3rd Qu.: 516.2   3rd Qu.:41.00   3rd Qu.:1.0000  
-##  Max.   :0.9994045   Max.   :1933.0   Max.   :73.00   Max.   :1.0000  
-##                                                                       
-##       idu               id              drop            delta       
-##  Min.   :0.0000   Min.   :   1.0   Min.   :0.0000   Min.   :0.0000  
-##  1st Qu.:0.0000   1st Qu.: 291.8   1st Qu.:0.0000   1st Qu.:0.0000  
-##  Median :0.0000   Median : 582.5   Median :0.0000   Median :0.0000  
-##  Mean   :0.3771   Mean   : 582.5   Mean   :0.1091   Mean   :0.4974  
-##  3rd Qu.:1.0000   3rd Qu.: 873.2   3rd Qu.:0.0000   3rd Qu.:1.0000  
-##  Max.   :1.0000   Max.   :1164.0   Max.   :1.0000   Max.   :1.0000  
-##                                                                     
-##       art       
-##  Min.   :0.033  
-##  1st Qu.:1.224  
-##  Median :1.936  
-##  Mean   :2.612  
-##  3rd Qu.:3.279  
-##  Max.   :9.810  
-##  NA's   :493</code></pre>
-<pre class="r"><code>keep.vars = c(&quot;t&quot;, &quot;delta&quot;, &quot;art&quot;, &quot;drop&quot;, &quot;id&quot;, &quot;idu&quot;, &quot;white&quot;, &quot;age&quot;, &quot;cd4&quot;)
+summary(a)
+
+keep.vars = c(&quot;t&quot;, &quot;delta&quot;, &quot;art&quot;, &quot;drop&quot;, &quot;id&quot;, &quot;idu&quot;, &quot;white&quot;, &quot;age&quot;, &quot;cd4&quot;)
 b = a[,colnames(a) %in% keep.vars]
 
-str(b) # check</code></pre>
-<pre><code>## 'data.frame':    1164 obs. of  9 variables:
-##  $ t    : num  6.3 0.4 10 10 10 ...
-##  $ cd4  : int  99 500 620 547 516 462 240 375 567 413 ...
-##  $ age  : int  24 32 27 40 30 34 35 61 38 45 ...
-##  $ white: num  0 1 0 1 0 1 1 1 0 0 ...
-##  $ idu  : int  0 1 0 0 0 1 1 0 1 1 ...
-##  $ id   : int  1 2 3 4 5 6 7 8 9 10 ...
-##  $ drop : num  0 0 0 0 0 0 1 0 0 0 ...
-##  $ delta: num  1 1 0 0 0 1 0 1 1 1 ...
-##  $ art  : num  1.5 NA 2.73 2.58 4.36 ...</code></pre>
-<pre class="r"><code>summary(b[,keep.vars]) </code></pre>
-<pre><code>##        t              delta             art             drop       
-##  Min.   : 0.003   Min.   :0.0000   Min.   :0.033   Min.   :0.0000  
-##  1st Qu.: 2.117   1st Qu.:0.0000   1st Qu.:1.224   1st Qu.:0.0000  
-##  Median : 6.735   Median :0.0000   Median :1.936   Median :0.0000  
-##  Mean   : 6.091   Mean   :0.4974   Mean   :2.612   Mean   :0.1091  
-##  3rd Qu.:10.000   3rd Qu.:1.0000   3rd Qu.:3.279   3rd Qu.:0.0000  
-##  Max.   :10.000   Max.   :1.0000   Max.   :9.810   Max.   :1.0000  
-##                                    NA's   :493                     
-##        id              idu             white             age       
-##  Min.   :   1.0   Min.   :0.0000   Min.   :0.0000   Min.   :17.00  
-##  1st Qu.: 291.8   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:31.00  
-##  Median : 582.5   Median :0.0000   Median :0.0000   Median :36.00  
-##  Mean   : 582.5   Mean   :0.3771   Mean   :0.4227   Mean   :36.44  
-##  3rd Qu.: 873.2   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:41.00  
-##  Max.   :1164.0   Max.   :1.0000   Max.   :1.0000   Max.   :73.00  
-##                                                                    
-##       cd4        
-##  Min.   :   0.0  
-##  1st Qu.: 212.8  
-##  Median : 348.5  
-##  Mean   : 393.6  
-##  3rd Qu.: 516.2  
-##  Max.   :1933.0  
-## </code></pre>
-<pre class="r"><code>write.csv(b, &quot;c:/temp/hividu15dec15.csv&quot;) # write data to comma delimited file.</code></pre>
+str(b) # check
+summary(b[,keep.vars]) </code></pre>
 </div>
 </div>
 <div id="program-2-table-1-and-table-2" class="section level2">
@@ -431,7 +339,8 @@ str(b) # check</code></pre>
     title &quot;Table 1, categorical variables, by IDU&quot;;
   proc freq data=a; 
     tables white;
-    title &quot;Table 1, categorical variables, overall&quot;;</code></pre>
+    title &quot;Table 1, categorical variables, overall&quot;;
+run;</code></pre>
 <pre><code>## First 20 records, WIHS IDU data
 ## 
 ## id    idu    white    age     cd4     art     drop    delta               t
@@ -531,8 +440,10 @@ str(b) # check</code></pre>
 <div id="r-1" class="section level4">
 <h4><span class="header-section-number">0.3.1.2</span> R</h4>
 <p>by IDU</p>
-<pre class="r"><code>names(b) # What are column names in data frame &quot;b&quot;?</code></pre>
-<pre><code>## [1] &quot;t&quot;     &quot;cd4&quot;   &quot;age&quot;   &quot;white&quot; &quot;idu&quot;   &quot;id&quot;    &quot;drop&quot;  &quot;delta&quot; &quot;art&quot;</code></pre>
+<pre class="r"><code>b = read.csv(&quot;c:/temp/hividu15dec15.csv&quot;, header=T) # read in data created in SAS code above.
+
+names(b) # What are column names in data frame &quot;b&quot;?</code></pre>
+<pre><code>## [1] &quot;t&quot;     &quot;delta&quot; &quot;art&quot;   &quot;drop&quot;  &quot;id&quot;    &quot;idu&quot;   &quot;white&quot; &quot;age&quot;   &quot;cd4&quot;</code></pre>
 <pre class="r"><code>cont.vars = c(&quot;age&quot;, &quot;cd4&quot;)
 t.one = CreateContTable(data=b, vars=cont.vars, strata=&quot;idu&quot;, test=F) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html or https://rpubs.com/kaz_yos/tableone-ext
 print(t.one, nonnormal=cont.vars)</code></pre>
@@ -561,12 +472,12 @@ print(t.1, nonnormal=c(&quot;age&quot;, &quot;cd4&quot;, &quot;t&quot;, &quot;ar
 ##                      0                       1                      
 ##   n                     725                     439                 
 ##   t (median [IQR])     7.82 [2.62, 10.00]      4.88 [1.36, 10.00]   
-##   cd4 (median [IQR]) 348.00 [216.00, 505.00] 352.00 [208.50, 522.00]
-##   age (median [IQR])  33.00 [29.00, 39.00]    40.00 [35.00, 44.00]  
-##   white = 1 (%)         326 (45.0)              166 (37.8)          
-##   drop = 1 (%)          101 (13.9)               26 ( 5.9)          
 ##   delta = 1 (%)         307 (42.3)              272 (62.0)          
-##   art (median [IQR])   1.87 [1.22, 3.24]       2.02 [1.22, 3.66]</code></pre>
+##   art (median [IQR])   1.87 [1.22, 3.24]       2.02 [1.22, 3.66]    
+##   drop = 1 (%)          101 (13.9)               26 ( 5.9)          
+##   white = 1 (%)         326 (45.0)              166 (37.8)          
+##   age (median [IQR])  33.00 [29.00, 39.00]    40.00 [35.00, 44.00]  
+##   cd4 (median [IQR]) 348.00 [216.00, 505.00] 352.00 [208.50, 522.00]</code></pre>
 </div>
 </div>
 <div id="table-1-categorical" class="section level3">
@@ -620,7 +531,7 @@ print(t.1, nonnormal=c(&quot;age&quot;, &quot;cd4&quot;, &quot;t&quot;, &quot;ar
 <h4><span class="header-section-number">0.3.2.2</span> R</h4>
 <p>by IDU</p>
 <pre class="r"><code>names(b) # What are column names in data frame &quot;b&quot;?</code></pre>
-<pre><code>## [1] &quot;t&quot;     &quot;cd4&quot;   &quot;age&quot;   &quot;white&quot; &quot;idu&quot;   &quot;id&quot;    &quot;drop&quot;  &quot;delta&quot; &quot;art&quot;</code></pre>
+<pre><code>## [1] &quot;t&quot;     &quot;delta&quot; &quot;art&quot;   &quot;drop&quot;  &quot;id&quot;    &quot;idu&quot;   &quot;white&quot; &quot;age&quot;   &quot;cd4&quot;</code></pre>
 <pre class="r"><code>cat.vars = c(&quot;white&quot;)
 t.one = CreateCatTable(data=b, vars=cat.vars, strata=&quot;idu&quot;, test=F)
 t.one</code></pre>
@@ -1123,13 +1034,13 @@ nrow(b) </code></pre>
 <pre><code>## [1] 1164</code></pre>
 <pre class="r"><code>b.3$offset = with(b.3, {b1*idu})
 head(b.3)</code></pre>
-<pre><code>##          t cd4 age white idu id drop delta   art        b1    offset
-## 478  6.300  99  24     0   0  1    0     1 1.495 0.7964419 0.0000000
-## 74   0.400 500  32     1   1  2    0     1    NA 0.7964419 0.7964419
-## 740 10.000 620  27     0   0  3    0     0 2.735 0.7964419 0.0000000
-## 718 10.000 547  40     1   0  4    0     0 2.585 0.7964419 0.0000000
-## 911 10.000 516  30     0   0  5    0     0 4.356 0.7964419 0.0000000
-## 831  3.472 462  34     1   1  6    0     1    NA 0.7964419 0.7964419</code></pre>
+<pre><code>##        t delta   art drop id idu white age cd4        b1    offset
+## 1  2.245     1    NA    0  1   1     0  44 376 0.7964419 0.7964419
+## 2  1.213     1    NA    0  2   1     1  32 392 0.7964419 0.7964419
+## 3 10.000     0 1.224    0  3   0     0  44 181 0.7964419 0.0000000
+## 4  1.240     1    NA    0  4   1     0  35 526 0.7964419 0.7964419
+## 5  7.871     1    NA    0  5   1     1  46 386 0.7964419 0.7964419
+## 6  6.593     1 2.207    0  6   0     1  29 285 0.7964419 0.0000000</code></pre>
 <pre class="r"><code>b.3.split = split(b.3, b.3$b1)
 
 glm.3 = lapply(b.3.split, function(z) glm(delta~1, offset=offset, family=&quot;binomial&quot;, data=z)) # do regression for each unique value of b1. See http://stackoverflow.com/questions/9014308/r-extract-regression-coefficients-from-multiply-regression-via-lapply-command
@@ -1163,16 +1074,16 @@ hess$seb1 = with(hess, sqrt(1/-second))</code></pre>
 <pre><code>## Warning in sqrt(1/-second): NaNs produced</code></pre>
 <pre class="r"><code>hess</code></pre>
 <pre><code>##                          b1      logl         first     second      seb1
-## 0                 0.0000000 -806.8079  5.322867e+01   1.405099       NaN
-## 0.02              0.0200000 -805.7489  5.237224e+01 -87.048844 0.1071812
-## 0.04              0.0400000 -804.7173  5.086832e+01 -63.343281 0.1256463
-## 0.06              0.0600000 -803.7130  4.953803e+01 -69.685650 0.1197921
-## 0.08              0.0800000 -802.7361  4.816145e+01 -67.971585 0.1212932
-## 0.1               0.1000000 -801.7865  4.679763e+01 -68.411123 0.1209029
-## 0.12              0.1200000 -800.8642  4.543083e+01 -68.268498 0.1210291
-## 0.14              0.1400000 -799.9692  4.406538e+01 -68.276760 0.1210218
-## 0.16              0.1600000 -799.1016  4.270022e+01 -68.239494 0.1210548
-## 0.18              0.1800000 -798.2612  4.133573e+01 -68.209338 0.1210816
+## 0                 0.0000000 -806.8079  5.322801e+01   1.519556       NaN
+## 0.02              0.0200000 -805.7489  5.237241e+01 -87.079513 0.1071623
+## 0.04              0.0400000 -804.7173  5.086827e+01 -63.335063 0.1256545
+## 0.06              0.0600000 -803.7130  4.953804e+01 -69.687852 0.1197902
+## 0.08              0.0800000 -802.7361  4.816145e+01 -67.970995 0.1212937
+## 0.1               0.1000000 -801.7865  4.679763e+01 -68.411281 0.1209027
+## 0.12              0.1200000 -800.8642  4.543083e+01 -68.268455 0.1210291
+## 0.14              0.1400000 -799.9692  4.406538e+01 -68.276771 0.1210218
+## 0.16              0.1600000 -799.1016  4.270022e+01 -68.239491 0.1210548
+## 0.18              0.1800000 -798.2612  4.133573e+01 -68.209339 0.1210816
 ## 0.2               0.2000000 -797.4481  3.997191e+01 -68.172194 0.1211146
 ## 0.22              0.2200000 -796.6623  3.860887e+01 -68.131849 0.1211504
 ## 0.24              0.2400000 -795.9038  3.724668e+01 -68.087297 0.1211900
@@ -1203,7 +1114,7 @@ hess$seb1 = with(hess, sqrt(1/-second))</code></pre>
 ## 0.74              0.7400000 -785.7173  3.697415e+00 -65.713183 0.1233598
 ## 0.76              0.7600000 -785.6565  2.384586e+00 -65.569750 0.1234947
 ## 0.78              0.7800000 -785.6219  1.074661e+00 -65.422737 0.1236334
-## 0.796441938816792 0.7964419 -785.6131  2.590252e-07 -65.299125 0.1237503
+## 0.796441938816815 0.7964419 -785.6131  2.588820e-07 -65.299125 0.1237503
 ## 0.8               0.8000000 -785.6135 -2.322901e-01 -65.272214 0.1237758
 ## 0.82              0.8200000 -785.6312 -1.536195e+00 -65.118308 0.1239220
 ## 0.84              0.8400000 -785.6749 -2.836987e+00 -64.960849 0.1240721
