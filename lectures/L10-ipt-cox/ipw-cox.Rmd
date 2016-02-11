@@ -205,7 +205,7 @@ proc sgplot data=d noautolegend;
 run;
 ```
 
-![](c:\temp\Hazards.jpeg) <!-- Add in the Survival.jpeg from SAS program above...-->
+![](c:\temp\Hazards.jpeg) <!-- Add in the Hazards.jpeg from SAS program above...-->
 
 
 ### R
