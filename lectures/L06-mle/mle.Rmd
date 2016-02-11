@@ -93,6 +93,9 @@ run; quit; run;
 
 proc contents data=mle.b; run;
 proc means data=mle.b; var _numeric_; run;
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile="c:\temp\hividu15dec15.csv" dbms=csv replace; run;
 ```
 
 
@@ -101,7 +104,7 @@ proc means data=mle.b; var _numeric_; run;
 Read the data.
 ```{r}
 #getwd() # get the working directory
-a = read.csv("../data/hividu.csv", header=T) # read in data. relative to the working directory go up however many levels and into 'data' folder to read data. 
+a = read.csv("../../data/hividu.csv", header=T) # read in data. relative to the working directory go up however many levels and into 'data' folder to read data. 
 #a = read.csv("../data/hividu.csv", header=T) # Ignore. only for local run checking.
 
 # Instead of "../../data/hividu.csv, can specify full path of data location. For example a path could be "c:\temp\hividu.csv"
@@ -112,7 +115,7 @@ colnames(a) = tolower(colnames(a)) # make all column names lower case
 ```
 
 Data handling.
-```{r r-program1, eval=FALSE}
+```{r r-program1, eval=F}
 
 a$u = runif(nrow(a)) # new random id
 a = a[order(a$u),] # order by random id
@@ -181,6 +184,7 @@ by IDU and overall
   proc freq data=a; 
   	tables white;
   	title "Table 1, categorical variables, overall";
+run;
 ```
 
 
@@ -188,6 +192,8 @@ by IDU and overall
 
 by IDU
 ```{r r-program2a}
+b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data created in SAS code above.
+
 names(b) # What are column names in data frame "b"?
 cont.vars = c("age", "cd4")
 t.one = CreateContTable(data=b, vars=cont.vars, strata="idu", test=F) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html or https://rpubs.com/kaz_yos/tableone-ext
