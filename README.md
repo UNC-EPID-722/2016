@@ -29,6 +29,11 @@
 
 [Lecture 9: IP-weighted survival](http://unc-epid-722.github.io/2016/iptw-survival.html) -- [.Rmd file](lectures/L09-iptw-survival/iptw-survival.Rmd)
 
+[Lecture 10: IP-weighted Cox models](http://unc-epid-722.github.io/2016/ipw-cox.html) -- [.Rmd file](lectures/L10-iptw-survival/ipw-survival.Rmd)
+
+[Lecture 11: Generalizability](http://unc-epid-722.github.io/2016/generalizability.html) -- [.Rmd file](lectures/L11-generalizability/generalizability.Rmd)
+
+
 ---
 
 **Recitation**
