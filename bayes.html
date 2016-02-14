@@ -2630,6 +2630,10 @@ log(1.5081) &amp;= 0.4109 \\
 \]</span></p>
 <p>Now you have added in an offset, offset.1 = log(Z) = log(1.2) = 0.1823. Given the formula at the start of the offset section above, the adjusted odds should be <span class="math">\(\frac{p/(1-p)}{Z}\)</span> = <span class="math">\(\frac{1.8097}{1.2}\)</span> = 1.5081. Then the intercept, log(odds) for the referent group of the x.1 variable, should be log(1.5081) = 0.4109. The intercept for the model with the offset, glm.1, is that value, 0.410857. Also, note that the coefficient for <span class="math">\(\beta_1\)</span> is the same across models with and without an offset.</p>
 <p>This example demonstrates that the offset Z adjusts the intercept of the observed data. In this example a Z&gt;1 moves the intercept in the logisitic regression downward from 0.5932 to 0.4109</p>
+<div class="references">
+<h3>Assigned reading</h3>
+<p>1. Cole SR, Chu H, Greenland S, et al. Bayesian Posterior Distributions Without Markov Chains. <em>Am. J. Epidemiol.</em> [electronic article]. 2012;175(5):368–375. (<a href="http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwr433" class="uri">http://aje.oxfordjournals.org/cgi/doi/10.1093/aje/kwr433</a>)</p>
+</div>
 </div>
 </div>
 
