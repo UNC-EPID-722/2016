@@ -95,8 +95,6 @@ run;
 ```{r}
 var.list = c("delta", "t", "drop", "idu", "white", "age", "cd4")
 
-summary(b[,var.list])
-
 t.1 = CreateTableOne(data=b[,var.list]) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html
 print(t.1, nonnormal=var.list)
 ```

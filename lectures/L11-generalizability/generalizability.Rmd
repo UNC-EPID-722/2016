@@ -235,7 +235,6 @@ nrow(b) # check numbers with SAS
 # descriptives
 head(b)
 
-
 CreateTableOne(data = b, 
                vars = c("white", "agegp"),
                strata = "sample",
