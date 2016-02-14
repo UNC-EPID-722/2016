@@ -163,7 +163,7 @@ libname mle "c:\temp";
 %let dir = c:\temp;
 data a; set mle.b; run;
 
-*Get Breslow estimators of survival functions for each treatment group;
+*Get KM estimators of survival functions for each treatment group;
 proc phreg data=a noprint;
 	model t*delta(0)=;
 	strata idu;
@@ -271,18 +271,23 @@ libname mle "c:\temp";
 data a; set mle.b; run;
 
 *Confounding weights;
-proc logistic data=a desc noprint; model idu=; output out=n p=n;
+proc logistic data=a desc noprint; model idu=; output out=n p=num; run;
+proc print data=n(obs=10); run;
+
 proc logistic data=a desc noprint; model idu=white age cd4; output out=d p=d;
 run;
 
 data mle.c; merge a n d;
-	if idu then w=n/d;
-	else w = (1-n)/(1-d);
+	if idu then w=num/d;
+	else w = (1-num)/(1-d);
 	label n= d=;
 	drop _level_;
 run; quit;
 proc print data=mle.c(obs=10); run;
 ```
+
+
+#### R
 
 ```{r r-part4}
 
@@ -423,14 +428,15 @@ summary(wts[,c("wt1", "wt2", "wt3")])
 
 ```
 
-### Check crude model is same with counting process data input
+### Check crude model is same with counting process data input (i.e. entry and exit times)
 
 #### SAS
 
 ```{r s-part6, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 libname mle "c:\temp";
 
-*Check crude model is same with counting-process data input;
+*Check crude model is same with counting-process data input (i.e. entry and exit times);
+
 proc phreg data=mle.f;
 	model (in,out)*delta2(0)=idu/rl ties=efron;
 	ods select modelinfo fitstatistics parameterestimates;
@@ -462,7 +468,7 @@ run;
 
 *IP-weighted Cox model, with counting-process data input;
 *Use robust variance;
-/*
+
 proc phreg data=f covs;
 	id id;
 	model (in,out)*delta2(0)=idu/rl ties=efron;
@@ -470,7 +476,7 @@ proc phreg data=f covs;
 	ods select modelinfo fitstatistics parameterestimates;
 	title "IP-weighted Cox model";
 run; quit;
-*/
+
 proc print data=mle.f(obs=10); run;
 
 ```
@@ -485,7 +491,7 @@ s.4 = coxph(Surv(time0, t, delta) ~ idu + cluster(id),
 summary(s.4)
 ```
 
-#### References
+## Assigned reading
 
 ---
 nocite: | 

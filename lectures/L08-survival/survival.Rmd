@@ -368,4 +368,11 @@ p.haz
 ```
 
 
-## References
+### Assigned reading
+
+---
+nocite: | 
+  @cole_survival_2010
+  
+...
+

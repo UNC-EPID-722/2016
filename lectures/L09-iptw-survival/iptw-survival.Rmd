@@ -2,6 +2,8 @@
 title: "IPTW Survival"
 author: "UNC EPID 722: Dr. Steve Cole"
 date: "February 11, 2016"
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
 output:
   html_document:
    toc: true
@@ -536,3 +538,12 @@ plot(s.4, lwd=1.5,
 
 legend(6, 0.2, c("IDU - No", "IDU - Yes") , lty=c(1,3), bty="n", col=col1 )
 ```
+
+## Assigned reading
+
+---
+nocite: | 
+  @cole_adjusted_2004
+...
+
+

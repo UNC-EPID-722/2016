@@ -44,7 +44,6 @@ output:
   require(stargazer)
   library(betareg) 
   library(rms)
-  library(optimx) 
   set.seed(123) # set seed so you get same results each time you run.
 ```
 
@@ -310,7 +309,7 @@ round(mipply(imputations, mean, to.matrix = TRUE), 3) # want the values to be th
 # Good way to visualize missing. Not sure how to use cox ph with this.
 ```
 
-```{r r-part5b, eval=FALSE}
+```{r r-part5b, eval=T, cache=TRUE}
 # See http://stats.stackexchange.com/questions/46333/using-multiple-imputation-for-cox-proportional-hazards-then-validating-with-rms
 
 var.list = c("t", "idu", "white", "age", "cd4", "delta", "drop")
@@ -500,13 +499,29 @@ summary(s.3)
 coef(summary(s.1)) # coefficients from observed data with no missing
 ```
 
-Summary of the different regression models
+Summary of the regression models for full observed data, complete case analysis and weighted regression.
 
 ```{r r-part8a, results='asis'}
-stargazer(s.1, s.2, s.3,
-            column.labels=c("Full data", "Complete case analysis", "Weighted regression"),
+ 
+stargazer(s.1, s.2,  s.3,
+            column.labels=c("Full data", "Complete case",
+                            "Weighted"),
           type="html",
           keep.stat = c("n"),
           title="Cox PH results by analysis type")
+
 ```
+
+Summary of MI parameter estimates
+```{r-part8b}
+summary(pool.coxph)[,1:2]
+```
+
+
+## Assigned reading
+
+---
+nocite: | 
+  @greenland_critical_1995
+...
 

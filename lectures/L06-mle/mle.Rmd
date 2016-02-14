@@ -2,6 +2,8 @@
 title: "Maximum Likelihood Estimates"
 author: "UNC EPID 722: Dr. Steve Cole"
 date: "February 2, 2016"
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
 output: 
   html_document:
    toc: true
@@ -644,3 +646,12 @@ o.logit = optim(start.beta, LL.logistic.reg.pml,
                    hessian=TRUE) # see http://stats.stackexchange.com/questions/81000/calculate-coefficients-in-a-logistic-regression-with-r
 o.logit$par
 ```
+
+
+## Assigned reading
+ 
+ 
+---
+nocite: | 
+  @cole_maximum_2014
+...

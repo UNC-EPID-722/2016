@@ -1,8 +1,15 @@
 ---
-title: "L03: G-computation with NAMCS"
-author: "EPID 722, 2016"
+title: "G-computation with NAMCS"
+author: 'UNC EPID 722: Dr. Alan Brookhart'
 date: "January 19, 2016"
-output: html_document
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
+output:
+  html_document:
+   toc: true
+   toc_depth: 4 
+   theme: united
+   number_sections: true
 ---
 
 ### Specify packages
@@ -115,3 +122,12 @@ pbleed.1=predict(glm.out,newdata=ns.temp,type="response")
 
 mean(pbleed.1)-mean(pbleed.0)
 ```
+
+
+## Assigned reading
+
+---
+nocite: | 
+  @snowden_implementation_2011; @petersen_assessing_2006; @rose_rose_2011; @vansteelandt_invited_2011-1
+...
+

@@ -2,7 +2,14 @@
 title: "Bootstrap Resampling"
 author: 'UNC EPID 722: Dr. Alan Brookhart'
 date: "January 28, 2016"
-output: html_document
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
+output:
+  html_document:
+   toc: true
+   toc_depth: 4 
+   theme: united
+   number_sections: true
 ---
 
 ```{r setup, echo=FALSE}
@@ -249,3 +256,12 @@ for (i in 1:sims)
 
 mean(cov)
 ```
+
+
+
+## Assigned reading
+
+---
+nocite: | 
+  @ahern_estimating_2009; @barker_practical_2005
+...

@@ -401,7 +401,7 @@ plot(s.4, lwd=1.5,
      fun = function(y) 1-y,
      xlab="Time (years)", 
      ylab="Risk",
-     main="IP-sampling-weighted survival",
+     main="IP-sampling-weighted risk",
      cex.lab=1, cex.axis=1, cex.main=1, cex.sub=1.5,
      mark.time=F,
      lty=c(1,3), col=col1)
