@@ -295,18 +295,61 @@ run;
 <div id="r-2" class="section level3">
 <h3><span class="header-section-number">0.4.2</span> R</h3>
 <p>Next step is to make missing data according to four different patterns.</p>
-<pre class="r"><code>expit = function(x) { 1/(1+exp(-x)) } # transform x, log(odds) to p= prob
+<pre class="r"><code>expit = function(x) { 1/(1+exp(-x)) } # transform x, log(odds) to p = prob
 
-#expected values in the full data;
-    eidu = 0.377;   edelta = 0.497;
-# choose marginal distribution for missing data pattern;
+# Expected values in the full data
+    eidu = mean(a.dat$idu); edelta = mean(a.dat$delta);
+    eidu; edelta; # check</code></pre>
+<pre><code>## [1] 0.3771478</code></pre>
+<pre><code>## [1] 0.4974227</code></pre>
+<pre class="r"><code># Choose marginal distribution for missing data pattern
     ep2 = 0.2; ep3 = 0.15; ep4 = 0.05;
-# back-calculate intercepts;
-    int2 = -log(1/ep2-1)-log(5)*edelta
-    int3 = -log(1/ep3-1)-log(5)*eidu
-    int4 = -log(1/ep4-1)
-
-# Make probability of missing data patterns
+    
+# Back-calculate intercepts;
+    int2 = -log(1/ep2-1) - log(5)*edelta
+    int3 = -log(1/ep3-1) - log(5)*eidu
+    int4 = -log(1/ep4-1)</code></pre>
+<p>Set-up for missing data:</p>
+<ul>
+<li><strong>Pattern 2</strong>: pr(delta = missing | delta) = expit (<span class="math">\(\beta_0 + \beta_1 \cdot\)</span> delta)
+<ul>
+<li><span class="math">\(\beta_0\)</span> = int2 = -log(1/ep2-1) - log(5)<span class="math">\(\cdot\)</span> E(delta) = -2.187</li>
+<li><span class="math">\(\beta_1\)</span> = log(5) = 1.609</li>
+<li>odds of missing if delta=0
+<ul>
+<li>exp(<span class="math">\(\beta_0\)</span>) = 0.112</li>
+</ul></li>
+<li>odds of missing if delta=1
+<ul>
+<li>exp(<span class="math">\(\beta_0 + \beta_1\)</span>) = 0.561</li>
+</ul></li>
+<li>Note: odds of missing for delta=1 is 5 times the odds of missing for delta=0 status.</li>
+</ul></li>
+<li><strong>Pattern 3</strong>: pr(idu = missing | idu) = expit (<span class="math">\(\beta_0 + \beta_1 \cdot\)</span> idu)
+<ul>
+<li><span class="math">\(\beta_0\)</span> = int3 = -log(1/ep3-1) - log(5)<span class="math">\(\cdot\)</span> E(idu) = -2.187</li>
+<li><span class="math">\(\beta_1\)</span> = log(5) = 1.609</li>
+<li>odds of missing if <strong>idu</strong>=0
+<ul>
+<li>exp(<span class="math">\(\beta_0\)</span>) = 0.096</li>
+</ul></li>
+<li>odds of missing if <strong>idu</strong>=1
+<ul>
+<li>exp(<span class="math">\(\beta_0 + \beta_1\)</span>) = 0.481</li>
+</ul></li>
+<li>Note: odds of missing for idu=1 is 5 times the odds of missing for idu=0 status.</li>
+</ul></li>
+<li><strong>Pattern 4</strong>: pr(idu = missing and delta = missing) = expit (<span class="math">\(\beta_0\)</span>)
+<ul>
+<li><span class="math">\(\beta_0\)</span> = int4 = -log(1/ep4-1) = -2.187</li>
+<li><span class="math">\(\beta_1\)</span> = log(5) = 1.609</li>
+<li>odds of missing
+<ul>
+<li>exp(<span class="math">\(\beta_0\)</span>) = 0.053</li>
+</ul></li>
+</ul></li>
+</ul>
+<pre class="r"><code># Make probability of missing data patterns
 # ..................................................
 # Missing data patterns: a to b are expit(x) = p (probability missing)
 
@@ -325,31 +368,25 @@ run;
 df.patterns.probs = cbind.data.frame(a,b,c,d)
 head(df.patterns.probs)</code></pre>
 <pre><code>##           a         b          c    d
-## 1 0.2655453 0.3596814 0.32477327 0.05
-## 2 0.2655453 0.3596814 0.32477327 0.05
-## 3 0.7612470 0.1009980 0.08775505 0.05
-## 4 0.2655453 0.3596814 0.32477327 0.05
-## 5 0.2655453 0.3596814 0.32477327 0.05
-## 6 0.5025635 0.3596814 0.08775505 0.05</code></pre>
+## 1 0.2657541 0.3595248 0.32472112 0.05
+## 2 0.2657541 0.3595248 0.32472112 0.05
+## 3 0.7613278 0.1009362 0.08773601 0.05
+## 4 0.2657541 0.3595248 0.32472112 0.05
+## 5 0.2657541 0.3595248 0.32472112 0.05
+## 6 0.5027392 0.3595248 0.08773601 0.05</code></pre>
 <pre class="r"><code>unique(df.patterns.probs) # check</code></pre>
 <pre><code>##            a         b          c    d
-## 1  0.2655453 0.3596814 0.32477327 0.05
-## 3  0.7612470 0.1009980 0.08775505 0.05
-## 6  0.5025635 0.3596814 0.08775505 0.05
-## 12 0.5242288 0.1009980 0.32477327 0.05</code></pre>
+## 1  0.2657541 0.3595248 0.32472112 0.05
+## 3  0.7613278 0.1009362 0.08773601 0.05
+## 6  0.5027392 0.3595248 0.08773601 0.05
+## 12 0.5243427 0.1009362 0.32472112 0.05</code></pre>
 <pre class="r"><code># 3) randomly assign missing data patterns
 # ......................................
 pattern = apply(df.patterns.probs, 1, function(x) {
   sample(c(1:4), size=1, prob=x[1:4], replace=TRUE)
 }) # get one integer from 1 to 4 representing the missing data pattern by probability of occuring
 
-table(pattern) #check</code></pre>
-<pre><code>## pattern
-##   1   2   3   4 
-## 625 271 210  58</code></pre>
-<pre class="r"><code>length(pattern)</code></pre>
-<pre><code>## [1] 1164</code></pre>
-<pre class="r"><code># make indicator variables
+# make indicator variables for missing patterns (1 for 1 of 4 missing data patterns per row, rest are 0)
 A = model.matrix(~factor(pattern)-1)
 head(A)</code></pre>
 <pre><code>##   factor(pattern)1 factor(pattern)2 factor(pattern)3 factor(pattern)4
@@ -372,12 +409,12 @@ names(b.dat)</code></pre>
 <pre class="r"><code>colnames(b.dat)[5:8] = c(&quot;pat1&quot;, &quot;pat2&quot;, &quot;pat3&quot;, &quot;pat4&quot;)
 head(b.dat)</code></pre>
 <pre><code>##           a         b          c    d pat1 pat2 pat3 pat4      t idu white
-## 1 0.2655453 0.3596814 0.32477327 0.05    0    1    0    0  2.245   1     0
-## 2 0.2655453 0.3596814 0.32477327 0.05    1    0    0    0  1.213   1     1
-## 3 0.7612470 0.1009980 0.08775505 0.05    1    0    0    0 10.000   0     0
-## 4 0.2655453 0.3596814 0.32477327 0.05    1    0    0    0  1.240   1     0
-## 5 0.2655453 0.3596814 0.32477327 0.05    1    0    0    0  7.871   1     1
-## 6 0.5025635 0.3596814 0.08775505 0.05    1    0    0    0  6.593   0     1
+## 1 0.2657541 0.3595248 0.32472112 0.05    0    1    0    0  2.245   1     0
+## 2 0.2657541 0.3595248 0.32472112 0.05    1    0    0    0  1.213   1     1
+## 3 0.7613278 0.1009362 0.08773601 0.05    1    0    0    0 10.000   0     0
+## 4 0.2657541 0.3595248 0.32472112 0.05    1    0    0    0  1.240   1     0
+## 5 0.2657541 0.3595248 0.32472112 0.05    1    0    0    0  7.871   1     1
+## 6 0.5027392 0.3595248 0.08773601 0.05    1    0    0    0  6.593   0     1
 ##   age cd4 delta drop pattern
 ## 1  44 376     1    0       2
 ## 2  32 392     1    0       1
@@ -386,8 +423,8 @@ head(b.dat)</code></pre>
 ## 5  46 386     1    0       1
 ## 6  29 285     1    0       1</code></pre>
 <pre class="r"><code>b.dat = within(b.dat, {
-  idu = ifelse(pat2==1 | pat4==1, NA, idu)
-  delta = ifelse(pat3==1 | pat4==1, NA, delta)
+  idu = ifelse(pat2==1 | pat4==1, NA, idu) # idu is missing in patterns 2 and 4
+  delta = ifelse(pat3==1 | pat4==1, NA, delta) # delta is missing in patterns 3 and 4
 })
 
 b.dat$complete = ifelse(complete.cases(b.dat),1,0)
@@ -462,6 +499,11 @@ summary(t.1)</code></pre>
 ## age      1164    0      0  36.4   8.2     36  31  41 2e+01   73  0.57  0.9
 ## cd4      1164    0      0 393.6 264.0    348 213 516 0e+00 1933  1.32  3.1
 ## complete 1164    0      0   0.5   0.5      1   0   1 0e+00    1 -0.15 -2.0</code></pre>
+<pre class="r"><code>rbind(prop.table(table(pattern)),
+      table(pattern)) #check distribution of patterns</code></pre>
+<pre><code>##                1           2           3           4
+## [1,]   0.5369416   0.2328179   0.1804124  0.04982818
+## [2,] 625.0000000 271.0000000 210.0000000 58.00000000</code></pre>
 </div>
 </div>
 <div id="complete-case-cox-model" class="section level2">
@@ -584,6 +626,159 @@ proc mianalyze data=d;
     title &quot;Multiple imputation&quot;;
 run;
 </code></pre>
+<pre><code>## The MI Procedure
+## 
+##                      Model Information
+## 
+## Data Set                             WORK.B                 
+## Method                               MCMC                   
+## Multiple Imputation Chain            Single Chain           
+## Initial Estimates for MCMC           EM Posterior Mode      
+## Start                                Starting Value         
+## Prior                                Jeffreys               
+## Number of Imputations                100                    
+## Number of Burn-in Iterations         200                    
+## Number of Iterations                 100                    
+## Seed for random number generator     3                      
+## 
+## 
+##                        Missing Data Patterns
+##  
+## Group  white    age    cd4    delta    idu        Freq     Percent
+## 
+##     1  X        X      X      X        X           650       55.84
+##     2  X        X      X      X        .           261       22.42
+##     3  X        X      X      .        X           198       17.01
+##     4  X        X      X      .        .            55        4.73
+## 
+##                              Missing Data Patterns
+##  
+##        -------------------------------Group Means------------------------------
+## Group         white            age            cd4          delta            idu
+## 
+##     1      0.420000      35.586154     397.238462       0.350769       0.256923
+##     2      0.425287      37.333333     371.379310       0.808429              .
+##     3      0.424242      38.398990     399.045455              .       0.681818
+##     4      0.436364      35.254545     435.418182              .              .
+## 
+## 
+##                         EM (Posterior Mode) Estimates
+##  
+## _TYPE_   _NAME_            white            age            cd4          delta
+## 
+## MEAN                    0.422680      36.440722     393.551546       0.491825
+## COV      white          0.242770      -0.378491      -2.137915      -0.015933
+## COV      age           -0.378491      66.393940    -182.931575       0.578436
+## COV      cd4           -2.137915    -182.931575          69269     -27.810904
+## COV      delta         -0.015933       0.578436     -27.810904       0.248576
+## COV      idu           -0.025510       1.243973       5.602319       0.038512
+## 
+## EM (Posterior Mode) Estimates
+##  
+##          idu
+## 
+##     0.371172
+##    -0.025510
+##     1.243973
+##     5.602319
+##     0.038512
+##     0.228130
+## 
+## 
+##                      Variance Information
+##  
+##             -----------------Variance-----------------
+## Variable         Between         Within          Total       DF
+## 
+## delta        0.000074084       0.000216       0.000291   546.83
+## idu          0.000085282       0.000199       0.000285   464.23
+## 
+##                  Variance Information
+##  
+##                 Relative       Fraction
+##                 Increase        Missing       Relative
+## Variable     in Variance    Information     Efficiency
+## 
+## delta           0.346512       0.258332       0.997423
+## idu             0.432372       0.303139       0.996978
+## 
+## 
+##                            Parameter Estimates
+##  
+## Variable            Mean      Std Error    95% Confidence Limits        DF
+## 
+## delta           0.492592       0.017052     0.459097     0.526087   546.83
+## idu             0.370964       0.016892     0.337769     0.404159   464.23
+## 
+##                              Parameter Estimates
+##  
+##                                                          t for H0:
+## Variable         Minimum        Maximum            Mu0    Mean=Mu0   Pr &gt; |t|
+## 
+## delta           0.469228       0.514823              0       28.89     &lt;.0001
+## idu             0.351274       0.392549              0       21.96     &lt;.0001
+##  
+##                                                                                 
+##  
+## Multiple imputation
+## 
+## The MIANALYZE Procedure
+## 
+##           Model Information
+## 
+## Data Set                  WORK.D      
+## Number of Imputations     100         
+## 
+## 
+##                       Variance Information
+##  
+##              -----------------Variance-----------------
+## Parameter         Between         Within          Total       DF
+## 
+## idu              0.002236       0.006586       0.008844   1518.6
+## white         0.000089130       0.006136       0.006226   473559
+## age           0.000000958    0.000022852    0.000023820    59981
+## cd4          4.379979E-10   3.2550723E-8     3.29931E-8   550674
+## 
+##                  Variance Information
+##  
+##                  Relative       Fraction
+##                  Increase        Missing       Relative
+## Parameter     in Variance    Information     Efficiency
+## 
+## idu              0.342866       0.256303       0.997444
+## white            0.014671       0.014463       0.999855
+## age              0.042347       0.040659       0.999594
+## cd4              0.013590       0.013412       0.999866
+## 
+## 
+##                             Parameter Estimates
+##  
+## Parameter        Estimate      Std Error    95% Confidence Limits        DF
+## 
+## idu              0.488310       0.094043      0.30384      0.67278   1518.6
+## white           -0.073406       0.078906     -0.22806      0.08125   473559
+## age              0.008049       0.004881     -0.00152      0.01762    59981
+## cd4             -0.001223       0.000182     -0.00158     -0.00087   550674
+## 
+##           Parameter Estimates
+##  
+## Parameter         Minimum        Maximum
+## 
+## idu              0.363565       0.602118
+## white           -0.095761      -0.050534
+## age              0.005715       0.010461
+## cd4             -0.001271      -0.001168
+## 
+##                   Parameter Estimates
+##  
+##                                    t for H0:
+## Parameter          Theta0   Parameter=Theta0   Pr &gt; |t|
+## 
+## idu                     0               5.19     &lt;.0001
+## white                   0              -0.93     0.3522
+## age                     0               1.65     0.0991
+## cd4                     0              -6.73     &lt;.0001</code></pre>
 </div>
 <div id="r-5" class="section level3">
 <h3><span class="header-section-number">0.7.2</span> R</h3>
