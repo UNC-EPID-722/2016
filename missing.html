@@ -311,24 +311,36 @@ run;
     int4 = -log(1/ep4-1)</code></pre>
 <p>Set-up for missing data:</p>
 <ul>
-<li><strong>Pattern 2</strong>: pr(delta = missing | delta) = expit (<span class="math">\(\beta_0 + \beta_1 \cdot\)</span> delta)
+<li><strong>Pattern 2</strong>:
 <ul>
-<li><span class="math">\(\beta_0\)</span> = int2 = -log(1/ep2-1) - log(5)<span class="math">\(\cdot\)</span> E(delta) = -2.187</li>
+<li><span class="math">\(M_2\)</span> = indicator for missing in pattern 2</li>
+<li>pr(<span class="math">\(M_2\)</span>=1) = <span class="math">\(p_2\)</span> = 0.2 (ep2 in SAS code)</li>
+<li>Model for missing data: logit(pr(<span class="math">\(M_2=1 \mid\)</span> delta)) = <span class="math">\(\beta_0 + \beta_1 \cdot\)</span> delta
+<ul>
+<li>Intercept<span class="math">\(^a\)</span>: <span class="math">\(\beta_0\)</span> = -log(1/ep2-1) - log(5)<span class="math">\(\cdot\)</span> E(delta) = -2.187 (int2 in SAS code)</li>
 <li><span class="math">\(\beta_1\)</span> = log(5) = 1.609</li>
-<li>odds of missing if delta=0
+<li>pr(<span class="math">\(M_2=1 \mid\)</span> delta) = expit (<span class="math">\(\beta_0 + \beta_1 \cdot\)</span> delta)</li>
+</ul></li>
+<li>odds of missing if <strong>delta</strong>=0
 <ul>
 <li>exp(<span class="math">\(\beta_0\)</span>) = 0.112</li>
 </ul></li>
-<li>odds of missing if delta=1
+<li>odds of missing if <strong>delta</strong>=1
 <ul>
 <li>exp(<span class="math">\(\beta_0 + \beta_1\)</span>) = 0.561</li>
 </ul></li>
-<li>Note: odds of missing for delta=1 is 5 times the odds of missing for delta=0 status.</li>
+<li>Note: odds of missing for <strong>delta</strong>=1 is 5 times the odds of missing for <strong>delta</strong>=0 status.</li>
 </ul></li>
-<li><strong>Pattern 3</strong>: pr(idu = missing | idu) = expit (<span class="math">\(\beta_0 + \beta_1 \cdot\)</span> idu)
+<li><strong>Pattern 3</strong>:
 <ul>
-<li><span class="math">\(\beta_0\)</span> = int3 = -log(1/ep3-1) - log(5)<span class="math">\(\cdot\)</span> E(idu) = -2.187</li>
+<li><span class="math">\(M_3\)</span> = indicator for missing in pattern 3</li>
+<li>pr(<span class="math">\(M_3\)</span>=1) = <span class="math">\(p_3\)</span> = 0.15 (ep3 in SAS code)</li>
+<li>Model for missing data: logit(pr(<span class="math">\(M_3=1 \mid\)</span> idu)) = <span class="math">\(\beta_0 + \beta_1 \cdot\)</span> idu
+<ul>
+<li>Intercept<span class="math">\(^a\)</span>: <span class="math">\(\beta_0\)</span> = -log(1/ep3-1) - log(5)<span class="math">\(\cdot\)</span> E(idu) = -2.342 (int3 in SAS code)</li>
 <li><span class="math">\(\beta_1\)</span> = log(5) = 1.609</li>
+<li>pr(<span class="math">\(M_3=1 \mid\)</span> idu) = expit (<span class="math">\(\beta_0 + \beta_1 \cdot\)</span> idu)</li>
+</ul></li>
 <li>odds of missing if <strong>idu</strong>=0
 <ul>
 <li>exp(<span class="math">\(\beta_0\)</span>) = 0.096</li>
@@ -337,18 +349,30 @@ run;
 <ul>
 <li>exp(<span class="math">\(\beta_0 + \beta_1\)</span>) = 0.481</li>
 </ul></li>
-<li>Note: odds of missing for idu=1 is 5 times the odds of missing for idu=0 status.</li>
+<li>Note: odds of missing for <strong>idu</strong>=1 is 5 times the odds of missing for <strong>idu</strong>=0 status.</li>
 </ul></li>
-<li><strong>Pattern 4</strong>: pr(idu = missing and delta = missing) = expit (<span class="math">\(\beta_0\)</span>)
+<li><strong>Pattern 4</strong>:
 <ul>
-<li><span class="math">\(\beta_0\)</span> = int4 = -log(1/ep4-1) = -2.187</li>
-<li><span class="math">\(\beta_1\)</span> = log(5) = 1.609</li>
-<li>odds of missing
+<li><span class="math">\(M_4\)</span> = indicator for missing in pattern 4</li>
+<li>pr(<span class="math">\(M_2\)</span> = 1 and <span class="math">\(M_3\)</span> = 1) = pr(<span class="math">\(M_4\)</span> = 1) = <span class="math">\(p_4\)</span> = 0.05 (ep4 in SAS code)</li>
+<li>Model for missing data: logit(<span class="math">\(p_4\)</span>) = <span class="math">\(\beta_0\)</span>
 <ul>
-<li>exp(<span class="math">\(\beta_0\)</span>) = 0.053</li>
+<li>Intercept: <span class="math">\(\beta_0\)</span> = -log(1/ep4-1) = -2.944 (int4 in SAS code)</li>
 </ul></li>
 </ul></li>
 </ul>
+<p><span class="math">\(^a\)</span> Back-calculating intercept: <span class="math">\[
+\begin{align*}
+  logit(p) &amp; = \beta_0 + \beta_1 x \\
+  logit(p) - \beta_1 x &amp; = \beta_0 \\
+  \textrm{approximate } x \textrm{ with } E(x) &amp;= \\
+  logit(p) - \beta_1 E(x) &amp; = \beta_0 \\
+  log(p/(1-p)) - \beta_1 E(x) &amp; = \beta_0 \\
+  log( ((1-p)/p)^{-1} ) - \beta_1 E(x) &amp; = \beta_0 \\
+  -log((1-p)/p) - \beta_1 E(x) &amp; = \beta_0 \\
+  -log(1/p - 1) - \beta_1 E(x) &amp; = \beta_0
+\end{align*}
+\]</span></p>
 <pre class="r"><code># Make probability of missing data patterns
 # ..................................................
 # Missing data patterns: a to b are expit(x) = p (probability missing)
