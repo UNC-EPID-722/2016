@@ -7,7 +7,7 @@ bibliography: ../../bib1.bib
 output:
   html_document:
    toc: true
-   toc_depth: 4 
+   toc_depth: 4
    theme: united
    number_sections: true
 ---
@@ -149,18 +149,75 @@ run;
 
 Next step is to make missing data according to four different patterns.
 
-```{r r-part2}
-expit = function(x) { 1/(1+exp(-x)) } # transform x, log(odds) to p= prob
+```{r r-part2a}
+expit = function(x) { 1/(1+exp(-x)) } # transform x, log(odds) to p = prob
 
-#expected values in the full data;
-	eidu = 0.377;	edelta = 0.497;
-# choose marginal distribution for missing data pattern;
-	ep2 = 0.2; ep3 = 0.15; ep4 = 0.05;
-# back-calculate intercepts;
-	int2 = -log(1/ep2-1)-log(5)*edelta
-	int3 = -log(1/ep3-1)-log(5)*eidu
+# Expected values in the full data
+	eidu = mean(a.dat$idu);	edelta = mean(a.dat$delta);
+	eidu; edelta; # check
+	
+# Choose marginal distribution for missing data pattern
+  	ep2 = 0.2; ep3 = 0.15; ep4 = 0.05;
+	
+# Back-calculate intercepts;
+	int2 = -log(1/ep2-1) - log(5)*edelta
+	int3 = -log(1/ep3-1) - log(5)*eidu
 	int4 = -log(1/ep4-1)
+```
 
+
+Set-up for missing data:
+
+* **Pattern 2**:
+    * $M_2$ = indicator for missing in pattern 2
+    * pr($M_2$=1) = $p_2$ = 0.2 (ep2 in SAS code)
+    * Model for missing data:  logit(pr($M_2=1 \mid$ delta)) =  $\beta_0 + \beta_1 \cdot$ delta
+        * Intercept$^a$: $\beta_0$ = -log(1/ep2-1) - log(5)$\cdot$ E(delta) = `r round(int2,3)` (int2 in SAS code)
+        * $\beta_1$ = log(5) = `r round(log(5),3)`
+        * pr($M_2=1 \mid$ delta) = expit ($\beta_0 + \beta_1 \cdot$ delta)
+    * odds of missing if **delta**=0
+        * exp($\beta_0$) = `r round(exp(int2),3)`
+    * odds of missing if **delta**=1
+        * exp($\beta_0 + \beta_1$) = `r round(exp(int2+log(5)),3)`
+    * Note: odds of missing for **delta**=1 is 5 times the odds of missing for **delta**=0 status.
+
+
+* **Pattern 3**: 
+    * $M_3$ = indicator for missing in pattern 3
+    * pr($M_3$=1) = $p_3$ = 0.15 (ep3 in SAS code)
+    * Model for missing data: logit(pr($M_3=1 \mid$ idu)) =  $\beta_0 + \beta_1 \cdot$ idu
+        * Intercept$^a$: $\beta_0$ = -log(1/ep3-1) - log(5)$\cdot$ E(idu) = `r round(int3,3)` (int3 in SAS code)
+        * $\beta_1$ = log(5) = `r round(log(5),3)`
+        * pr($M_3=1 \mid$ idu) = expit ($\beta_0 + \beta_1 \cdot$ idu)
+    * odds of missing if **idu**=0
+        * exp($\beta_0$) = `r round(exp(int3),3)`
+    * odds of missing if **idu**=1
+        * exp($\beta_0 + \beta_1$) = `r round(exp(int3+log(5)),3)`
+    * Note: odds of missing for **idu**=1 is 5 times the odds of missing for **idu**=0 status.
+
+
+* **Pattern 4**: 
+    * $M_4$ = indicator for missing in pattern 4
+    * pr($M_2$ = 1 and $M_3$ = 1) = pr($M_4$ = 1) = $p_4$ = 0.05 (ep4 in SAS code)
+    * Model for missing data: logit($p_4$) =  $\beta_0$
+        * Intercept: $\beta_0$ = -log(1/ep4-1) = `r round(int4,3)` (int4 in SAS code)
+
+$^a$ Back-calculating intercept:
+$$
+\begin{align*}
+  logit(p) & = \beta_0 + \beta_1 x \\
+  logit(p) - \beta_1 x & = \beta_0 \\
+  \textrm{approximate } x \textrm{ with } E(x) &= \\
+  logit(p) - \beta_1 E(x) & = \beta_0 \\
+  log(p/(1-p)) - \beta_1 E(x) & = \beta_0 \\
+  log( ((1-p)/p)^{-1} ) - \beta_1 E(x) & = \beta_0 \\
+  -log((1-p)/p) - \beta_1 E(x) & = \beta_0 \\
+  -log(1/p - 1) - \beta_1 E(x) & = \beta_0
+\end{align*}
+$$
+
+
+```{r r-part2b}
 # Make probability of missing data patterns
 # ..................................................
 # Missing data patterns: a to b are expit(x) = p (probability missing)
@@ -187,10 +244,7 @@ pattern = apply(df.patterns.probs, 1, function(x) {
   sample(c(1:4), size=1, prob=x[1:4], replace=TRUE)
 }) # get one integer from 1 to 4 representing the missing data pattern by probability of occuring
 
-table(pattern) #check
-length(pattern)
-
-# make indicator variables
+# make indicator variables for missing patterns (1 for 1 of 4 missing data patterns per row, rest are 0)
 A = model.matrix(~factor(pattern)-1)
 head(A)
 head(pattern)
@@ -202,8 +256,8 @@ colnames(b.dat)[5:8] = c("pat1", "pat2", "pat3", "pat4")
 head(b.dat)
 
 b.dat = within(b.dat, {
-  idu = ifelse(pat2==1 | pat4==1, NA, idu)
-  delta = ifelse(pat3==1 | pat4==1, NA, delta)
+  idu = ifelse(pat2==1 | pat4==1, NA, idu) # idu is missing in patterns 2 and 4
+  delta = ifelse(pat3==1 | pat4==1, NA, delta) # delta is missing in patterns 3 and 4
 })
 
 b.dat$complete = ifelse(complete.cases(b.dat),1,0)
@@ -236,6 +290,26 @@ var.list = c("delta", "t", "drop", "idu", "white", "age", "cd4", "complete")
 t.1 = CreateTableOne(data=b.dat[,var.list]) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html
 summary(t.1)
 
+rbind(prop.table(table(pattern)),
+      table(pattern)) #check distribution of patterns
+
+```{r r-part3a, echo=FALSE, eval=F}
+# check odds of missing by observed delta status
+miss.delta = with(b.dat, ifelse(is.na(delta),1,0))
+mean(miss.delta)
+table.delta = table(miss.delta, a.dat$delta)
+table.delta
+prop.table(table.delta,2)
+
+# check odds of missing by observed idu status
+miss.idu = with(b.dat, ifelse(is.na(idu),1,0))
+mean(miss.idu)
+table.idu = table(miss.idu, a.dat$idu)
+table.idu
+prop.table(table.idu,2)
+
+table(b.dat$idu)
+
 ```
 
 ## Complete-case Cox model
@@ -267,7 +341,7 @@ summary(s.2)
 
 ### SAS
 
-```{r s-part5, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=F}
+```{r s-part5, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
 libname mle "c:\temp";
 %let dir = c:\temp;
 data b; set mle.b; run;
@@ -309,14 +383,16 @@ round(mipply(imputations, mean, to.matrix = TRUE), 3) # want the values to be th
 # Good way to visualize missing. Not sure how to use cox ph with this.
 ```
 
-```{r r-part5b, eval=T, cache=TRUE}
+```{r r-part5b, eval=T, cache=TRUE, message=FALSE}
 # See http://stats.stackexchange.com/questions/46333/using-multiple-imputation-for-cox-proportional-hazards-then-validating-with-rms
 
 var.list = c("t", "idu", "white", "age", "cd4", "delta", "drop")
 
 imp.b.dat = mice(b.dat[, var.list], m=10, maxit=10,
                  diagnostics=T, seed=50) # note: I set number of imputation data sets to 10 so it runs faster.
+```
 
+```{r r-part5c}
 coxph.mi.out <- with(imp.b.dat, coxph( Surv(t, delta) ~ idu + white + age + cd4))
 
 pool.coxph = pool(coxph.mi.out)

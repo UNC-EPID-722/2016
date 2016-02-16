@@ -167,7 +167,7 @@ data a; set mle.b; run;
 proc phreg data=a noprint;
 	model t*delta(0)=;
 	strata idu;
-	baseline out=b survival=s/method=pl;
+	baseline out=b survival=s / method=pl;
 	output out=c(keep=idu t n) atrisk=n/method=pl;
 *Merge together survival data with numbers at risk;
 proc sort data=b;
@@ -274,13 +274,13 @@ data a; set mle.b; run;
 proc logistic data=a desc noprint; model idu=; output out=n p=num; run;
 proc print data=n(obs=10); run;
 
-proc logistic data=a desc noprint; model idu=white age cd4; output out=d p=d;
+proc logistic data=a desc noprint; model idu=white age cd4; output out=d p=den;
 run;
 
 data mle.c; merge a n d;
-	if idu then w=num/d;
-	else w = (1-num)/(1-d);
-	label n= d=;
+	if idu then w=num/den;
+	else w = (1-num)/(1-den);
+	label num= den=;
 	drop _level_;
 run; quit;
 proc print data=mle.c(obs=10); run;
