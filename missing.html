@@ -80,12 +80,12 @@ img {
 <li><a href="#sas-1"><span class="toc-section-number">0.3.1</span> SAS</a></li>
 <li><a href="#r-1"><span class="toc-section-number">0.3.2</span> R</a></li>
 </ul></li>
-<li><a href="#make-some-data-mar-you-can-skip-this-data-step-at-first"><span class="toc-section-number">0.4</span> Make some data MAR (you can skip this data step at first)</a><ul>
+<li><a href="#make-some-data-mar-you-can-and-perhaps-should-skip-this-data-step-at-first"><span class="toc-section-number">0.4</span> Make some data MAR, you can (and perhaps should) skip this data step at first</a><ul>
 <li><a href="#sas-2"><span class="toc-section-number">0.4.1</span> SAS</a></li>
 <li><a href="#r-2"><span class="toc-section-number">0.4.2</span> R</a></li>
 <li><a href="#r-annotation"><span class="toc-section-number">0.4.3</span> R, annotation</a></li>
 </ul></li>
-<li><a href="#look-at-data-now-with-missingness"><span class="toc-section-number">0.5</span> Look at data, now with missingness</a><ul>
+<li><a href="#look-at-observed-data-now-with-missingness-this-is-what-we-usually-get"><span class="toc-section-number">0.5</span> Look at observed data, now with missingness (this is what we usually get)</a><ul>
 <li><a href="#sas-3"><span class="toc-section-number">0.5.1</span> SAS</a></li>
 <li><a href="#r-3"><span class="toc-section-number">0.5.2</span> R</a></li>
 </ul></li>
@@ -133,6 +133,7 @@ img {
   require(stargazer)
   library(betareg) 
   library(rms)
+  require(optimx) 
   set.seed(123) # set seed so you get same results each time you run.</code></pre>
 </div>
 </div>
@@ -167,6 +168,7 @@ proc export data=mle.a outfile=&quot;c:\temp\hividu15dec15.csv&quot; dbms=csv re
 %let dir = c:\temp;
 data a; set mle.a; run;
 
+* Full data adjusted Cox model (we wish we had the full data);
 proc phreg data=a;
     model t*delta(0)=idu white age cd4/rl ties=efron;
     ods select modelinfo censoredsummary fitstatistics parameterestimates;
@@ -255,15 +257,15 @@ summary(s.1)</code></pre>
 ## Score (logrank) test = 114.8  on 4 df,   p=0</code></pre>
 </div>
 </div>
-<div id="make-some-data-mar-you-can-skip-this-data-step-at-first" class="section level2">
-<h2><span class="header-section-number">0.4</span> Make some data MAR (you can skip this data step at first)</h2>
+<div id="make-some-data-mar-you-can-and-perhaps-should-skip-this-data-step-at-first" class="section level2">
+<h2><span class="header-section-number">0.4</span> Make some data MAR, you can (and perhaps should) skip this data step at first</h2>
 <div id="sas-2" class="section level3">
 <h3><span class="header-section-number">0.4.1</span> SAS</h3>
 <pre class="sas"><code>libname mle &quot;c:\temp&quot;;
 %let dir = c:\temp;
 data a; set mle.a; run;
 
-*Make some data MAR, you can skip this data step at first;
+*Make some data MAR, you can (and perhaps should) skip this data step at first;
 data mle.b; 
     set a;
     call streaminit(1); *initiaize a reproducable pseudorandom number stream;
@@ -462,15 +464,15 @@ table(b.dat$complete)</code></pre>
 ## 539 625</code></pre>
 </div>
 </div>
-<div id="look-at-data-now-with-missingness" class="section level2">
-<h2><span class="header-section-number">0.5</span> Look at data, now with missingness</h2>
+<div id="look-at-observed-data-now-with-missingness-this-is-what-we-usually-get" class="section level2">
+<h2><span class="header-section-number">0.5</span> Look at observed data, now with missingness (this is what we usually get)</h2>
 <div id="sas-3" class="section level3">
 <h3><span class="header-section-number">0.5.1</span> SAS</h3>
 <pre class="sas"><code>libname mle &quot;c:\temp&quot;;
 %let dir = c:\temp;
 data b; set mle.b; run;
 
-*Look at data, now with missingness;
+*Look at observed data, now with missingness (this is what we usually get);
 proc means data=b n nmiss mean sum min max; 
     var delta t drop idu white age cd4 complete;
     title &quot;Time from 12/6/95 to AIDS or death in WIHS&quot;;
@@ -639,7 +641,7 @@ summary(s.2)</code></pre>
 %let dir = c:\temp;
 data b; set mle.b; run;
 
-*MI;
+*MI, assuming multivariate normality (MVN);
 proc mi data=b seed=3 nimpute=100 out=c;
     var white age cd4 delta idu;
     mcmc; *default is chain=single nbiter=200 niter=100 prior=Jeffreys initial=EM;
@@ -815,109 +817,7 @@ run;
 var.list = c(&quot;t&quot;, &quot;idu&quot;, &quot;white&quot;, &quot;age&quot;, &quot;cd4&quot;, &quot;delta&quot;, &quot;drop&quot;)
 
 imp.b.dat = mice(b.dat[, var.list], m=10, maxit=10,
-                 diagnostics=T, seed=50) # note: I set number of imputation data sets to 10 so it runs faster.</code></pre>
-<pre><code>## 
-##  iter imp variable
-##   1   1  idu  delta
-##   1   2  idu  delta
-##   1   3  idu  delta
-##   1   4  idu  delta
-##   1   5  idu  delta
-##   1   6  idu  delta
-##   1   7  idu  delta
-##   1   8  idu  delta
-##   1   9  idu  delta
-##   1   10  idu  delta
-##   2   1  idu  delta
-##   2   2  idu  delta
-##   2   3  idu  delta
-##   2   4  idu  delta
-##   2   5  idu  delta
-##   2   6  idu  delta
-##   2   7  idu  delta
-##   2   8  idu  delta
-##   2   9  idu  delta
-##   2   10  idu  delta
-##   3   1  idu  delta
-##   3   2  idu  delta
-##   3   3  idu  delta
-##   3   4  idu  delta
-##   3   5  idu  delta
-##   3   6  idu  delta
-##   3   7  idu  delta
-##   3   8  idu  delta
-##   3   9  idu  delta
-##   3   10  idu  delta
-##   4   1  idu  delta
-##   4   2  idu  delta
-##   4   3  idu  delta
-##   4   4  idu  delta
-##   4   5  idu  delta
-##   4   6  idu  delta
-##   4   7  idu  delta
-##   4   8  idu  delta
-##   4   9  idu  delta
-##   4   10  idu  delta
-##   5   1  idu  delta
-##   5   2  idu  delta
-##   5   3  idu  delta
-##   5   4  idu  delta
-##   5   5  idu  delta
-##   5   6  idu  delta
-##   5   7  idu  delta
-##   5   8  idu  delta
-##   5   9  idu  delta
-##   5   10  idu  delta
-##   6   1  idu  delta
-##   6   2  idu  delta
-##   6   3  idu  delta
-##   6   4  idu  delta
-##   6   5  idu  delta
-##   6   6  idu  delta
-##   6   7  idu  delta
-##   6   8  idu  delta
-##   6   9  idu  delta
-##   6   10  idu  delta
-##   7   1  idu  delta
-##   7   2  idu  delta
-##   7   3  idu  delta
-##   7   4  idu  delta
-##   7   5  idu  delta
-##   7   6  idu  delta
-##   7   7  idu  delta
-##   7   8  idu  delta
-##   7   9  idu  delta
-##   7   10  idu  delta
-##   8   1  idu  delta
-##   8   2  idu  delta
-##   8   3  idu  delta
-##   8   4  idu  delta
-##   8   5  idu  delta
-##   8   6  idu  delta
-##   8   7  idu  delta
-##   8   8  idu  delta
-##   8   9  idu  delta
-##   8   10  idu  delta
-##   9   1  idu  delta
-##   9   2  idu  delta
-##   9   3  idu  delta
-##   9   4  idu  delta
-##   9   5  idu  delta
-##   9   6  idu  delta
-##   9   7  idu  delta
-##   9   8  idu  delta
-##   9   9  idu  delta
-##   9   10  idu  delta
-##   10   1  idu  delta
-##   10   2  idu  delta
-##   10   3  idu  delta
-##   10   4  idu  delta
-##   10   5  idu  delta
-##   10   6  idu  delta
-##   10   7  idu  delta
-##   10   8  idu  delta
-##   10   9  idu  delta
-##   10   10  idu  delta</code></pre>
+                 diagnostics=T, print=F, seed=50) # note: I set number of imputation data sets to 10 so it runs faster.</code></pre>
 <pre class="r"><code>coxph.mi.out &lt;- with(imp.b.dat, coxph( Surv(t, delta) ~ idu + white + age + cd4))
 
 pool.coxph = pool(coxph.mi.out)
@@ -975,9 +875,51 @@ proc nlmixed data=b qtol=1e-12 gtol=1e-12;
     title &quot;missing data model estimates&quot;;
     run;
 
-proc transpose data=gams out=gams2 prefix=gam; *this makes the set of gamma horizontal;
+proc transpose data=gams out=mle.gams2 prefix=gam; *this makes the set of gamma horizontal;
 run;
 </code></pre>
+<pre><code>## missing data model estimates
+## 
+## The NLMIXED Procedure
+## 
+##                               Parameter Estimates
+##  
+##                        Standard
+## Parameter   Estimate      Error     DF   t Value   Pr &gt; |t|    Alpha      Lower
+## 
+## gamma40      -2.6565     0.7151   1164     -3.71     0.0002     0.05    -4.0596
+## gamma30      -2.8010     0.4383   1164     -6.39     &lt;.0001     0.05    -3.6610
+## gamma20      -2.7199     0.3858   1164     -7.05     &lt;.0001     0.05    -3.4768
+## gamma41      0.02314     0.2816   1164      0.08     0.9345     0.05    -0.5293
+## gamma42     0.000535   0.000484   1164      1.11     0.2692     0.05   -0.00041
+## gamma43     -0.01611    0.01742   1164     -0.93     0.3550     0.05   -0.05028
+## gamma31       0.2341     0.1640   1164      1.43     0.1537     0.05   -0.08762
+## gamma32     4.509E-6   0.000300   1164      0.02     0.9880     0.05   -0.00058
+## gamma33     0.009275    0.01046   1164      0.89     0.3755     0.05   -0.01125
+## gamma34       1.5564     0.1662   1164      9.36     &lt;.0001     0.05     1.2302
+## gamma21       0.1328     0.1485   1164      0.89     0.3713     0.05    -0.1586
+## gamma22     0.000259   0.000265   1164      0.98     0.3291     0.05   -0.00026
+## gamma23     0.004531   0.008894   1164      0.51     0.6105     0.05   -0.01292
+## gamma24       1.8689     0.1688   1164     11.07     &lt;.0001     0.05     1.5377
+## 
+##       Parameter Estimates
+##  
+## Parameter      Upper    Gradient
+## 
+## gamma40      -1.2535    -1.54E-7
+## gamma30      -1.9410    -4.57E-7
+## gamma20      -1.9630    -3.85E-7
+## gamma41       0.5756    -4.79E-9
+## gamma42     0.001486    -0.00011
+## gamma43      0.01805    -3.96E-6
+## gamma31       0.5558    -2.18E-7
+## gamma32     0.000594    -0.00021
+## gamma33      0.02980    -0.00001
+## gamma34       1.8826    -3.21E-7
+## gamma21       0.4242    -1.68E-7
+## gamma22     0.000778    -0.00018
+## gamma23      0.02198    -0.00001
+## gamma24       2.2002    -2.57E-7</code></pre>
 <pre class="r"><code>x.mat = cbind(rep(1,length(b.dat$idu)), b.dat$white, b.dat$cd4, b.dat$age,  b.dat$idu, b.dat$delta) # add an intercept to x matrix
 head(x.mat)</code></pre>
 <pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6]
@@ -1042,12 +984,13 @@ o.logit = optim(par=start.gamma, fn=LL.logistic.reg,
 <h2><span class="header-section-number">0.9</span> Make weights</h2>
 <div id="sas-7" class="section level3">
 <h3><span class="header-section-number">0.9.1</span> SAS</h3>
-<pre class="sas"><code>libname mle &quot;c:\temp&quot;;
+<pre class="sas"><code>
+libname mle &quot;c:\temp&quot;;
 %let dir = c:\temp;
 data b; set mle.b; run;
 
 data mle.b2; set b; 
-    if _N_=1 then set gams2; *this puts horisontal gammas on each record;
+    if _N_=1 then set mle.gams2; *this puts horisontal gammas on each record;
     if pattern=1 then do;
         p1=1-(
         1/(1+exp(-(gam1+gam4*white+gam5*cd4+gam6*age)))+
@@ -1062,6 +1005,15 @@ data mle.b2; set b;
 proc means data=mle.b2 maxdec=4; var p1 w; 
     title &quot;Nonmonotonic IP weights, no constraint&quot;;
     run;</code></pre>
+<pre><code>## Nonmonotonic IP weights, no constraint
+## 
+## The MEANS Procedure
+## 
+## Variable       N            Mean         Std Dev         Minimum         Maximum
+## --------------------------------------------------------------------------------
+## p1          1164          0.5523          0.1944          0.1728          0.8136
+## w           1164          0.9999          1.0568          0.0000          5.7861
+## --------------------------------------------------------------------------------</code></pre>
 </div>
 <div id="r-6" class="section level3">
 <h3><span class="header-section-number">0.9.2</span> R</h3>
@@ -1100,6 +1052,47 @@ proc phreg data=b2 covs;
     *To implement AIPW...;
 
 run; quit; run;</code></pre>
+<pre><code>## Nonmonotonic IP-weighted complete data, no constraint
+## 
+## The PHREG Procedure
+## 
+##         Model Information
+## 
+## Data Set                 WORK.B2 
+## Dependent Variable       t       
+## Censoring Variable       delta   
+## Censoring Value(s)       0       
+## Weight Variable          w       
+## Ties Handling            BRESLOW 
+## 
+## 
+## Summary of the Number of Event and Censored Values
+##  
+##                                      Percent
+##    Total       Event    Censored    Censored
+## 
+##      650         228         422       64.92
+## 
+## 
+##                  Analysis of Maximum Likelihood Estimates
+##  
+##                   Parameter     Standard   StdErr
+## Parameter   DF     Estimate        Error    Ratio   Chi-Square   Pr &gt; ChiSq
+## 
+## idu          1      0.45812      0.13353    1.513      11.7712       0.0006
+## white        1     -0.03092      0.12917    1.482       0.0573       0.8108
+## age          1      0.01327      0.00852    1.558       2.4254       0.1194
+## cd4          1     -0.00157    0.0004167    2.048      14.2045       0.0002
+## 
+##   Analysis of Maximum Likelihood Estimates
+##  
+##               Hazard      95% Hazard Ratio
+## Parameter      Ratio      Confidence Limits
+## 
+## idu            1.581       1.217       2.054
+## white          0.970       0.753       1.249
+## age            1.013       0.997       1.030
+## cd4            0.998       0.998       0.999</code></pre>
 </div>
 <div id="r-7" class="section level3">
 <h3><span class="header-section-number">0.10.2</span> R</h3>
@@ -1144,6 +1137,7 @@ summary(s.3)</code></pre>
 ## white -0.174635614 0.8397630 0.0863914008 -2.021447 4.323354e-02
 ## age    0.009968916 1.0100188 0.0052904566  1.884321 5.952163e-02
 ## cd4   -0.001584309 0.9984169 0.0002043882 -7.751471 9.103829e-15</code></pre>
+<hr />
 <p>Summary of the regression models for full observed data, complete case analysis and weighted regression.</p>
 <pre class="r"><code>stargazer(s.1, s.2,  s.3,
             column.labels=c(&quot;Full data&quot;, &quot;Complete case&quot;,
@@ -1388,7 +1382,8 @@ Observations
 </td>
 </tr>
 </table>
-<p>Summary of MI parameter estimates</p>
+<hr />
+<p>The following estimates are from the regression model using imputed results.</p>
 <pre class="r"><code>summary(pool.coxph)[,1:2]</code></pre>
 <pre><code>##                est           se
 ## idu    0.510315000 0.1093330963
