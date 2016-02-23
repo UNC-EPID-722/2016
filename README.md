@@ -33,6 +33,7 @@
 
 [Lecture 11: Generalizability](http://unc-epid-722.github.io/2016/generalizability.html) -- [.Rmd file](lectures/L11-generalizability/generalizability.Rmd)
 
+[Lecture 12: Missing](http://unc-epid-722.github.io/2016/missing.html) -- [.Rmd file](lectures/L12-missing/missing.Rmd)
 
 ---
 
