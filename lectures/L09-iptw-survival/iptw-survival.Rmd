@@ -449,13 +449,17 @@ proc print data=mle.f(obs=25) noobs;
   df.split.dt$drop = ifelse(last & df.split.dt$drop==1, 1, 0)
   #head(df.split.dt)
   
-  df.split.dt[, `:=` (
-    nm2 = 1 - plogis(predict(glm(drop ~ factor(in.t), family="binomial"))),
-    dn2 = 1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial")))
-              ),
-              by=replicate] 
-  #head(df.split.dt)
+  df.split.dt[, `:=` (nm2 = ifelse(drop==1,
+                                   plogis(predict(glm(drop ~ factor(in.t), family="binomial"))),
+                                   1 - plogis(predict(glm(drop ~ factor(in.t), family="binomial")))
+                                   ),
+                      dn2 = ifelse(drop==1, 
+                                   plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial"))),
+                                   1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial")))
+                                   ),
+                      by=replicate)] 
 
+  
   # 3) create cumulative product of nm2 and dn2 ...................
 
   # see http://stackoverflow.com/questions/11308754/add-multiple-columns-to-r-data-table-in-one-function-call
