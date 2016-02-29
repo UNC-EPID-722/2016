@@ -75,7 +75,7 @@
 
   </style>
 
-  <link href="data:text/css,%2Ereveal%20pre%20%7B%20%20%20%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20margin%2Dbottom%3A%200%3B%20%0A%7D%0A%0A%2Ecodefont%20pre%20%7B%0A%20%20%20%20font%2Dsize%3A%2012px%3B%0A%20%20%20%20line%2Dheight%3A%2010px%3B%0A%7D%0A%0A%0A%2Ecodefont2%20pre%20%7B%0A%20%20%20%20font%2Dsize%3A%2016px%3B%0A%20%20%20%20line%2Dheight%3A%2014px%3B%0A%7D%0A%0A%0A%0A%2F%2A%20%0Asee%20http%3A%2F%2Fstackoverflow%2Ecom%2Fquestions%2F28207912%2Fchange%2Dfont%2Dsizes%2Dwith%2Dstyle%2Dsheets%2Dfor%2Drstudio%2Dpresentation%20%0Aand%0Ahttps%3A%2F%2Fgithub%2Ecom%2Frstudio%2Frstudio%2Fblob%2F44b1b2815b76013d5a2ba6e9a203ab52be7e5d9e%2Fsrc%2Fcpp%2Fsession%2Fresources%2Fpresentation%2Fslides%2Ecss%0A%2A%2F%0A%0Ah2%20%7B%20%0A%20font%2Dsize%3A1%2E2em%3B%20%0A%20color%3A%20black%3B%0A%20margin%2Dtop%3A%20%2E1em%3B%0A%20margin%2Dbottom%3A%200%2E1em%3B%20%0A%7D%0A%0Ah3%20%7B%0A%20%20margin%2Dtop%3A%20%2E1em%3B%0A%20%20margin%2Dbottom%3A%20%2E1em%3B%20%0A%7D" rel="stylesheet" type="text/css" />
+  <link href="data:text/css,%2Ereveal%20pre%20%7B%20%20%20%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20margin%2Dbottom%3A%200%3B%20%0A%7D%0A%0A%2Ecodefont%20pre%20%7B%0A%20%20%20%20font%2Dsize%3A%2012px%3B%0A%20%20%20%20line%2Dheight%3A%2010px%3B%0A%7D%0A%0A%0A%2Ecodefont2%20pre%20%7B%0A%20%20%20%20font%2Dsize%3A%2016px%3B%0A%20%20%20%20line%2Dheight%3A%2014px%3B%0A%7D%0A%0A%0A%0A%2F%2A%20%0Asee%20http%3A%2F%2Fstackoverflow%2Ecom%2Fquestions%2F28207912%2Fchange%2Dfont%2Dsizes%2Dwith%2Dstyle%2Dsheets%2Dfor%2Drstudio%2Dpresentation%20%0Aand%0Ahttps%3A%2F%2Fgithub%2Ecom%2Frstudio%2Frstudio%2Fblob%2F44b1b2815b76013d5a2ba6e9a203ab52be7e5d9e%2Fsrc%2Fcpp%2Fsession%2Fresources%2Fpresentation%2Fslides%2Ecss%0A%2A%2F%0A%0Ah2%20%7B%20%0A%20font%2Dsize%3A1%2E2em%3B%20%0A%20color%3A%20black%3B%0A%20margin%2Dtop%3A%20%2E1em%3B%0A%20margin%2Dbottom%3A%200%2E1em%3B%20%0A%7D%0A%0Ah3%20%7B%0A%20%20margin%2Dtop%3A%20%2E1em%3B%0A%20%20margin%2Dbottom%3A%20%2E1em%3B%20%0A%7D%0A%0Aslide%20%7B%0A%20%20margin%2Dleft%3A%20%2D450px%3B%0A%20%20margin%2Dtop%3A%20%2D500px%3B%0A%20%20padding%3A%2010px%2010px%3B%0A%7D" rel="stylesheet" type="text/css" />
 
 
 </head>
@@ -408,7 +408,7 @@ idut            0.975       0.917       1.035</pre>
 
 <p><a href='https://vonholleunc.shinyapps.io/survival/' title=''><a href='https://vonholleunc.shinyapps.io/survival/' title=''>https://vonholleunc.shinyapps.io/survival/</a></a></p>
 
-</article></slide><slide class=''><hgroup><h2>Nice table of Cox PH model assumptions <span class="cite">(2)</span></h2></hgroup><article  id="nice-table-of-cox-ph-model-assumptions-p502harrell_regression_2015-p502">
+</article></slide><slide class=''><hgroup><h2>Nice table of Cox PH model assumptions <span class="cite">(2)</span> &#8211; optional</h2></hgroup><article  id="nice-table-of-cox-ph-model-assumptions-p502harrell_regression_2015-p502----optional">
 
 <!-- see http://stackoverflow.com/questions/15625990/how-to-set-size-for-local-image-using-knitr-for-markdown-->
 
@@ -643,7 +643,7 @@ p.haz = ggplot(data = d.rev.dt, aes(x=t, y=log(h), group=factor(idu), colour=fac
 
 </article></slide><slide class=''><hgroup><h2>Confounding weights (SAS), 1</h2></hgroup><article  id="confounding-weights-sas-1" class="codefont smaller">
 
-<p>Output the IP weight, \(\displaystyle\frac{Pr(IDU=1)}{Pr(IDU=1 \mid \textbf{C})}\) where \(\textbf{C}\) = vector of covariates including <strong>white</strong>, <strong>age</strong>, <strong>cd4</strong> as confounders. The <strong>n</strong> data set contains the numerator of stabilized IP weight and the <strong>d</strong> data set contains the denominator of the stabilized IP weight.</p>
+<p>Output the stabilized IP weight, \(\displaystyle\frac{Pr(A_i=a)}{Pr(A_i=a \mid \mathbf{C})}\) where \(A\) is the exposure (IDU in this example) and \(\mathbf{C}\) = vector of covariates including <strong>white</strong>, <strong>age</strong>, <strong>cd4</strong> as confounders. The <strong>n</strong> data set contains the numerator of stabilized IP weight and the <strong>d</strong> data set contains the denominator of the stabilized IP weight.</p>
 
 <pre class = 'prettyprint lang-sas'>libname mle &quot;c:\temp&quot;;
 %let dir = c:\temp;
@@ -876,21 +876,21 @@ proc print data=mle.dn2(obs=10); run;</pre>
 
 </article></slide><slide class=''><hgroup><h2>IP-censoring weights (SAS), 5</h2></hgroup><article  id="ip-censoring-weights-sas-5" class="smaller">
 
-<p>Merge the data sets with the numerator part of the censor weight, <strong>dn2</strong>, and the denominator part of the censor weight, <strong>nm2</strong>, by the unique person and time combinations. There are 1164 people and up to five time intervals per person so if there were no drop outs and no censoring then there could be up to 5820 rows in the data set <strong>f</strong>.</p>
+<p>Merge the data sets with the numerator part of the censor weight, <strong>dn2</strong>, and the denominator part of the censor weight, <strong>nm2</strong>, by the unique person and time combinations. There are 1164 people and up to five time intervals per person so if there were no drop outs, no censoring and no events then there could be up to 5820 rows in the data set <strong>f</strong>.</p>
 
 <p>For each person take the product of the weight across all the time intervals. If the person is censored in the time interval then their weight is 0.</p>
 
 <p>\[
-\textrm{ipcw}_{it}^{} = \displaystyle \prod_{q=1}^{t} \displaystyle\frac{ Pr(D_i(q)=0)}{Pr(D_i(q)^{}=0 \mid  D_i(q) \geq q, \textrm{cov}_i^{})}
+\textrm{ipcw}_{it}^{} = \displaystyle\frac{ Pr(D_i &gt; t)}{Pr(D_i &gt; t \mid \textrm{cov}_i^{})} = \displaystyle\prod_{q \leq t} \displaystyle\frac{Pr(D_i(q)=0)}{Pr(D_i(q)=0 \mid \mathbf{cov}_i)}
 \]</p>
 
 <ul>
-<li><p>Notation:</p>
+<li><p>Notation</p>
 
 <ul>
 <li><p>\(D_i(q)\) = drop out status for individual \(i\) at time \(q\) (1=yes, 0=no)</p></li>
 <li><p>\(Pr(D_i(q)=0)\) is &quot;&#8230;marginal proportion who had not dropped out by time \(q\).&quot; <span class="cite">(5)</span></p></li>
-<li><p>\(cov_i\) = covariate values for individual \(i\)</p></li>
+<li><p>\(\mathbf{cov}_i\) = covariate values for individual \(i\) that are common causes of drop out and study outcome for individual \(i\) up to time \(t\).</p></li>
 </ul></li>
 </ul>
 
@@ -909,7 +909,7 @@ data f; merge e nm2 dn2; by id in; retain num den;
     if first.id then do; num=1; den=1; end;
     num=num*nm2;
     den=den*dn2;
-    if _drop then w2=(1-num)/(1-den); else w2=num/den;
+    if _drop then w2=(1-num)/(1-den);  else w2=num/den;
     w3=w*w2;
     label nm2= dn2=;
     run;
