@@ -350,7 +350,7 @@ run;
 proc sort data=nm2; by id in; 
 proc sort data=dn2; by id in; 
 
-data mle.f; merge e nm2 dn2; by id in; retain num den;
+data mle.f; merge e(drop=num den) nm2 dn2; by id in; retain num den;
 	if first.id then do; num=1; den=1; end;
 	num=num*nm2;
 	den=den*dn2;

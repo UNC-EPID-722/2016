@@ -36,6 +36,7 @@ output:
 #  library(rms)
   library(muhaz)
   library(tableone)
+  library(ipw)
   set.seed(123) # set seed so you get same results each time you run.
 ```
 
@@ -156,6 +157,7 @@ plot(s.1, lwd=1.5,
      cex.lab=1, cex.axis=1, cex.main=1, cex.sub=1.5,
      mark.time=F,
      lty=c(1,3), col=col1)
+
 legend(6, 0.2, c("IDU - No", "IDU - Yes") , lty=c(1,3), bty="n", col=col1 ) 
 
 ```
@@ -449,14 +451,10 @@ proc print data=mle.f(obs=25) noobs;
   df.split.dt$drop = ifelse(last & df.split.dt$drop==1, 1, 0)
   #head(df.split.dt)
   
-  df.split.dt[, `:=` (nm2 = ifelse(drop==1,
-                                   plogis(predict(glm(drop ~ factor(in.t), family="binomial"))),
-                                   1 - plogis(predict(glm(drop ~ factor(in.t), family="binomial")))
-                                   ),
-                      dn2 = ifelse(drop==1, 
-                                   plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial"))),
-                                   1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial")))
-                                   ),
+  #assigning the treatment contrasts to in.tf
+
+  df.split.dt[, `:=` (nm2 = 1 - plogis(predict(glm(drop ~ factor(in.t), family="binomial"))),
+                      dn2 = 1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial"))),
                       by=replicate)] 
 
   
@@ -481,6 +479,27 @@ var.list.2 = c("id", "in.t", "out.t", "delta", "drop", "num.do", "den.do", "w2",
 df.split.dt[1:10, var.list.2, with=F]
   
 ```
+
+
+### Double check estimates with ipw package [@vanderwal_ipw_2011]
+
+```{r}
+#### Check analyses with ipw package
+temp.stab <- ipwtm(exposure = drop, family = "binomial",
+                     link="logit",
+                     numerator = ~ factor(in.t),
+                     denominator = ~  factor(in.t) + idu + white + age + cd4, 
+                     id = id, tstart = in.t,
+                     timevar = out.t, type = "first", 
+                     data = df.split.dt)
+
+  #w2.check =  ifelse(df.split.dt$drop==1, 0, temp.stab$ipw.weights)
+  
+  w2.check =  temp.stab$ipw.weights
+  summary(w2.check)
+
+```
+
 
 ### IP-confounding-and-drop-out weighted curves
 
