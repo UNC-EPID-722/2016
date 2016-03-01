@@ -45,7 +45,12 @@
 
 [Day 2 (2016-02-01): g-comp R and SAS review](http://unc-epid-722.github.io/2016/gcomp-R-and-SAS-recitation.html) -- [.Rmd file producing code](recitation/gcomp-R-and-SAS-recitation.Rmd)
 
-[Day 3 (2016-02-08): IPTW R and SAS review](http://unc-epid-722.github.io/2016/iptw-R-and-SAS-recitation.html) -- [.Rmd file](recitation/http://unc-epid-722.github.io/2016/iptw-R-and-SAS-recitation.Rmd)
+[Day 3 (2016-02-08): IPTW R and SAS review](http://unc-epid-722.github.io/2016/iptw-R-and-SAS-recitation.html) -- [.Rmd file](recitation/iptw-R-and-SAS-recitation.Rmd)
+
+**NOTE**: To print off the following ioslides for *Day 5*, use Google Chrome and print to pdf. Otherwise it won't work.
+
+[Day 5 (2016-02-29): Cox PH SAS and R review](http://unc-epid-722.github.io/2016/ipw-coxph-recitation.html) -- [.Rmd file](recitation/ipw-coxph-recitation.Rmd) 
+
 
 
 
