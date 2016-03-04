@@ -21,8 +21,8 @@ bibliography: bib1.bib
 | Tuesday 2/16  | IP-weighted Cox models [@buchanan_worth_2014]                       | Cole              |
 | Thursday 2/18 | Generalizability [@cole_generalizing_2010]             | Cole              |
 | Tuesday 2/23  | Missing data [@greenland_critical_1995]        | Cole              |
-| Thursday 2/25 | Smoothing and splines | Brookhart              |
-| Tuesday 3/1   | Exam preview                       | Brookhart/Cole            |
+| Thursday 2/25 | Discussion-Review 1 (interpreting point estimates) | Brookhart              |
+| Tuesday 3/1   | Discussion-Review 2 (class questions)                       | Brookhart/Cole            |
 | Thursday 3/3  | Exam                        |     |
 | Tuesday 3/8   | Exam review                   | Brookhart/Cole         |
 | Thursday 3/10 | Open Session<sup>1</sup>          | Brookhart/Cole    |
