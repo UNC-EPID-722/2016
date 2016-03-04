@@ -51,7 +51,7 @@
 
 [Day 5 (2016-02-29): Cox PH SAS and R review](http://unc-epid-722.github.io/2016/ipw-coxph-recitation.html) -- [.Rmd file](recitation/ipw-coxph-recitation.Rmd) 
 
-[Lecture review] (http://unc-epid-722.github.io/2016/review.html) -- [.Rmd file](lecture/review.Rmd) 
+[Lecture review] (http://unc-epid-722.github.io/2016/review.html) -- [.Rmd file](lectures/review.Rmd) 
 
 
 
