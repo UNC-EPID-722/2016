@@ -1,0 +1,657 @@
+---
+title: "Maximum Likelihood Estimates"
+author: "UNC EPID 722: Dr. Steve Cole"
+date: "February 2, 2016"
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
+output: 
+  html_document:
+   toc: true
+   toc_depth: 4 
+   theme: united
+   number_sections: true
+---
+
+***NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's programs titled, "program1.15dec15.sas", "program2.15dec15.sas", and "program3.19jan16.sas". R code is adapted to the SAS code and written by Ann Von Holle.***
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+```
+
+## Preliminaries
+
+### Specify packages for R
+
+```{r, echo=T, message=FALSE, warning=FALSE}
+  #install.packages(c("knitr", "foreign", "tableone", "nlme")) # Note: you only need to do this once. then only if you want updates.
+  require(knitr)
+  require(foreign)
+#  require(plyr)
+  require(tableone)
+  require(nlme)
+  require(ggplot2)
+  set.seed(123) # set seed so you get same results each time you run.
+```
+
+```{r, echo=FALSE}
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp'  -ls 80 -ps 60  -nocenter -nodate" # see http://bit.ly/1QB4ZTb
+```
+
+## Program 1: read in hividu.csv data -- will need to correct the path + data handling.
+
+### SAS
+
+```{r s-program1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+
+*Set a directory pointer;
+%LET dir = c:\temp;
+libname mle "c:\temp";
+
+*Read excel data file;
+proc import out=a datafile="&dir\hividu.csv" dbms=csv replace; getnames=yes;
+
+*Make new random id;
+data a; set a; 
+	call streaminit(123);
+	u=rand("uniform");
+proc sort data=a; by u;
+
+*Rename variables;
+data mle.b; set a; by u; * Note: I added a permanent dir to make this word in .Rmd file;
+
+* create delta, t and art variables;
+	if eventtype=0 then do; delta=0; t=t; art=.; end; *Censored w/out ART;
+	if eventtype=1 and dth=0 then do; delta=0; t=taidsdth; art=tarv; end; *Censored w/ART;
+	if eventtype=1 and dth=1 then do; delta=1; t=taidsdth; art=tarv; end; *Event (AIDS or death) w/ART;
+
+* FOLLOWUP NOTE: the following two lines seem redundant. Any reason for setting it up this way?;
+	if eventtype=2 and arv=0 then do; delta=1; t=taidsdth; art=.; end; *Event w/out ART;
+	if eventtype=2 and arv=1 then do; delta=1; t=taidsdth; art=.; end; *Event w/out ART, ART was after AIDS;
+
+	if t>10 then do; *Admin censor at 10 years;
+		t=10; delta=0;
+		if art>10 then art=.;
+	end;
+
+	if t<10 and delta=0 then drop=1; else drop=0;
+	id=_n_;
+	idu=baseidu;
+	white=1-black;
+	age=ageatfda;
+	cd4=cd4nadir;
+	art=round(art, 0.001); *Round times to .001 of a year, or about 8h;
+	t=round(t, 0.001);
+	keep id idu white age cd4 drop delta art t;
+
+*Save as flat ASCII file;
+data _null_; set mle.b;
+	file "&dir\hividu15dec15.dat"; 
+	put id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
+run; quit; run;
+
+proc contents data=mle.b; run;
+proc means data=mle.b; var _numeric_; run;
+
+* Export to .csv for use in R;
+proc export data=mle.b outfile="c:\temp\hividu15dec15.csv" dbms=csv replace; run;
+```
+
+
+### R
+
+Read the data.
+```{r}
+#getwd() # get the working directory
+a = read.csv("../../data/hividu.csv", header=T) # read in data. relative to the working directory go up however many levels and into 'data' folder to read data. 
+#a = read.csv("../data/hividu.csv", header=T) # Ignore. only for local run checking.
+
+# Instead of "../../data/hividu.csv, can specify full path of data location. For example a path could be "c:\temp\hividu.csv"
+
+class(a) # check type of object
+head(a) # default is first six rows of data frame
+colnames(a) = tolower(colnames(a)) # make all column names lower case
+```
+
+Data handling.
+```{r r-program1, eval=F}
+
+a$u = runif(nrow(a)) # new random id
+a = a[order(a$u),] # order by random id
+head(a) # check
+
+a = within(a, {
+  art = round(ifelse(eventtype==1, tarv, NA), 3) # no missing eventtype. round to 3 decimal places
+  delta = ifelse(eventtype==2, 1,
+                 ifelse(eventtype==1 & dth==1, 1,
+                        ifelse(eventtype==1 & dth==0, 0,
+                               ifelse(eventtype==0, 0, NA))))
+  t = round(ifelse(eventtype==0, t, taidsdth), 3) # round to 3 decimal places
+  
+  delta[t>10] = 0 # admin censor at 10 years
+  art[t>10 & art>10] = NA
+  t[t>10] = 10 
+
+  drop = ifelse(t<10 & delta==0, 1, 0)
+  id = 1:nrow(a)
+  idu = baseidu
+  white = 1-black
+  age = ageatfda
+  cd4 = cd4nadir
+  }) # rename variables
+
+summary(a)
+
+keep.vars = c("t", "delta", "art", "drop", "id", "idu", "white", "age", "cd4")
+b = a[,colnames(a) %in% keep.vars]
+
+str(b) # check
+summary(b[,keep.vars]) 
+
+```
+
+## Program 2: Table 1 and Table 2
+
+### Table 1 continuous
+
+#### SAS
+
+by IDU and overall
+
+```{r s-program2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+  
+  *First 20 records;
+  proc print data=a(obs=20) noobs; 
+  	var id idu white age cd4 art drop delta t;
+  	title "First 20 records, WIHS IDU data";
+  
+  *Table 1, continuous;
+  proc sort data=a; by idu;
+  proc means data=a n median q1 q3 maxdec=1; by idu; 
+  	var age cd4;
+  	title "Table 1, continuous variables, by IDU";
+  proc means data=a n median q1 q3 maxdec=1;
+  	var age cd4;
+  	title "Table 1, continuous variables, overall";
+  
+  *Table 1, categorical;
+  proc freq data=a; 
+  	tables white*idu/norow nopercent;
+  	title "Table 1, categorical variables, by IDU";
+  proc freq data=a; 
+  	tables white;
+  	title "Table 1, categorical variables, overall";
+run;
+```
+
+
+#### R
+
+by IDU
+```{r r-program2a}
+b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data created in SAS code above.
+
+names(b) # What are column names in data frame "b"?
+cont.vars = c("age", "cd4")
+t.one = CreateContTable(data=b, vars=cont.vars, strata="idu", test=F) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html or https://rpubs.com/kaz_yos/tableone-ext
+print(t.one, nonnormal=cont.vars)
+```
+
+Overall
+```{r r-program2b}
+t.one.t = CreateContTable(data=b, vars=cont.vars) 
+print(t.one.t, nonnormal=c("age", "cd4"))
+```
+
+Extra. All variables in data set stratified by idu
+```{r r-program2c}
+vars = names(b)[-c(5,6)] # take out 5th and 6th elements, idu and id variables.
+t.1 = CreateTableOne(vars=vars,
+                     strata = c("idu"), 
+                     data = b,
+                     factorVars = c("white", "drop", "delta"),
+                     test=F)
+print(t.1, nonnormal=c("age", "cd4", "t", "art"))
+```
+
+### Table 1 categorical
+
+#### SAS
+
+by IDU and overall
+```{r s-program2b, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+  
+  *Table 1, categorical;
+  proc freq data=a; 
+  	tables white*idu/norow nopercent;
+  	title "Table 1, categorical variables, by IDU";
+  proc freq data=a; 
+  	tables white;
+  	title "Table 1, categorical variables, overall";
+  run;
+```
+
+
+#### R
+
+by IDU
+
+```{r r-program2d}
+names(b) # What are column names in data frame "b"?
+cat.vars = c("white")
+t.one = CreateCatTable(data=b, vars=cat.vars, strata="idu", test=F)
+t.one
+```
+
+Overall
+
+```{r r-program2e}
+cat.vars = c("white")
+t.one.t = CreateCatTable(data=b, vars=cat.vars, test=F)
+t.one.t
+```
+
+
+### Table 2, disposition
+
+#### SAS
+
+```{r s-program2c, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+  *Table 2, disposition;
+  proc freq; tables delta*drop; title "Table 2, disposition";
+  run; quit; run;
+```
+
+#### R
+```{r}
+CreateCatTable(vars = "delta", strata="drop", data = b, test=F)
+```
+
+## Program 3: Maximum likelihood
+
+### Injection drug use by AIDS or death
+
+#### SAS
+```{r s-program3a, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+  *Simplify to a binary outcome, delta;
+  proc freq data=a; 
+  	tables idu*delta;
+  	title "Injection drug use by AIDS or death";
+  run;
+```
+
+#### R
+```{r}
+CreateCatTable(vars = "idu", strata="delta", data = b, test=F)
+```
+
+### ML by logistic
+
+#### SAS
+Note: adding genmod in here as well.
+
+```{r s-program3b, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+  *ML by logistic;
+  proc logistic data=a desc; 
+  	model delta=idu;
+  	ods select modelinfo fitstatistics parameterestimates;
+  	title "ML by logistic procedure";
+  run;
+  
+  * ML by genmod;
+  proc genmod data=a desc; 
+  	model delta=idu/d=b;
+  	ods select modelinfo modelfit parameterestimates;
+  	title "ML by genmod procedure";
+  	run; quit;
+```
+
+#### R
+```{r r-program3b}
+summary(glm(delta ~ idu, family=binomial(link = "logit"), data=b))
+```
+
+### ML by non-linear mixed model
+
+
+#### SAS
+```{r s-program3c, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+*ML by nlmixed;
+proc nlmixed data=a; 
+	parms b0 b1 0;
+	mu=1/(1+exp(-(b0+b1*idu)));
+	logl=delta*log(mu)+(1-delta)*log(1-mu);
+	model delta~general(logl);
+	ods select specifications fitstatistics parameterestimates;
+	title "ML by nlmixed procedure";
+	run; quit;
+```
+
+#### R
+
+Background info for the optim function use
+
+*Logistic regression model*
+
+\[
+  \text{logit }P(Y_i=1|X) = X_i\beta = \beta_0 + \beta_1 \cdot x_{i}
+\]
+
+with Y $\sim Bin(n,p)$ with n=1 and
+
+\[
+  P(Y=y) = {n \choose y} p^y(1-p)^{n-y}
+\]
+
+The log likelihood for the logistic model would be as follows:
+
+  \begin{flalign*}
+    \text{binomial } Likelihood(\beta_0,\beta_1) & = \prod_{i=1}^{n} p_i^{y_i} (1-p_i)^{1-y_i} \\
+    log(Lik(\beta_0,\beta_1)) & = log\left(\prod_{i=1}^{n} p_i^{y_i} (1-p_i)^{1-y_i}\right) \\
+    & = \sum_{i=1}^{n} y_i log(p_i) + (1-y_i) log(1-p_i) \\
+  \end{flalign*}
+
+\noindent also, with the logit link, 
+\[
+ \text{logit(p) =} \beta_0 + \beta_1 x_i \text{ = lp} \text{ and}
+\]
+
+\[
+  \text{p = } (1+exp(-lp))^{-1}
+\]
+
+So the final function to maximize with respect to $\beta_0$ and $\beta_1$ is:
+
+\[
+  \sum_{i=1}^{n}[y_i \cdot log\left((1+exp(-lp))^{-1}\right) + (1-y_i) \cdot log\left(1 - (1+exp(-lp))^{-1}\right)]
+\]
+
+```{r r-program3c}
+# ML for the observed data
+# now set up likelihood function for logistic regression so you can put it in the optim function
+# ##################################################
+
+LL.logistic.reg = function(beta, x, y) {
+  lp = x %*% beta
+  return(-sum(
+    y*(log((1+exp(-lp))^(-1))) + (1-y)*(log(1 - (1+exp(-lp))^(-1)))
+  )
+  ) 
+}
+
+# initial set of parameters
+start.beta = c(0, 1) # arbitrary starting parameters
+
+x.2 = cbind(rep(1,length(b$idu)), b$idu) # add an intercept to x matrix
+
+# minimize the (negative) log-likelihood to get the logit fit
+o.logit = optim(start.beta, LL.logistic.reg,
+                   x = x.2, y = b$delta, 
+                   method = 'BFGS', 
+                   hessian=TRUE) # see http://stats.stackexchange.com/questions/81000/calculate-coefficients-in-a-logistic-regression-with-r
+o.logit$par
+
+# variance: see http://stats.stackexchange.com/questions/27033/in-r-given-an-output-from-optim-with-a-hessian-matrix-how-to-calculate-paramet
+fisher_info = solve(o.logit$hessian)
+prop.sigma = sqrt(diag(fisher_info))
+prop.sigma # se for parameters 
+
+upper = o.logit$par + 1.96*prop.sigma
+lower = o.logit$par - 1.96*prop.sigma
+interval<-data.frame(value = o.logit$par, upper=upper, lower=lower)
+interval
+
+m.1 = glm(delta ~ idu, data=b, family="binomial") # double check
+cbind(coef(m.1), confint(m.1))
+```
+
+```{r r-program3c-plot}
+# Plot likelihood
+# .........................
+
+LL.logistic.reg.rev = function(beta) {
+  lp = x.2 %*% beta
+  return(sum(
+    b$delta*(log((1+exp(-lp))^(-1))) + (1-b$delta)*(log(1 - (1+exp(-lp))^(-1)))
+  )
+  ) 
+}
+
+beta.vals = seq(-2, 4, by=0.1)
+ll.dat.1 = apply(cbind(rep(o.logit$par[1],length(beta.vals)), beta.vals), 1, LL.logistic.reg.rev) # loop through various values for beta and get likelihood, 
+# need to start with the estimated intercept...
+#head(ll.dat.1)
+ll.dat.2 = data.frame(cbind(beta.vals, ll.dat.1))
+#head(ll.dat.2)
+
+# see http://stackoverflow.com/questions/29642867/drawing-a-tangent-to-the-plot-and-finding-the-x-intercept-using-r
+# for plotting tangents
+
+beta.plot.val = o.logit$par[2]
+spl = smooth.spline(ll.dat.2$ll.dat.1 ~ ll.dat.2$beta.vals )
+pred0 = predict(spl, x=beta.plot.val, deriv=0);# pred0
+pred1 <- predict(spl, x=beta.plot.val, deriv=1);# pred1
+
+# see http://docs.ggplot2.org/current/geom_segment.html
+
+ggplot(data.frame(ll.dat.2), aes(x=beta.vals, y=ll.dat.1)) +
+  geom_line() +
+  geom_segment(aes(x=pred0$x-1, y=pred0$y, 
+                   xend=pred0$x+1, yend = pred0$y + pred1$y*1)) +
+  geom_point(aes(x=pred0$x, y=pred0$y)) +
+  ylab("Likelihood") + xlab(expression(beta[1])) + # see http://astrostatistics.psu.edu/su07/R/html/grDevices/html/plotmath.html
+  scale_x_continuous(breaks=c(round(pred1$x,3), c(-2,-1,0,2,3))) +
+  geom_vline(xintercept=pred1$x, lty=3) +
+  theme_bw() +
+  ggtitle(expression(atop("Plot of maximum likelihood values by",  paste(beta[1], " coefficient values for the sample logistic regression model."))))
+```
+
+### Profile ML
+
+#### SAS
+```{r s-program4, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  %let dir=c:\temp;
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+
+  * profile ML;
+  data b; 
+  	set a;
+  	do b1=0 to 1 by .02, .796442;
+  		b1idu=b1*idu;
+  		output;
+  	end;
+  proc sort data=b; 
+  	by b1;
+  run; ods select none; run; *Turn off output;
+  proc genmod data=b desc; 
+  	by b1;
+  	model delta=/d=b offset=b1idu;
+  	ods output modelfit=c;
+  run; ods select all; run; *Turn on output;
+  data d; 
+  	set c;
+  	by b1;
+  	logl=value;
+  	format logl stderr 10.4;
+  	if criterion='Log Likelihood' then output;
+  	keep b1 logl;
+  
+  *plot profile loglikelihood;
+  *Note: left this part out of the R markdown output;
+  * See SAS program titled, "program3.19jan16.sas";
+  
+  *approximate derivatives using cubic splines;
+  proc expand data=d out=e; convert logl=first/observed=(beginning,derivative); id b1;
+  proc expand data=e out=f; convert first=second/observed=(beginning,derivative); id b1;
+  data f; 
+  	set f;
+  	se=sqrt(1/-second);
+  proc print data=f noobs; 
+  	var b1 logl first second se;
+  	title '1st and 2nd approximate derivitives';
+```
+
+
+#### R
+```{r r-program4}
+
+# Profile ML for beta_1
+# ..............................
+
+coef(m.1)[2] # coefficient for beta1 parameter in regression
+
+b1.prep = c(coef(m.1)[2], seq(0, 1, by=0.02))
+#df.3 = expand.grid(df.2[,c("x","y")], b1=b1.prep)
+
+b.3 = cbind(b[rep(1:nrow(b), times=length(b1.prep)),],
+             b1=rep(b1.prep, each=nrow(b))) # see http://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
+
+nrow(b) 
+
+b.3$offset = with(b.3, {b1*idu})
+head(b.3)
+b.3.split = split(b.3, b.3$b1)
+
+glm.3 = lapply(b.3.split, function(z) glm(delta~1, offset=offset, family="binomial", data=z)) # do regression for each unique value of b1. See http://stackoverflow.com/questions/9014308/r-extract-regression-coefficients-from-multiply-regression-via-lapply-command
+#coef(glm.3[[1]]) # checking
+#deviance(glm.3[[1]]) # -2ll
+#logLik(glm.3[[1]]) # ll
+
+glm.3.int = sapply(glm.3, coef) # extract regression coefficients from glm.3 object, just intercepts
+head(glm.3.int)
+#length(glm.3.int) # check
+
+glm.3.ll = sapply(glm.3, logLik) # extract ll from glm.3 object, just intercepts
+head(glm.3.ll)
+
+hess = data.frame(b1 = sort(b1.prep), logl=glm.3.ll)
+
+# add first and second derivatives
+spl = with(hess, smooth.spline(logl ~ b1 ))
+pred0 = predict(spl,  deriv=0); #pred0
+pred1 = predict(spl, deriv=1); #pred1
+pred2 = predict(spl, deriv=2); #pred2
+
+hess$first = pred1$y
+hess$second = pred2$y
+hess$seb1 = with(hess, sqrt(1/-second))
+hess
+```
+
+### Penalized ML, Laplace prior
+
+#### SAS
+```{r s-program5, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  %let dir=c:\temp;
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+
+*penalized ML, laplace prior;
+data a2;
+	set a;
+	m=0; *prior log OR;
+	r=1/8; *prior precision;
+	records=1164;
+proc nlmixed data=a2; 
+	parms b0 b1 0;
+	mu=1/(1+exp(-(b0+b1*idu)));
+	logl=(log(mu)*delta+log(1-mu)*(1-delta))-0.5*r*(b1-m)**2/records;
+	model delta~general(logl);
+	ods select specifications fitstatistics parameterestimates;
+	title "Penalized ML, Laplace prior";
+*NOTE: # records is needed because SAS applies the penalty to each record;
+*WARNING: Disregard  generated  CI;
+run; quit;
+```
+
+#### R
+
+```{r r-program5a}
+LL.logistic.reg.pml = function(beta, x, y, r, m, records) {
+  lp = x %*% beta
+  mu = 1 / (1+exp(-lp))
+  
+  return(-sum(
+    (y*log(mu) + (1-y)*log(1 - mu)) - 0.5*r*(beta[2]-m)^2/records
+  )
+  ) 
+}
+
+# Initial set of parameters
+start.beta = c(0, 1) # Arbitrary starting parameters for beta_0 and beta_1
+
+x.2 = cbind(rep(1,length(b$idu)), b$idu) # add an intercept to x matrix
+
+# minimize the (negative) log-likelihood to get the logit fit
+o.logit = optim(start.beta, LL.logistic.reg.pml,
+                   x = x.2, y = b$delta, r=1/8, m=0, records=1164,
+                   method = 'BFGS', 
+                   hessian=TRUE) # see http://stats.stackexchange.com/questions/81000/calculate-coefficients-in-a-logistic-regression-with-r
+o.logit$par
+
+```
+
+### Penalized ML, near-dogmatic prior
+
+#### SAS
+```{r s-program6, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=TRUE, message=F, warning=FALSE, eval=T}
+  %let dir=c:\temp;
+  libname mle "c:\temp";
+  data a; set mle.b; run;
+
+data a2;
+	set a;
+	m=0; *prior log OR;
+	r=10000; *prior precision;
+	records=1164;
+proc nlmixed data=a2; 
+	parms b0 b1 0;
+	mu=1/(1+exp(-(b0+b1*idu)));
+	logl=(log(mu)*delta+log(1-mu)*(1-delta))-0.5*r*(b1-m)**2/records;
+	model delta~general(logl);
+	ods select specifications fitstatistics parameterestimates;
+	title "Penalized ML, near-dogmatic prior";
+run; quit;
+
+*NOTE: # records is needed because SAS applies the penalty to each record;
+*WARNING: Disregard  generated  CI;
+
+*Time permitting, try some other priors like in Table 2;
+*Also, you can subset the data to make it sparse, then show how penalization helps (comparing against the full data);
+```
+
+#### R
+
+```{r r-program5b}
+# minimize the (negative) log-likelihood to get the logit fit
+o.logit = optim(start.beta, LL.logistic.reg.pml,
+                   x = x.2, y = b$delta, r=1e4, m=0, records=1164,
+                   method = 'BFGS', 
+                   hessian=TRUE) # see http://stats.stackexchange.com/questions/81000/calculate-coefficients-in-a-logistic-regression-with-r
+o.logit$par
+```
+
+
+## Assigned reading
+ 
+ 
+---
+nocite: | 
+  @cole_maximum_2014
+...
