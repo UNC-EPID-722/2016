@@ -1,0 +1,886 @@
+---
+title: "Review for midterm"
+author: "UNC EPID 722"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    number_sections: yes
+    theme: united
+    toc: yes
+    toc_depth: 4
+  word_document: default
+bibliography: ../bib1.bib
+---
+
+**NOTE: Most material either copied or paraphrased from EPID 722 lecture content (with the exception of the 'extra' part at bottom). Compiled by Ann, i.e. blame her for any mistakes (but thank Sydney for helpful edits). **
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=F, results="hide",
+                 warning=FALSE, message=FALSE, comment=NA) # all chunks will follow these specifications unless changed at the chunk.
+```
+
+```{r, echo=FALSE}
+  #install.packages(c("knitr", "foreign", "tableone", "MCMCpack", "ipw", "plyr", "mi", "betareg", "mice", "stargazer", "data.table","epiR")) # Note: you only need to do this once. then only if you want updates. Warning: rms loads a lot of other packages. 
+  
+  library(data.table)
+  library(reshape2)
+  library(survival)
+  library(ggplot2)
+#  library(rms)
+  library(muhaz)
+  library(tableone)
+  require(ipw) 
+  require(plyr)
+  require(survey)
+  require(mi) 
+  require(mice) 
+  require(stargazer)
+  require(knitr)
+  library(epiR) 
+  library(epitools)
+  set.seed(123) # set seed so you get same results each time you run.
+```
+
+
+```{r read}
+# READ in relevant files.
+a.dat = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.
+
+```
+
+# G-computation
+
+## Causal Inference from Multivariable Outcome Models
+
+If all confounders are measured (treatment if exchangeable) and model is correct, then model is estimating an expected value of a counterfactual given covariates
+
+\[ E[Y \mid X=1, C] = E[Y(1) \mid C] \]
+
+\[ E[Y \mid X=0, C] = E[Y(0) \mid C] \]
+
+
+## "G-computation" or "G-formula"
+
+If we have a single categorical covariate, $C$,
+
+$$\begin{align*}
+E[Y(X)] &= \displaystyle\sum_{c}^{} E[ Y(x) \mid C=c ] \cdot Pr(C=c) \\
+ & = \sum_{c}^{} E[Y \mid X=x, C=c] \cdot Pr(C=c) \\
+ & = \sum_{i=1}^n \hat{E}[Y \mid X=x, C=c_i]\frac{1}{n} \\
+\end{align*}
+$$
+
+**In English please?**
+
+Follow these steps to produce estimate above:
+
+1) Fit multivariable model to observed data
+2) Estimate outcome with $x_i$=1 for all observations
+    * Take average of these observations to get E[Y(1)]
+3) Estimate outcome with $x_i$=1 for all observations
+    * Take average of these observations to get E[Y(0)]
+4) Use these estimates from steps 2 and 3 to get risk difference, E[Y(1)] - E[Y(0)], or risk ratio, E[Y(1)]/E[Y(0)]
+
+## Required readings[@snowden_implementation_2011; @petersen_assessing_2006; @rose_rose_2011; @vansteelandt_invited_2011]
+
+# Inverse Propensity Score Weight (IPTW)
+
+## Key assumptions for causal inference 
+
+* No unmeasured confounders / exchangeability
+
+* $Y(1), Y(0)$ are independent of treatment $X$ given the confounders $C$
+
+* $C$ is a set of variables (age, sex, history of GI bleed, etc...)
+
+* Among people with the same values for the confounders, treatment is effectively randomized.
+
+* We could estimate unbiased treatment effects within strata of $C$.
+
+* Also need consistency assumption as described in slides on counterfactuals.  This is needed to link counterfactual outcomes to observed data.  This asserts that the exposure is well-defined or less restrictively one can assume that the different versions of exposure are equivalent.
+
+
+## Key Propensity Score Theory
+
+Propensity score is the probability of receiving treatment given $C$
+
+\[
+PS(C) = Pr(X=1 \mid C)
+\]
+
+If all confounders are measured, Rosenbaum and Rubin [@rosenbaum_central_1983] show
+
+\[
+Y(1), Y(0) \textrm{ are independent of } X \textrm{ given } PS(C)
+\]
+
+**Among people with the same propensity score, treatment is effectively randomized.**
+
+## Estimating the Propensity Score
+
+Propensity scores are not known -- they must be estimated.
+
+
+$$
+\begin{align*}
+  Pr(X=1 \mid C) & = PS(C) \\
+ & = expit(\beta_0 + \beta \mathbf{C}) \\
+ & = expit(\beta_0 + \beta_1C_1 + \beta_2C_2 + \beta_3C_3 + \ldots) \\
+\end{align*}
+$$
+
+
+## Inverse Probability of Treatment Weighting
+
+* Each subject weighted by the inverse of the probability that they received their treatment
+
+* Inverse probability of treatment (IPTW) estimator
+    - Fit a standard regression, but weight by 
+        - $\displaystyle\frac{1}{PS(C)}$, in treated patients
+        - $\displaystyle\frac{1}{1-PS(C)}$, in untreated patients
+        
+
+## IPTW can be used to estimate the average effect of treatment in the population
+
+- Absolute Scale (e.g. risk difference)
+    
+    RD $= E[Y(1) - E(Y(0)]$
+    
+- Relative Scale (e.g., risk ratio)
+    
+    RR = $\displaystyle\frac{E[Y(1)]}{E[Y(0)]}$
+    
+- This contrasts with other treatment effects (treatment effect in the treated):  $RD_{TT} = E[ Y(1) \mid X=1 ] - E[ Y(0) \mid X=1 ]$
+
+## SMR Weight
+
+* Weighting method uses a standardized mortality/morbidity ratio (SMR) weight: 
+    * 1, in the treated 
+    * $\displaystyle\frac{PS(C)}{1-PS(C)}$, propensity odds, in the untreated
+
+* This weighting approach uses the *treated group* as the standard
+
+* Yields the effect of "treatment among the treated."
+
+    * $E[ Y(1) - Y(0) \mid X=1]$
+
+## Required readings [@austin_introduction_2011; @brookhart_propensity_2013; @lunceford_stratification_2004; @rosenbaum_reducing_1984]
+
+# Bootstrapping
+
+## Introduction
+
+* Bootstrap estimation is an approach to estimating standard errors and variances of complex estimators
+* Useful when analytic formula for variances may not be
+known or may not be valid, e.g.,
+    * Variance of an IPTW estimator with estimated weights
+    * Variance of an exposure effect estimated in a stepwise regression model
+    * G-computation estimators
+    * Other two-stage estimators
+
+* Distribution of estimates across bootstrap samples is an approximation of true sampling distribution of parameter
+
+## Non-parametric bootstrap algorithm
+
+1) Estimate sampling distribution of parameter $\hat\alpha$.
+2) Repeat $b$=1 to $B$
+    * $B$ is number of bootstrap samples
+    - Resample *with replacement* $n$ observations (where $n$ is the number of observations in data set)
+    - Compute statistic of interest, $\hat\alpha_b$.
+3) Yields $B$ estimates of the parameter of interest, $\hat\alpha_1, \hat\alpha_2, \cdots, \hat\alpha_B$.
+4) Distribution of $\hat\alpha_1, \hat\alpha_2, \cdots, \hat\alpha_B$ approximates the sampling distribution of the estimator, $\hat\alpha$.
+5) The 95% confidence interval can be obtained by either taking the 2.5th and 97.5th percentiles of these estimates from the bootstrap distribution or taking the original estimate +/- 1.96 times the standard deviation of the bootstrap estimates.
+
+## Required readings [@ahern_estimating_2009; @barker_practical_2005]
+
+# Survival
+
+## Product Limit survival curve
+
+Note: See assigned reading [@cole_survival_2010] for information on estimates. For example, the notation for the  hazard, $h(t)$, is in Appendix A, p2430. Estimates are based on data used in the SAS program for the survival lecture on program5.25jan16.sas, **hividu15dec15.dat**.
+
+First, the Kaplan-Meier estimator for the survival function, $S(t)$:
+
+* Notation
+    * $Y_k$ is the number of individuals who died at each of the ranked times $R_k$.
+    * $N_k$ is the number of individuals at-risk for mortality while under observation at distinct ranked event time $R_k$ for $k = 1, \ldots, D^{\prime}$.
+
+$$
+\begin{align*}
+S^{KM}(t) &= \displaystyle\prod_{k:R_k \leq t}^{} 1-\frac{Y_k}{N_k}
+\end{align*}
+$$
+
+where "the product is taken over all ordered events up to time t".
+
+```{r}
+b = read.csv("c:/temp/hividu15dec15.csv", header=T) # read in data.
+  names(b)
+s.1 = survfit(Surv(t, delta) ~ 1, data=b[b$t<0.04,])
+
+#names(summary(s.1))
+sum.surv = summary(s.1)
+
+d = data.frame(
+  R = sum.surv$time,
+  N = sum.surv$n.risk,
+#  r = 1-sum.surv$surv,
+  S = sum.surv$surv,
+  Y = sum.surv$n.event,
+  n.censor = sum.surv$n.censor
+)
+d$k = 1:nrow(d)
+
+```
+
+**The calculations in these sections below are based on ONLY the first seven time points in the hividu15dec15.dat data set, with time < 0.04 years.**
+
+```{r, results='asis'}
+d.names = c("k", 'R', 'Y', 'N', "S")
+
+kable(d[d.names], col.names=c("Rank k", "Event time $R_k$", "No. of events $Y_k$", "No. at risk $N_k$", "Survival $S^{KM}(t=R_k)$"))
+```
+
+Note that the Kaplan-Meier estimator 'steps at event times and is flat elsewhere.' [@cole_survival_2010].
+
+```{r }
+
+png("c:/temp/splot.png", width=4, height=4, units="in", res=300)
+par(mar=c(4,4,1,1))
+
+plot(s.1, lwd=1.5, 
+     fun = function(y) 1-y ,
+     xlab="Time (years)", 
+     ylab="Cumulative probability = Pr(Event <= t)",
+     ylim=c(0,1),
+     xlim=c(0,0.05),
+#     main="Time from 12/6/95 to AIDS or death in WIHS",
+     cex.lab=1, cex.axis=1, cex.main=1, cex.sub=1.5, 
+     mark.time=T,
+     conf.int=F)
+
+dev.off()
+
+```
+
+[](c:\temp\splot.png)
+
+
+## Hazard
+
+$$
+\begin{align*}
+h_k = \frac{Y_k}{N_k \Delta_k}
+\end{align*}
+$$
+
+where $\Delta_k = R_k - R_{k-1}$ and $R_0=0$ and $R_k$ is observed event time at rank $k$.
+
+The cumulative hazard, $H(t)$ is estimated as $H^{KM}_t = -log(S^{KM}(t))$.
+
+---
+
+Now take the same table as before and calculate the hazard.
+
+```{r}
+d.rev = rbind(c( R=0, N=d$N[1], S=1, Y=0, n.censor=NA, k=0), d) # add a time origin point here.
+
+d.rev$delta.k = c(0,diff(as.matrix(d.rev$R))) # get delta t
+d.rev$h = with(d.rev, Y/(N*delta.k))
+
+```
+
+```{r, results='asis'}
+
+d.names = c("k", 'R', 'Y', 'N', 'delta.k', 'h', "S")
+
+kable(d.rev[d.names], col.names=c("Rank k", 
+                              "Event time $R_k$",
+                              "No. of events $Y_k$", 
+                              "No. at risk $N_k$",
+                              'Time interval $\\Delta_k$', 
+                              "Hazard $h_k$",
+                              "Survival $S^{KM}(t=R_k)$"))
+```
+
+## Interpretation of estimates
+
+* $S(t)$, Survival: probability that the random variable $T$ is greater than some specified time $t$ (p 2426).
+
+* $F(t) = 1-S(t)$, Cumulative probability of outcome: Pr($T \leq t$).
+
+* $h(t)$, hazard: instantaneous **rate** of events at time $t$, with range [0,$\infty$].
+
+## Censoring and Truncation
+
+* **Censoring**: "we do not know the exact time of an event, but we do know the event occurred before or after a known time, or within a given
+interval" (p2423)
+
+* **Truncation**: "we do not observe individuals with event times that are smaller or larger than certain values" (p2423)
+
+## Required reading [@cole_survival_2010]
+
+
+# Inverse probability of censoring weights
+
+## Censoring weights 
+
+* Unstabilized weights [@cole_estimation_2015] and program6.25jan16.sas.
+
+$$
+\textrm{ipcw}_{it}^{} = \displaystyle \prod_{q=1}^{t} \displaystyle\frac{ I(D>q)}{Pr(D(q)^{}=0 \mid  D(q) \geq q, \textrm{cov}_i^{})}
+$$
+
+  * Notation:
+  
+    * $D_i(q)$ = drop out status for individual i at time q (1=yes, 0=no)
+
+    * $I(D>q)$ is an indicator of dropout after time $q$. If $D>q$ then $I(D>q)$ = 1, otherwise 0.
+    
+
+## Required reading [@cole_adjusted_2004]
+
+
+# Cox proportional hazards model
+
+Model (see handout titled, "Cox model notes 15feb16.pdf"):
+
+$$\lambda(t \mid X; \beta) = \lambda_0(t) \times exp(\beta X)$$
+
+Terms in model (with one covariate):
+
+* $\lambda$: rate of event; hazard
+
+* $t$: time to event
+
+* $X$: covariate representing a variable such as gender, treatment, etc...
+
+* $\beta$: parameter indicating the log hazard ratio
+
+* **Model assumption** (see updated program, "program7.17feb16.sas")
+
+
+    * "One of the central assumptions of the Cox model is that the ratios of the hazards defined by levels of the covariates are constant over time." [@buchanan_worth_2014]. 
+    
+    * Test this assumption with visual inspection of log($H(t)$) by $t$ and examine p-value for test of product of covariate of interest, $X$, and time, $t$.
+  
+## Required reading [@buchanan_worth_2014]
+
+# Generalizability
+
+Inverse probability of selection weight (p109 [@cole_generalizing_2010]):
+
+
+
+$$W_i= \begin{cases} \frac{P(S_i=1)}{P(S_i=1 \mid \mathbf{Z}_i)}, & S_i=1 \\ 0, & S_i=0 \ \end{cases} $$
+
+
+where
+
+* $S_i$ in indicator for selection from the target population into the sample of $\sum_{i=1}^n S_i$ patients.
+
+* $\mathbf{Z}$ is the group of discrete or continuous variables describing the composition of the target population.
+
+
+## Required reading [@cole_generalizing_2010]
+
+
+# Missing
+
+| **Assumption** | **Description[@greenland_critical_1995]** | **Mathematical terms$^a$** |
+| --- | --- | --- |
+| Missing completely at random (MCAR) | "For each variable, the observed (nonmissing) values effectively constitute a simple random sample of the values for all study subjects, so that whether one is observed or not for a given variable is independent of any other variable and independent of whether one is observed or not for any other variable." |  $Pr( m \mid y_o, y_m) = Pr(m)$ |
+| --- | --- | --- |
+| Stratified (MCAR) | "...requires only randomness of missing data within levels of completely observed covariates" | $Pr( m \mid y_o, y_m) = Pr(m \mid y_o^{\prime})$, where $y_o^{\prime}$ is completely observed  |
+| --- | --- | --- |
+| Missing at random (MAR) | "Whether a value is missing or not ... does not depend on any unobserved (missing) covariate or outcome value..."  | $Pr( m \mid y_o, y_m) = Pr(m \mid y_o)$ |
+| --- | --- | --- |
+| Missing not at random (MNAR) | "the setting where the missing data are a stratified random sample of the full data, with strata defined by unobserved data" (lecture notes) |
+
+$^a$ See reading and [missingdata.lshtm.ac.uk](missingdata.lshtm.ac.uk), which lists $Pr(M=m \mid y_o, y_m)$ as "... the probability that a set of values are missing given the values taken by the observed [$y_o$] and missing observations [$y_m$]." $M=m$ is a missing value indicator with $M=1$ if missing and $M=0$ if observed.
+
+## Required reading [@greenland_critical_1995]
+
+
+---
+
+# Extra
+
+## Methods summary table
+
+| Method$^a$ | Estimator | Interpretation of effect | Target Population$$^b$$ | Adjust confounders by? | Advantages | Disadvantages | Assumptions |
+| --- | --- | --- | --- | --- | --- | --- |
+| Conditional multivariable model | conditional |  |  | multivariable regression  |  |  |
+| ---
+| G-computation for point measure$^c$ | marginal |   | Total (exposed + unexposed), exposed, unexposed, etc... | weighting |   | |  |
+|  |  |  |  |  |  |  |  |
+| ---
+| IPTW for point measure$^c$ | marginal |   | Total (exposed + unexposed) | weighting |   |    |   |
+|  |  |  |  |  |   | | |
+| 
+|  |  |  |  |  |   | | |
+| 
+
+$^a$ Assuming "positivity, well-defined exposures, correctly specified models, and no unmeasured confounding or selection bias". [@buchanan_worth_2014]
+
+$^b$ Assume that the intervention of interest is some form of binary exposure variable (exposed vs unexposed).
+
+$^c$ These methods are equivalent when a covariate is discrete and the outcome measure is risk [@sato_marginal_2003-1].
+
+## Example of conditioning versus weighting
+
+As an example, look at data set from R titled, [UCBAdmissions](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/UCBAdmissions.html), frequently used as an example of Simpson's paradox. These data are an aggregate of admission status by gender and six of the largest departments at UC Berkeley in 1973. 
+
+**NOTE**: There will be no discussion of the substantive meaning of these calculations below as this is meant only to be a demonstration of numerical properties of odds ratios when accounting for confounding with IPTW and multivariable regression model adjustment. Assume for the sake of the example that the effect of interest is gender of applicant to UCB in 1973, the outcome is odds of admittance and the only confounder is department (A and F, a subset of the six departments).
+
+
+```{r}
+ucb <- UCBAdmissions
+
+ucb.dat = data.frame(ucb)
+
+ucb.dat$fake.ids = 1:nrow(ucb.dat)
+levels(ucb.dat$Admit)
+ucb.dat$Admit = factor(ucb.dat$Admit, levels=c("Rejected", "Admitted")) # change order of factors
+
+wt.dat = svydesign(data=ucb.dat, ids = ~ fake.ids, weights = ~ Freq)
+levels(ucb.dat$Admit)
+
+t.o = svyCreateTableOne(data=wt.dat,
+                     vars=c("Admit"),
+                     strata=c("Gender", "Dept"),
+                     test=F)
+t.o # look at all admit/reject by gender and dept to find which departments have more admit than reject for women. C and E are two.
+
+class(ucb.dat)
+names(ucb.dat)
+
+ucb.dat = subset(ucb.dat, subset=(Dept %in% c("A", "F"))) # restrict to two departments
+ucb.dat$Dept = factor(ucb.dat$Dept) # fix factor issue
+table(ucb.dat$Dept) #check
+
+Admit.bin = ifelse(ucb.dat$Admit=="Admitted", 1, 0)
+Gender.bin = ifelse(ucb.dat$Gender=="Female", 1, 0)
+
+# Crude model
+log.cond.crude = glm(Admit.bin ~ Gender, family = binomial("logit"), weights = Freq, data=ucb.dat)
+summary(log.cond.crude)
+
+# Multivariable conditional model
+log.cond = glm(Admit.bin ~ Gender + Dept, family = binomial("logit"), weights = Freq, data=ucb.dat)
+summary(log.cond)
+
+#  IPTW model
+wts = plogis(predict(glm(Gender.bin ~ Dept, family = binomial("logit"), weights = Freq, data=ucb.dat)))
+w1 = ifelse(Gender.bin==1, 1/wts, 1/(1-wts))
+
+wt.vals = data.frame(unique(cbind.data.frame(w1, Gender=ucb.dat$Gender, Dept=ucb.dat$Dept)))
+wt.vals
+
+ucb.dat.rev = merge(ucb.dat, wt.vals, by=c("Gender", "Dept")) # Add the weight
+ucb.dat.rev = within(ucb.dat.rev, {
+  wts = w1*Freq
+})
+
+log.wt = glm(Admit.bin ~ Gender, family = binomial("logit"), weights = wts, data=ucb.dat.rev) # disregard warning
+
+summary(log.wt)
+```
+
+```{r}
+ucb.dat$fake.ids = 1:nrow(ucb.dat)
+wt.dat = svydesign(data=ucb.dat, ids = ~ fake.ids, weights = ~ Freq)
+class(wt.dat)
+
+t.1 = svyCreateTableOne(data=wt.dat,
+                     vars=c("Admit"),
+                     strata=c("Gender"),
+                     test=F)
+```
+
+Crude effect: proportion admitted by gender.
+
+```{r, results='markup', comment=NA}
+  print(t.1)
+```
+
+Summary of crude gender effect shows women are less likely to be admitted (without accounting for department). 
+
+```{r}
+t.2 = svyCreateTableOne(data=wt.dat,
+                     vars=c("Admit"),
+                     strata=c("Gender", "Dept"),
+                     test=F)
+``` 
+
+
+Proportion admitted by gender and department groups:
+
+```{r, results='markup', comment=NA}
+  t.2
+```
+
+Based on this information, women are more likely to be admitted within each department. Also, the association between gender and admission differs across strata of department.
+
+```{r}
+t.3 = svyCreateTableOne(data=wt.dat,
+                     vars=c("Gender"),
+                     strata=c("Dept"),
+                     test=F)
+
+check.admitbydept = svyCreateTableOne(data=wt.dat,
+                  var="Admit",
+                  strata="Dept",
+                  test=F) # F has very low acceptance rate, below 10 percent.
+
+``` 
+
+
+Distribution of gender or admittance by department:
+
+```{r, results='markup', comment=NA}
+t.3
+
+check.admitbydept
+```
+
+More women apply to Department F, which is much less likely to admit students.
+
+
+### IPW weights
+
+The table with distribution of gender by department demonstrates that department F has a higher proportion female applicants than department A so down-weight female applicants in department F and up-weight female applicants in department A to create a 'pseudo-population' in which the distribution of female and male applicants is the same within (50/50) each department.
+
+* Make weights = 1/Pr(gender $\mid$ dept). 
+
+  * In this example
+  
+      1) find proportion of admitted students of each gender by department, and
+      
+      2) take the inverse of those values to get the weights. Then 
+      
+      
+
+```{r}
+
+t.4 = rbind(t.3$CatTable$A$Gender, t.3$CatTable$F$Gender)
+t.4
+
+t.4$Dept = c("A", "A", "F", "F")
+t.4$weight = with(t.4, 1/(0.01*percent)) # these are the weights for prob of being gender given the department.
+```
+
+```{r, results='markup'}
+  kable(t.4[c("Dept", "level", "freq", "percent", "weight")])
+```
+
+Next, create a pseudo-population where gender distribution is equal in each department by multiplying the observed frequencies by the weights, considered the confounder. In the table below, new.freq = weight * freq.
+
+```{r}
+vals.1 = rep(names(t.2$CatTable),each=2) # twice, one for admit, one for reject
+vals.1
+
+t.2.rev = rbind(t.2$CatTable[[1]]$Admit,
+                t.2$CatTable[[2]]$Admit,
+                t.2$CatTable[[3]]$Admit,
+                t.2$CatTable[[4]]$Admit) # get frequencies of admit/reject by gender
+t.2.rev
+
+t.2.rev$gender.dept = vals.1
+t.2.rev
+
+# reshape freqs from long to wide so there is only one row per unique combo of gender and dept
+t.2.rev.wide = dcast(t.2.rev, gender.dept ~ level, value.var="freq")
+t.2.rev.wide
+
+# add weights to these counts
+t.4$gender.dept = with(t.4, paste0(level, ":", Dept))
+t.5 = merge(t.4[c("gender.dept", "weight")], t.2.rev[c("gender.dept", "level", "freq")], by="gender.dept")
+t.5
+
+t.5$new.freq = with(t.5, weight*freq)
+t.5$gender = substr(t.5$gender.dept, 1, 1)
+t.5$dept = gsub(".*:", "", t.5$gender.dept)
+t.5
+
+```
+
+```{r, results='markup'}
+  kable(t.5[c("gender", "dept", "level", "freq", "weight", "new.freq")])
+```
+
+The new frequencies should reflect a distribution by department that is the same in each gender group and matches the observed overall distribution of department in the total sample.
+
+Observed overall distribution of department in sample:
+
+```{r}
+
+t.5$fake.ids = rep(1:nrow(t.5))
+t.5$admit = t.5$level
+
+t.5.sub = t.5[c("admit", "gender", "dept", "new.freq", "fake.ids")] # Note have to change column name from level to something else.
+
+wt.dat2 = svydesign(data=t.5.sub, ids = ~ fake.ids, weights = ~ new.freq)
+
+check.dept = svyCreateTableOne(data=wt.dat2,
+                  var="dept",
+                  test=F)
+
+check.gendbydept = svyCreateTableOne(data=wt.dat2,
+                  var="dept",
+                  strata="gender",
+                  test=F)
+
+check.deptbygend = svyCreateTableOne(data=wt.dat2,
+                  var="gender",
+                  strata="dept",
+                  test=F)
+
+
+```
+
+```{r, results='markup', comment=NA}
+  check.dept
+```
+
+The distribution of department by gender group using new weighted frequencies (from pseudo-population):
+
+```{r, results='markup', comment=NA}
+  check.gendbydept
+```
+
+Note that the distribution of gender within each department in the newly created population is 50/50.
+
+
+```{r, results='markup', comment=NA}
+  check.deptbygend
+```
+
+Next, after weighting, collapse the counts for gender groups across departments to get the new **marginal** frequencies by gender and the odds of being admitted in each gender group.
+
+```{r}
+
+t.5 = t.5[order(t.5$dept, t.5$level, t.5$gender),] # sort so I can take the last two rows after summing
+t.5
+
+t.6 = data.table(t.5)
+t.6[, new.freq.sum:= cumsum(new.freq), by=c("gender", "level")]
+t.6
+
+
+# reshape freqs from long to wide so there is only one row per unique combo of gender 
+t.2.rev.wide = dcast(t.6[5:8,], gender ~ level, 
+                     value.var="new.freq.sum",
+                      fun.aggregate = sum)
+
+t.2.rev.wide$odds = with(t.2.rev.wide, Admitted/Rejected)
+t.2.rev.wide
+wide = t.2.rev.wide
+colnames(wide)[4] = "odds of admit"
+```
+
+
+```{r, results='markup'}
+  kable(wide)
+```
+
+Taking the ratio of the odds of being admitted for females to males you get and odds ratio of `r t.2.rev.wide$odds[1]/t.2.rev.wide$odds[2]` and the log(odds) of `r log(t.2.rev.wide$odds[1]/t.2.rev.wide$odds[2])`.  The log odds estimate matches that the parameter estimate for the weighted regression in the table in the regression results below.
+
+### G-computation
+
+$$ 
+E[Y(X=x)] = \sum_{c}^{} E[Y \mid X=x, C=c] \cdot Pr(C=c) 
+$$
+
+```{r}
+# data handling here
+## make data set instead of data table
+
+tab.gc = expand.table(UCBAdmissions) # nice function from the epitools package.
+tab.gc = tab.gc[tab.gc$Dept %in% c("A", "F"),]
+tab.gc$Dept = factor(tab.gc$Dept)
+levels(tab.gc$Dept)
+levels(tab.gc$Admit)
+tab.gc$Admit = factor(tab.gc$Admit, levels=c("Rejected", "Admitted"))
+```
+
+1) Make the 'Q-model' using logistic regression to get predicted probabilities of admission by gender and department. You can also derived these from 2 by 2 tables.
+
+```{r, results='markup', echo=FALSE}
+g.1 = glm(Admit ~ Gender*Dept, family=binomial, data=tab.gc)
+coef(summary(g.1))
+```
+
+2) Obtain the probabilities of admission by gender and department from the Q-model above.
+```{r, results='markup', echo=FALSE}
+p.1 = predict(g.1, type="response") # check that model returns probability of admit for each gender and department
+q = unique(cbind(tab.gc, p.1))
+q = q[q$Admit=="Admitted",]; q
+```
+
+Add counts of each department and gender to each row, to be used as weights.
+
+```{r, results='markup'}
+prop.dept = data.frame(with(tab.gc, table(Dept))); prop.dept
+
+colnames(prop.dept) = c("Dept",  "prop.dept");# prop.dept
+
+dat.q = merge(q, prop.dept, by=c("Dept"))
+dat.q$weight.1 = with(dat.q, p.1*prop.dept); dat.q
+```
+
+3) Apply the total population distribution of department (considered confounder in this example) to weight the **female** probabilities of admission within each department.
+
+  * Using the regression model results
+  
+```{r, results='markup', echo=TRUE}
+tab.gc2 = tab.gc
+tab.gc2$Gender="Female"
+g.1.Female = predict(g.1, newdata=tab.gc2, type="response") # get predicted probabilities of admission
+kable(data.frame(table(g.1.Female)))
+p1=mean(g.1.Female); p1
+
+```
+
+  * Using the tables of frequencies, multiply the proportion admit for females by department by the total number of people by department, p.1 * prop.dept = weight.1. Sum weight.1 across department to get the count of admitted females had the entire population been female.
+  
+```{r, results='markup'}
+dat.female = dat.q[dat.q$Gender=="Female",]
+
+dat.f.extra = rbind.fill(dat.female, data.frame(Dept="Total", 
+                                  prop.dept=sum(dat.female$prop.dept),
+                                  weight.1=sum(dat.female$weight.1)))
+```
+
+
+```{r, results='markup'}
+kable(dat.f.extra)
+```
+
+Taking totals, you get the proportion admitted for females: `r dat.f.extra$weight.1[nrow(dat.f.extra)]`  / `r dat.f.extra$prop.dept[nrow(dat.f.extra)]` = `r dat.f.extra$weight.1[nrow(dat.f.extra)] / dat.f.extra$prop.dept[nrow(dat.f.extra)]`.
+
+4)  Apply the total population distribution of department (considered confounder in this example) to weight the **male** probabilities of admission within each department.
+
+  * Using the regression model results
+  
+```{r, results='markup'}
+# 2) Apply total population distribution of covariate (dept) to weight the probability of outcome for males by strata of department
+tab.gc2$Gender="Male"
+g.1.Male = predict(g.1, newdata=tab.gc2,  type="response") # get predicted probabilities of admission
+kable(data.frame(table(g.1.Male)))
+
+p2=mean(g.1.Male); p2
+```
+
+  * Using the tables of frequencies, multiply the proportion admit for males by department by the total number of people by department, p.1 * prop.dept = weight.1. Sum weight.1 across department to get the count of admitted males had the entire population been male.
+  
+```{r, results='markup'}
+dat.male = dat.q[dat.q$Gender=="Male",]
+
+dat.m.extra = rbind.fill(dat.male, data.frame(Dept="Total", 
+                                  prop.dept=sum(dat.male$prop.dept),
+                                  weight.1=sum(dat.male$weight.1)))
+```
+
+```{r, results='markup'}
+kable(dat.m.extra)
+```
+
+Taking totals, you get the proportion admitted for females: `r dat.m.extra$weight.1[nrow(dat.m.extra)]`  / `r dat.m.extra$prop.dept[nrow(dat.m.extra)]` = `r dat.m.extra$weight.1[nrow(dat.m.extra)] / dat.m.extra$prop.dept[nrow(dat.m.extra)]`.
+
+
+5) Use the predicted probabilities to get the odds ratio: effect of all females vs effect of all males having a distribution of the confounder (dept) in the total population.
+
+```{r, results='markup', echo=TRUE}
+or = (p1/(1-p1))/(p2/(1-p2)); or;
+
+log(or) # this matches what we have using the iptw approach.
+```
+
+
+### Stratification of odds ratio of admit (female vs male) by department.
+
+A multivariable logistic regression model with gender and department as covariates and outcome  logit(p=prob of admittance) will provide an estimate similar to a Mantel-Haenszel odds ratio stratified by department.
+
+```{r}
+
+tab1 = expand.table(UCBAdmissions) # nice function from the epitools package.
+tab1.sub = tab1[tab1$Dept %in% c("A", "F"),]
+class(tab1.sub)
+levels(tab1.sub$Admit)
+
+tab1.sub$Admit = factor(tab1.sub$Admit, levels=c("Rejected", "Admitted"))
+
+tab1.sub$Dept = factor(tab1.sub$Dept)
+levels(tab1.sub$Dept)
+
+tab2 = table(tab1.sub)
+tab2
+
+tab2.dat = as.data.frame(tab2); tab2.dat
+tab2.wide = dcast(tab2.dat, Dept + Gender ~  Admit, 
+                     value.var="Freq",
+                      fun.aggregate = sum); tab2.wide
+
+
+e2 = epi.2by2(dat = tab2, method = "cohort.count",
+conf.level = 0.95, units = 100, homogeneity = "breslow.day",
+outcome = "as.columns")
+
+names(e2)
+names(e2$massoc)
+e2$massoc$OR.mh
+e2$massoc$OR.strata.cfield
+
+odds = c(NA, e2$massoc$OR.strata.cfield$est[1], NA,  e2$massoc$OR.strata.cfield$est[2]); odds
+cmh = e2$massoc$OR.mh$est
+  
+tab2.wide$`odds admit`=with(tab2.wide, Admitted/Rejected)
+combine.or.dat = cbind(tab2.wide, `OR, female vs male` = odds); combine.or.dat
+
+combine.or.dat
+```
+
+To calculate the odds of admission for females vs males stratified by department by using the Cochran MH method you can use the following formula:
+
+$$\hat OR = \frac{ \displaystyle \sum_i^{} \frac{ female.admit_i^{} \cdot male.reject_i^{}}{n_i{}^{}}} {\displaystyle \sum_i^{} \frac{female.reject_i^{} \cdot male.admit_i^{}}{n_i^{}}}$$
+
+With these data (below) and stratifying the odds of admission for females vs males by department, you get an adjusted OR of `r round(cmh,4)`. The log of this adjusted odds ratio, `r round(log(cmh),4)` is very close to the estimate for the multivariable regression model including gender and department, `r round(coef(log.cond)[2],4)`.
+
+```{r, results='markup', comment=NA}
+  kable(combine.or.dat)
+```
+
+### Regression results
+
+
+**Model for crude effect regression**: logit ($p_i) = \beta_0 + \beta_1 \times gender_i$, where $p_i = E(Y_i \mid gender_i)$ 
+
+**Model for weighted regression**: logit ($p_i) = \beta_0 + \beta_1^{\prime} \times gender_i$, where $p_i = E(Y_i \mid gender_i)$ (with IPTW weighting in the logistic regression model with weights a function of p = pr(gender $\mid$ department)).
+
+**Model for multivariable conditional regression**: logit($p_i) = \beta_0 + \beta_1 \times gender_i + \beta_2 \times \textrm{department}_i$, where $p_i = E(Y_i \mid department_i, gender_i)$.
+
+
+```{r, results='markup', comment=NA}
+  stargazer(log.cond.crude, log.cond, log.wt, type="text", 
+            title="Parameter estimates for gender effect by type of model",
+            dep.var.labels = c("Admission (yes vs no)"),
+            column.labels = c("Crude", "Conditional", "IP Weighted"),
+            omit.table.layout = "sn",
+            keep=c("GenderFemale"))
+```
+
+The weighted regression gives a marginal gender effect (removing any confounding by department via IPTW) and the multivariable regression gives a gender effect conditional on the department. These effects are different because they are derived from different models.
+
+The **interpretation of the multivariable adjusted (conditional) effect**, from the multivariable logistic regression as noted in the table above would be the odds ratio of admit for women vs men, adjusting for department, is `r round(exp(coef(log.cond)[2]),4)`.
+
+The **interpretation of the weighted effect**, given a logistic regression analysis with IPT weights as noted in the table above, would be the odds ratio of admission for women vs men, in a population with a distribution of departments A and F the same as that of the entire school (considered the population), is `r round(exp(coef(log.wt)[2]),4)`.
+
+The gender effect is not the same across strata. If these results were to be evaluated on a substantive basis the choice of estimate given by the different methods would require careful consideration.
+
+
+# References
