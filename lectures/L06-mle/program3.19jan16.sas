@@ -7,14 +7,12 @@ options nocenter pagesize=60 linesize=80 nodate pageno=1;
 dm log "clear;" continue; dm out "clear;" continue;
 
 *Set a directory pointer;
-*%LET dir = D:\dropbox\Cole\Teaching\EPID722\2016;
-%let dir = c:\temp;
+%LET dir = D:\dropbox\Cole\Teaching\EPID722\2016;
 
 *Read ASCII file;
 data a;
 	infile "&dir\hividu15dec15.dat"; 
 	input id 1-4 idu 6 white 8 age 10-11 cd4 13-16 drop 18 delta 20 @22 art 6.3 @29 t 6.3;
-run;
 
 *Simplify to a binary outcome, delta;
 proc freq data=a; 
@@ -41,7 +39,6 @@ proc nlmixed data=a;
 	model delta~general(logl);
 	ods select specifications fitstatistics parameterestimates;
 	title "ML by nlmixed procedure";
-	run;
 
 *profile ML;
 data b; 
@@ -92,17 +89,13 @@ data a2;
 	m=0; *prior log OR;
 	r=1/8; *prior precision;
 	records=1164;
-	run; quit;
-	proc print data=a2(obs=10); run; * check;
-
 proc nlmixed data=a2; 
 	parms b0 b1 0;
 	mu=1/(1+exp(-(b0+b1*idu)));
-	logl = (log(mu)*delta+log(1-mu)*(1-delta)) - 0.5*r*(b1-m)**2 / records;
+	logl=(log(mu)*delta+log(1-mu)*(1-delta))-0.5*r*(b1-m)**2/records;
 	model delta~general(logl);
 	ods select specifications fitstatistics parameterestimates;
 	title "Penalized ML, Laplace prior";
-	run; quit;
 *NOTE: # records is needed because SAS applies the penalty to each record;
 *WARNING: Disregard  generated  CI;
 
