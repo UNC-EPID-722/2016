@@ -53,6 +53,9 @@
 
 [Lecture review] (http://unc-epid-722.github.io/2016/review.html) -- [.Rmd file](lectures/review.Rmd) 
 
+---
+
+[Data intro](recitation/epid722-data-intro-2016.pdf) -- [.Rnw file](recitation/epid722-data-intro-2016.Rnw)
 
 
 
