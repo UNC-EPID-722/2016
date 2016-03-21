@@ -1,0 +1,343 @@
+% for the preamble see Karl Broman's notes at 12_talks_posters_withnotes.pdf: kbroman.org/Tools4RR and https://kbroman.wordpress.com/2013/10/07/better-looking-latexbeamer-slides/
+
+\documentclass[12pt,t]{beamer}
+\usepackage{graphicx}
+
+\usepackage{pgfpages}
+%\setbeameroption{show notes on second screen}
+%\setbeameroption{show notes}
+\setbeameroption{hide notes}
+%\setbeameroption{show only notes}
+
+\setbeamertemplate{note page}[plain]
+
+% FONTS
+% ------------------------------
+% set font to Helvetica
+% \usepackage[T1]{fontenc}
+% \usepackage[scaled=1]{helvet}
+% \renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+
+\usepackage{fontspec}
+ %setting a font
+%  \setsansfont{TeX Gyre Adventor} % Note: need to use xelatex.exe
+\usefonttheme{professionalfonts}
+\usefonttheme{serif}
+\setmainfont{Arial}
+\setbeamerfont{note page}{family*=pplx,size=\footnotesize} % Palatino for notes
+
+\newcommand\Fontvi{\fontsize{10}{7.2}\selectfont}
+
+\usepackage{booktabs}
+\usepackage{colortbl, xcolor} % need this for ztable colors to work
+
+%Prepare for citations using biblatex
+
+% got from http://tex.stackexchange.com/questions/48023/mimic-bibtex-apalike-with-biblatex-biblatex-apa-broken
+\PassOptionsToPackage{
+        style=numeric,
+        hyperref=true,
+        backend=bibtex,
+        maxbibnames=99,
+        firstinits=true,
+        uniquename=init,
+        maxcitenames=2,
+        parentracker=true,
+        url=false,
+        doi=true,
+        isbn=false,
+        eprint=false,
+        backref=true,
+            }   {biblatex}
+\usepackage{biblatex}
+\addbibresource{bib1.bib}
+
+
+\DeclareFieldFormat{eprint:pmcid}{%
+  PMCID\addcolon\space
+  \ifhyperref
+    {\href{http://www.ncbi.nlm.nih.gov/pmc/articles/#1}{\nolinkurl{#1}}}
+    {\nolinkurl{#1}}}
+\DeclareFieldAlias{eprint:PMC}{eprint:pmcid}
+\DeclareFieldAlias{eprint:PMCID}{eprint:pmcid}
+\DeclareFieldAlias{eprint:pmc}{eprint:pmcid}
+
+
+\usetheme{default}
+\beamertemplatenavigationsymbolsempty 
+\hypersetup{pdfpagemode=UseNone} % don't show bookmarks on initial view
+  
+
+% slide 
+% 
+% \definecolor{foreground}{RGB}{255,255,255} % see http://www.rapidtables.com/web/color/RGB_Color.htm
+% \definecolor{background}{RGB}{24,24,24}
+% \definecolor{title}{RGB}{107,174,214}
+% \definecolor{gray}{RGB}{155,155,155}
+% \definecolor{subtitle}{RGB}{102,255,204}
+% \definecolor{hilight}{RGB}{102,255,204}
+% \definecolor{vhilight}{RGB}{255,111,207}
+% 
+% 
+% % I use those colors, for the titles, subtitle, institute, etc.
+% 
+% \setbeamercolor{titlelike}{fg=title}
+% \setbeamercolor{subtitle}{fg=subtitle}
+% \setbeamercolor{institute}{fg=gray}
+% \setbeamercolor{normal text}{fg=foreground,bg=background}
+
+%This stuff changes the color of bullets in itemize environments and changes nested bullet symbols to en-dashes (???) in gray, and a bit smaller.
+
+\setbeamercolor{item}{fg=foreground} % color of bullets
+\setbeamercolor{subitem}{fg=gray}
+\setbeamercolor{itemize/enumerate subbody}{fg=gray}
+\setbeamertemplate{itemize subitem}{{\textendash}}
+\setbeamerfont{itemize/enumerate subbody}{size=\footnotesize}
+\setbeamerfont{itemize/enumerate subitem}{size=\footnotesize}
+
+% This gives me a slide number in the lower-right, in gray.
+\setbeamertemplate{footline}{%
+    \raisebox{5pt}{\makebox[\paperwidth]{\hfill\makebox[20pt]{\color{gray}
+          \scriptsize\insertframenumber}}}\hspace*{5pt}}
+
+% This adds a bit of space between paragraphs on the notes pages.
+
+\addtobeamertemplate{note page}{\setlength{\parskip}{12pt}}
+
+% Palatino for notes
+\setbeamerfont{note page}{family*=pplx ,size=\footnotesize}
+
+
+\title{Project Data:}
+\subtitle{National Ambulatory Medical Care Survey}
+\author{EPID 722}
+\institute{UNC{\textendash}Chapel Hill}
+
+
+\date{\tt \scriptsize epid722.web.unc.edu}
+
+
+\begin{document}
+
+\titlepage
+
+(Slides adapted from Alan Brookhart.)
+
+
+\begin{frame}{Research Question:}
+\vspace{40pt} 
+
+\bigskip
+
+What is the effect of initiation of moderate- or high-dose statin therapy versus no statin initiation on 10-year CVD endpoints (i.e., CVD hospitalization or all-cause mortality) among adults aged 35-75 years with no clinical history of CVD? 
+
+\end{frame}
+
+
+\begin{frame}{NAMCS: General description}
+
+\begin{itemize}
+  \item National Ambulatory Care Medical Survey
+  \item National Center for Health Statistics (CDC)
+  \item National sample of 20,000 visits/year to office-based physicians
+  \item NHAMCS: emergency/outpatient
+  \item 1995 to present
+\end{itemize}
+
+\note{The National Ambulatory Care Medical Survey is a national survey collecting information on the use of ambulatory medical care services in the United States; it is headed by the CDC. 
+
+Findings are based on a national sample of 20,000 visits per year to office-based physicians.
+
+Data collected annually since 1995 to the present. 
+
+It is designed to collect data on the use and provision of ambulatory care services both in hospital emergency and outpatient departments. 
+}
+\end{frame}
+
+\begin{frame}{NAMCS: Content}
+
+\bigskip
+
+\begin{itemize}
+  \item Data elements
+    \begin{itemize}
+      \item Physician and practice characteristics
+      \item Patient demographics, comorbidities
+      \item Treatment (medications: Multum Lexicon)
+    \end{itemize}
+  \item See patient form (and Data Use Agreement (DUA))
+    \begin{itemize}
+      \item Patient form: \textit{2011\_NAMCS30.pdf}
+      \item Data use agreement: \textit{dua.pdf}
+      \item Additional forms: physician/CHC induction, EMR/workflow)
+      \end{itemize}
+  \item http://www.cdc.gov/nchs/ahcd.htm
+\end{itemize}
+
+\note{Data are obtained on patients, symptoms, physicians, diagnoses, and medications ordered or provided. 
+
+The survey also provides statistics on the demographic characteristics of patients and services provided, including information on diagnostic procedures, patient management, and planned future treatment. 
+
+This link to the CDC website gives more detailed information on the survey. 
+}
+\end{frame}
+
+\begin{frame}{General description of our data}
+
+\bigskip
+
+\begin{itemize}
+  \item 2000-2004 NAMCS data
+  
+  \item Data dictionary posted with relevant variables
+    \begin{itemize}
+      \item title: 722 Project Data Dictionary\_2016.pdf
+      \end{itemize}
+  \item STATIN dataset -- select NAMCS population
+    \begin{itemize}
+      \item Contains 6,521 observations and 16 variables.
+      \item Main treatment variable: NEWUSER
+      \item Outcome: CVD-hospitalization and all-cause mortality
+      \end{itemize}
+  \end{itemize}
+  
+\note{We will be using select data from the 2000-2004 NAMCS surveys. We have restricted our dataset to exclude individuals with prevalent CVD.  
+
+We have posted a data dictionary along with the dataset on Sakai. 
+
+The main exposure variable is NEWUSER, describing statin initiation. 
+
+This does not include time-varying variables. It only includes baseline exposure and covariate and follow-up outcomes. 
+}
+\end{frame}
+
+\begin{frame}{Differences with original NAMCS}
+
+\bigskip
+
+\begin{itemize}
+  \item Selected convenient variables
+
+  \item Calculated/imputed missing variables
+
+  \item Assumed a simple random sample (removed cluster ID, weights)
+
+  \item Assumed new prescription = initiation
+\end{itemize}
+
+\note{Preprocessing for some of the missing data- imputation to remove some of the missing data.}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Obtain SAS data set} % need fragile to show code
+
+\bigskip
+
+\begin{itemize}
+  \item See \textbf{sas-read-url.sas} SAS program on Sakai.
+
+  \item Reads in data from \url{https://epid722.web.unc.edu/2016-data/}
+\end{itemize}
+
+
+<<readchunk, echo=F, cache=FALSE, message=FALSE, warning=FALSE>>=
+require(rms)
+require(xtable)
+require(ztable)
+library(tableone)
+read_chunk('sas-read-url.sas')
+@
+
+<<sasopts, echo=FALSE>>=
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp' -ls 80 -ps 60  -nocenter -nodate" # see http://bit.ly/1QB4ZTb
+@
+
+\tiny
+<<sasread1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='asis', echo=F, message=F, warning=FALSE, eval=T>>=
+@
+
+<<sasread2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='asis', echo=T, message=F, warning=FALSE, eval=F>>=
+@
+
+\end{frame}
+
+\begin{frame}[fragile]{Aside: read data in R}
+\tiny
+
+<<basic-R, echo=T, results='markup', comment=NA, tidy=T>>=
+mydata = read.csv("http://epid722.web.unc.edu/files/2015/11/namcs-class-2016.csv")
+colnames(mydata) = tolower(colnames(mydata))
+t.1=CreateTableOne(data = mydata[,c("age","male","newuser","white","obese","t","delta")],
+               factorVars=c("delta"))
+@
+
+\footnotesize
+
+<<r-table, echo=FALSE, comment=NA>>=
+  t.1
+@
+
+\end{frame}
+
+
+\begin{frame}{Let's take a look...}
+
+\vspace{-1em}
+<<r-read, echo=FALSE, results='asis'>>=
+dat1 = read.csv("c://temp//vars.csv")
+z=ztable(dat1[,c(3,7,8)], size=3)
+print(z, type="latex")
+@
+
+\end{frame}
+
+\begin{frame}{Exposure: \textbf{newuser}}
+
+\vspace{-1em}
+<<r-exp, echo=FALSE, results='asis'>>=
+z=ztable(dat1[,c(3,7,8)], size=3)
+z=addRowColor(z, c(10),"pink")
+print(z, type="latex") #https://cran.r-project.org/web/packages/ztable/vignettes/ztable.html
+
+# NOTE: need to have colortbl package
+
+@
+
+\end{frame}
+    
+    
+
+\begin{frame}{Outcome: \textbf{delta}}
+\Fontvi % make font smaller for this slide
+
+<<r-exp2, echo=FALSE, results='asis'>>=
+z=ztable(dat1[c(4:10),c(3,7,8)], size=3)
+z=addRowColor(z, c(5),"pink")
+print(z, type="latex") #https://cran.r-project.org/web/packages/ztable/vignettes/ztable.html
+@
+
+Values for \textbf{delta}:
+  \begin{itemize}
+    \item[] 0 = 'Administratively censored at 10 years'
+	  \item[] 1 = 'Hospitalization for CVD'
+	  \item[] 2 = 'All-cause mortality'
+	  \item[] 3 = 'Loss to follow-up';
+	 \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Optional Readings}
+
+\bigskip
+
+\textbf{Research Studies using NAMCS}
+
+\nocite{phan_prescribing_2012,solomon_use_2012}
+\printbibliography
+
+\end{frame}
+
+\end{document}
