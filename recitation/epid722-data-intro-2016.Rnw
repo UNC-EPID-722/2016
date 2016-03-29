@@ -256,10 +256,7 @@ sasopts <- "-nosplash -log 'c:\\temp' -ls 80 -ps 60  -nocenter -nodate" # see ht
 @
 
 \tiny
-<<sasread1, engine='sas', engine.path=saspath, engine.opts=sasopts, results='asis', echo=F, message=F, warning=FALSE, eval=T>>=
-@
-
-<<sasread2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='asis', echo=T, message=F, warning=FALSE, eval=F>>=
+<<sasread2, engine='sas', engine.path=saspath, engine.opts=sasopts, results='asis', echo=T, message=F, warning=FALSE, eval=T>>=
 @
 
 \end{frame}
