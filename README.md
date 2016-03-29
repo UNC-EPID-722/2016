@@ -55,8 +55,7 @@
 
 ---
 
-[Data intro](recitation/epid722-data-intro-2016.pdf) -- [.Rnw file](recitation/epid722-data-intro-2016.Rnw)
-
+[Data intro](recitation/epid722-data-intro-2016.pdf) -- [.Rnw file](recitation/epid722-data-intro-2016.Rnw) -- [SAS file to read in data](recitation/sas-read-url.sas)
 
 
 
