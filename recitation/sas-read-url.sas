@@ -4,15 +4,11 @@
 * Investigator: 	
 * Programmer: 		
 * Created on:   	2015/12
-* Last Revision: 	2016/01/06
+* Last Revision: 	2016/03/21
 * Program:      	sas-read-url.sas
 * Output data:		temp data set, dat1
 * Note:				reading url in SAS 9.3 does not work with proc import
 *************************************************************;
-
-*
-##@knitr sasread1
-;
 
 /*
 * Note: this does not run for SAS 9.3. Works in SAS 9.4
@@ -23,10 +19,6 @@ proc import datafile=dat1
      getnames=yes;
 run;
 */
-
-*
-##@knitr sasread2
-;
 
 filename dat1 url "http://epid722.web.unc.edu/files/2015/11/namcs-class-2016.csv";
 
@@ -52,7 +44,6 @@ filename dat1 url "http://epid722.web.unc.edu/files/2015/11/namcs-class-2016.csv
       ;
       run;
       
-
 proc format;
 value newuser	0 = 'not a new user' 1 = 'new user';
 value newusercat 0 = 'not a new user' 1 = 'low potency statin' 2 = 'high potency statin';
@@ -92,13 +83,3 @@ format newuser newuser. newusercat newusercat. delta delta. diabetes diabetes.
 htn htn. hyplipid hyplipid. white white. male male. obese obese. smoke smoke.;
 run; quit;
 
-ods output variables=vars;
-proc contents data=dat1; run;
-
-proc print data=vars; run;
-
-PROC EXPORT DATA= WORK.VARS 
-            OUTFILE= "C:\temp\vars.csv" 
-            DBMS=CSV REPLACE;
-     PUTNAMES=YES;
-RUN;
