@@ -374,29 +374,26 @@ run; quit;
 </div>
 <div id="r-4" class="section level4">
 <h4><span class="header-section-number">0.2.0.2</span> R</h4>
-<pre class="r"><code>b$replicate=0
-b.dt = data.table(b) # Many different ways to do this. Am using data.table package for this task. Can use this approach for bootstrapping later.
-setkey(b.dt, &quot;replicate&quot;)
+<pre class="r"><code>b.dt = data.table(b) # Many different ways to do this. Am using data.table package for this task. 
 
 b.dt[, `:=`(nm = plogis(predict(glm(idu ~ 1, family=&quot;binomial&quot;(link=&quot;logit&quot;)))),
-            dn = plogis(predict(glm(idu ~ white + age + cd4, family=&quot;binomial&quot;(link=&quot;logit&quot;))))),
-     by = replicate][, w1:= ifelse(idu==1, nm/dn, (1-nm)/(1-dn))] # add new columns to the data.table b.dt
+            dn = plogis(predict(glm(idu ~ white + age + cd4, family=&quot;binomial&quot;(link=&quot;logit&quot;)))))][, w1:= ifelse(idu==1, nm/dn, (1-nm)/(1-dn))] # add new columns to the data.table b.dt
 
 head(b.dt) </code></pre>
-<pre><code>##    id idu white age cd4 drop delta   art      t replicate        nm
-## 1:  1   1     0  44 376    0     1    NA  2.245         0 0.3771478
-## 2:  2   1     1  32 392    0     1    NA  1.213         0 0.3771478
-## 3:  3   0     0  44 181    0     0 1.224 10.000         0 0.3771478
-## 4:  4   1     0  35 526    0     1    NA  1.240         0 0.3771478
-## 5:  5   1     1  46 386    0     1    NA  7.871         0 0.3771478
-## 6:  6   0     1  29 285    0     1 2.207  6.593         0 0.3771478
-##           dn        w1
-## 1: 0.5443055 0.6928972
-## 2: 0.2613618 1.4430101
-## 3: 0.5211106 1.3006181
-## 4: 0.3693680 1.0210625
-## 5: 0.5444478 0.6927161
-## 6: 0.2056292 0.7840825</code></pre>
+<pre><code>##    id idu white age cd4 drop delta   art      t        nm        dn
+## 1:  1   1     0  44 376    0     1    NA  2.245 0.3771478 0.5443055
+## 2:  2   1     1  32 392    0     1    NA  1.213 0.3771478 0.2613618
+## 3:  3   0     0  44 181    0     0 1.224 10.000 0.3771478 0.5211106
+## 4:  4   1     0  35 526    0     1    NA  1.240 0.3771478 0.3693680
+## 5:  5   1     1  46 386    0     1    NA  7.871 0.3771478 0.5444478
+## 6:  6   0     1  29 285    0     1 2.207  6.593 0.3771478 0.2056292
+##           w1
+## 1: 0.6928972
+## 2: 1.4430101
+## 3: 1.3006181
+## 4: 1.0210625
+## 5: 0.6927161
+## 6: 0.7840825</code></pre>
 <pre class="r"><code>b.df = as.data.frame(b.dt) # if don't convert back to data frame sometimes extra work required with data handling
 
 summary(b.df[,c(&quot;nm&quot;, &quot;dn&quot;, &quot;w1&quot;)]) # IP confounding weights</code></pre>
@@ -597,53 +594,47 @@ proc print data=mle.f(obs=25) noobs;
 <h4><span class="header-section-number">0.3.1.2</span> R</h4>
 <pre class="r"><code># DROP OUT weights
 
-# 1) Merge quintiles of drop out times by replicate to drop out times of individuals
+# 1) Merge quintiles of drop out times to drop out times of individuals
 # ...................................................................................
-  
-  split.1 = function(i){
-    quint = c(0,10,as.numeric(quantile(b.dt[b.dt$replicate==i &amp; b.dt$drop==1,]$t, 
+  quint = c(0,10,as.numeric(quantile(b.dt[b.dt$drop==1,]$t, 
                                 probs=c(0.20, 0.40, 0.60, 0.80))))
     
-    survSplit(data=b.dt[b.dt$replicate==i,], 
+  df.split = survSplit(data=b.dt, 
               cut=as.numeric(quint), 
               end=&quot;t&quot;, 
               start=&quot;time0&quot;, 
               event=&quot;delta&quot;)
-  }
-  
-  list.split = split.1(0) # Replicate 0 is the observed data.
 
-  df.split &lt;- list.split # Combine all vectors into a data.frame
-  df.split = df.split[order( df.split$id),] # order so I can check in SAS
-  df.split[df.split$replicate==0,][1:10,] # check with results in SAS</code></pre>
-<pre><code>##      id idu white age cd4 drop delta   art       t replicate        nm
-## 1165  1   1     0  44 376    0     0    NA  1.6156         0 0.3771478
-## 2329  1   1     0  44 376    0     1    NA  2.2450         0 0.3771478
-## 1166  2   1     1  32 392    0     1    NA  1.2130         0 0.3771478
-## 1167  3   0     0  44 181    0     0 1.224  1.6156         0 0.3771478
-## 2331  3   0     0  44 181    0     0 1.224  3.4770         0 0.3771478
-## 3495  3   0     0  44 181    0     0 1.224  5.7666         0 0.3771478
-## 4659  3   0     0  44 181    0     0 1.224  7.3840         0 0.3771478
-## 5823  3   0     0  44 181    0     0 1.224 10.0000         0 0.3771478
-## 1168  4   1     0  35 526    0     1    NA  1.2400         0 0.3771478
-## 1169  5   1     1  46 386    0     0    NA  1.6156         0 0.3771478
-##             dn        w1  time0
-## 1165 0.5443055 0.6928972 0.0000
-## 2329 0.5443055 0.6928972 1.6156
-## 1166 0.2613618 1.4430101 0.0000
-## 1167 0.5211106 1.3006181 0.0000
-## 2331 0.5211106 1.3006181 1.6156
-## 3495 0.5211106 1.3006181 3.4770
-## 4659 0.5211106 1.3006181 5.7666
-## 5823 0.5211106 1.3006181 7.3840
-## 1168 0.3693680 1.0210625 0.0000
-## 1169 0.5444478 0.6927161 0.0000</code></pre>
+  df.split = df.split[order(df.split$id),] # order so I can check in SAS
+  df.split[1:10,] # check with results in SAS</code></pre>
+<pre><code>##      id idu white age cd4 drop delta   art       t        nm        dn
+## 1165  1   1     0  44 376    0     0    NA  1.6156 0.3771478 0.5443055
+## 2329  1   1     0  44 376    0     1    NA  2.2450 0.3771478 0.5443055
+## 1166  2   1     1  32 392    0     1    NA  1.2130 0.3771478 0.2613618
+## 1167  3   0     0  44 181    0     0 1.224  1.6156 0.3771478 0.5211106
+## 2331  3   0     0  44 181    0     0 1.224  3.4770 0.3771478 0.5211106
+## 3495  3   0     0  44 181    0     0 1.224  5.7666 0.3771478 0.5211106
+## 4659  3   0     0  44 181    0     0 1.224  7.3840 0.3771478 0.5211106
+## 5823  3   0     0  44 181    0     0 1.224 10.0000 0.3771478 0.5211106
+## 1168  4   1     0  35 526    0     1    NA  1.2400 0.3771478 0.3693680
+## 1169  5   1     1  46 386    0     0    NA  1.6156 0.3771478 0.5444478
+##             w1  time0
+## 1165 0.6928972 0.0000
+## 2329 0.6928972 1.6156
+## 1166 1.4430101 0.0000
+## 1167 1.3006181 0.0000
+## 2331 1.3006181 1.6156
+## 3495 1.3006181 3.4770
+## 4659 1.3006181 5.7666
+## 5823 1.3006181 7.3840
+## 1168 1.0210625 0.0000
+## 1169 0.6927161 0.0000</code></pre>
 <pre class="r"><code>  colnames(df.split)[which(colnames(df.split) %in% c(&quot;time0&quot;,&quot;t&quot;))] = c(&quot;out.t&quot;, &quot;in.t&quot;)
   df.split.dt = data.table(df.split)
-  setkey(df.split.dt, &quot;replicate&quot;, &quot;id&quot;, &quot;in.t&quot;)
+  setkey(df.split.dt, &quot;id&quot;, &quot;in.t&quot;)
   
-#  summary(df.split[df.split$replicate==0 ,]$delta) # check with results in SAS
-#  summary(df.split.dt[df.split.dt$replicate==0 ,]$delta) # check with results in SAS
+#  summary(df.split$delta) # check with results in SAS
+#  summary(df.split.dt$delta) # check with results in SAS
 #  head(df.split.dt)
   
   # 2) drop out numerator model................
@@ -655,29 +646,29 @@ proc print data=mle.f(obs=25) noobs;
   #assigning the treatment contrasts to in.tf
 
   df.split.dt[, `:=` (nm2 = 1 - plogis(predict(glm(drop ~ factor(in.t), family=&quot;binomial&quot;))),
-                      dn2 = 1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family=&quot;binomial&quot;))),
-                      by=replicate)] 
+                      dn2 = 1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family=&quot;binomial&quot;))))] 
 
   
   # 3) create cumulative product of nm2 and dn2 ...................
 
   # see http://stackoverflow.com/questions/11308754/add-multiple-columns-to-r-data-table-in-one-function-call
-  df.split.dt[, num.do:= cumprod(nm2), by=list(replicate, id)][, den.do:=cumprod(dn2), by=list(replicate, id)] 
+  df.split.dt[, num.do:= cumprod(nm2), by=list(id)][, den.do:=cumprod(dn2), by=list(id)]
+  
   head(df.split.dt)</code></pre>
-<pre><code>##    id idu white age cd4 drop delta   art  out.t replicate        nm
-## 1:  1   1     0  44 376    0     0    NA 1.6156         0 0.3771478
-## 2:  1   1     0  44 376    0     1    NA 2.2450         0 0.3771478
-## 3:  2   1     1  32 392    0     1    NA 1.2130         0 0.3771478
-## 4:  3   0     0  44 181    0     0 1.224 1.6156         0 0.3771478
-## 5:  3   0     0  44 181    0     0 1.224 3.4770         0 0.3771478
-## 6:  3   0     0  44 181    0     0 1.224 5.7666         0 0.3771478
-##           dn        w1   in.t       nm2       dn2 by    num.do    den.do
-## 1: 0.5443055 0.6928972 0.0000 0.9776632 0.9896079  0 0.9776632 0.9896079
-## 2: 0.5443055 0.6928972 1.6156 0.9724972 0.9877205  0 0.9507748 0.9774560
-## 3: 0.2613618 1.4430101 0.0000 0.9776632 0.9816421  0 0.9776632 0.9816421
-## 4: 0.5211106 1.3006181 0.0000 0.9776632 0.9838731  0 0.9776632 0.9838731
-## 5: 0.5211106 1.3006181 1.6156 0.9724972 0.9809642  0 0.9507748 0.9651443
-## 6: 0.5211106 1.3006181 3.4770 0.9678663 0.9780547  0 0.9202229 0.9439639</code></pre>
+<pre><code>##    id idu white age cd4 drop delta   art  out.t        nm        dn
+## 1:  1   1     0  44 376    0     0    NA 1.6156 0.3771478 0.5443055
+## 2:  1   1     0  44 376    0     1    NA 2.2450 0.3771478 0.5443055
+## 3:  2   1     1  32 392    0     1    NA 1.2130 0.3771478 0.2613618
+## 4:  3   0     0  44 181    0     0 1.224 1.6156 0.3771478 0.5211106
+## 5:  3   0     0  44 181    0     0 1.224 3.4770 0.3771478 0.5211106
+## 6:  3   0     0  44 181    0     0 1.224 5.7666 0.3771478 0.5211106
+##           w1   in.t       nm2       dn2    num.do    den.do
+## 1: 0.6928972 0.0000 0.9776632 0.9896079 0.9776632 0.9896079
+## 2: 0.6928972 1.6156 0.9724972 0.9877205 0.9507748 0.9774560
+## 3: 1.4430101 0.0000 0.9776632 0.9816421 0.9776632 0.9816421
+## 4: 1.3006181 0.0000 0.9776632 0.9838731 0.9776632 0.9838731
+## 5: 1.3006181 1.6156 0.9724972 0.9809642 0.9507748 0.9651443
+## 6: 1.3006181 3.4770 0.9678663 0.9780547 0.9202229 0.9439639</code></pre>
 <pre class="r"><code>  first &lt;- with(df.split.dt, c(TRUE, diff(id) !=0)) #first id for each subject
   last &lt;- c(first[-1], TRUE) #last id
 
@@ -687,7 +678,7 @@ proc print data=mle.f(obs=25) noobs;
   })
   
   # table of weights (for observed sample)
-with(df.split.dt, summary(df.split.dt[replicate==0, c(&quot;num.do&quot;, &quot;den.do&quot;, &quot;w2&quot;, &quot;w3&quot;), with=F])) #these also match the SAS output.</code></pre>
+with(df.split.dt, summary(df.split.dt[, c(&quot;num.do&quot;, &quot;den.do&quot;, &quot;w2&quot;, &quot;w3&quot;), with=F])) #these also match the SAS output.</code></pre>
 <pre><code>##      num.do           den.do             w2               w3        
 ##  Min.   :0.8420   Min.   :0.4948   Min.   :0.3540   Min.   :0.2956  
 ##  1st Qu.:0.8836   1st Qu.:0.8974   1st Qu.:0.9815   1st Qu.:0.7830  
