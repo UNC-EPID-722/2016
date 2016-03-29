@@ -369,26 +369,21 @@ proc means data=mle.f;
 
 ```{r r-part5}
 # Set up the data frame with counting process style data
-b$replicate=0
 b.dt = data.table(b)
+
 # try to get quantiles as close to SAS as possible
 # documentation for quantile function in R says type 3
 quantile(b.dt[b.dt$drop==1, with=T]$t, probs=c(0.20, 0.40, 0.60, 0.80), type=3) # check these quantiles with SAS. Close.
 
-# function that can be used with replicates if you bootstrap. no boostrap in this example.
-split.1 = function(i){
-    quint = c(0, max(b$t), 
-              as.numeric(quantile(b.dt[b.dt$replicate==i & 
-                                         b.dt$drop==1, with=T]$t,
-                                  probs=c(0.20, 0.40, 0.60, 0.80), type=3)))
-    survSplit(data=b.dt[b.dt$replicate==i,], 
+quint = c(0, max(b$t), 
+          as.numeric(quantile(b.dt[b.dt$drop==1, with=T]$t,
+                                   probs=c(0.20, 0.40, 0.60, 0.80), type=3)))
+
+split.dat = survSplit(data=b.dt,
               cut=as.numeric(quint), 
               end="t", 
               start="time0", 
               event="delta") #survSplit function from the survival package will create a counting process style data frame for you.
-  }
-
-split.dat = split.1(0) # Replicate 0 is the observed data.
 
 # IMPORTANT: Fix the drop variable. Only want the drop status (if =1) to show at last record
 split.dat = split.dat[order(split.dat$id),] # order so I can check in SAS
@@ -397,7 +392,7 @@ last <- c(first[-1], TRUE) #last id
 split.dat$drop.rev = ifelse(last & split.dat$drop==1, 1, 0) 
 table(split.dat$drop.rev) # now matches 127 drops in SAS data
 
-split.dat[split.dat$replicate==0,][1:10,] # check results
+split.dat[1:10,] # check results
 
 # Use the reconfigured data to get censoring weights from ipw package.
 

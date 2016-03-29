@@ -262,13 +262,10 @@ run; quit;
 
 ```{r r-part4}
 
-b$replicate=0
-b.dt = data.table(b) # Many different ways to do this. Am using data.table package for this task. Can use this approach for bootstrapping later.
-setkey(b.dt, "replicate")
+b.dt = data.table(b) # Many different ways to do this. Am using data.table package for this task. 
 
 b.dt[, `:=`(nm = plogis(predict(glm(idu ~ 1, family="binomial"(link="logit")))),
-            dn = plogis(predict(glm(idu ~ white + age + cd4, family="binomial"(link="logit"))))),
-     by = replicate][, w1:= ifelse(idu==1, nm/dn, (1-nm)/(1-dn))] # add new columns to the data.table b.dt
+            dn = plogis(predict(glm(idu ~ white + age + cd4, family="binomial"(link="logit")))))][, w1:= ifelse(idu==1, nm/dn, (1-nm)/(1-dn))] # add new columns to the data.table b.dt
 
 head(b.dt) 
 b.df = as.data.frame(b.dt) # if don't convert back to data frame sometimes extra work required with data handling
@@ -417,32 +414,26 @@ proc print data=mle.f(obs=25) noobs;
  
 # DROP OUT weights
 
-# 1) Merge quintiles of drop out times by replicate to drop out times of individuals
+# 1) Merge quintiles of drop out times to drop out times of individuals
 # ...................................................................................
-  
-  split.1 = function(i){
-    quint = c(0,10,as.numeric(quantile(b.dt[b.dt$replicate==i & b.dt$drop==1,]$t, 
+  quint = c(0,10,as.numeric(quantile(b.dt[b.dt$drop==1,]$t, 
                                 probs=c(0.20, 0.40, 0.60, 0.80))))
     
-    survSplit(data=b.dt[b.dt$replicate==i,], 
+  df.split = survSplit(data=b.dt, 
               cut=as.numeric(quint), 
               end="t", 
               start="time0", 
               event="delta")
-  }
-  
-  list.split = split.1(0) # Replicate 0 is the observed data.
 
-  df.split <- list.split # Combine all vectors into a data.frame
-  df.split = df.split[order( df.split$id),] # order so I can check in SAS
-  df.split[df.split$replicate==0,][1:10,] # check with results in SAS
+  df.split = df.split[order(df.split$id),] # order so I can check in SAS
+  df.split[1:10,] # check with results in SAS
 
   colnames(df.split)[which(colnames(df.split) %in% c("time0","t"))] = c("out.t", "in.t")
   df.split.dt = data.table(df.split)
-  setkey(df.split.dt, "replicate", "id", "in.t")
+  setkey(df.split.dt, "id", "in.t")
   
-#  summary(df.split[df.split$replicate==0 ,]$delta) # check with results in SAS
-#  summary(df.split.dt[df.split.dt$replicate==0 ,]$delta) # check with results in SAS
+#  summary(df.split$delta) # check with results in SAS
+#  summary(df.split.dt$delta) # check with results in SAS
 #  head(df.split.dt)
   
   # 2) drop out numerator model................
@@ -454,14 +445,14 @@ proc print data=mle.f(obs=25) noobs;
   #assigning the treatment contrasts to in.tf
 
   df.split.dt[, `:=` (nm2 = 1 - plogis(predict(glm(drop ~ factor(in.t), family="binomial"))),
-                      dn2 = 1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial"))),
-                      by=replicate)] 
+                      dn2 = 1 - plogis(predict(glm(drop ~ factor(in.t) + idu + white + age + cd4, family="binomial"))))] 
 
   
   # 3) create cumulative product of nm2 and dn2 ...................
 
   # see http://stackoverflow.com/questions/11308754/add-multiple-columns-to-r-data-table-in-one-function-call
-  df.split.dt[, num.do:= cumprod(nm2), by=list(replicate, id)][, den.do:=cumprod(dn2), by=list(replicate, id)] 
+  df.split.dt[, num.do:= cumprod(nm2), by=list(id)][, den.do:=cumprod(dn2), by=list(id)]
+  
   head(df.split.dt)
   
   first <- with(df.split.dt, c(TRUE, diff(id) !=0)) #first id for each subject
@@ -473,7 +464,7 @@ proc print data=mle.f(obs=25) noobs;
   })
   
   # table of weights (for observed sample)
-with(df.split.dt, summary(df.split.dt[replicate==0, c("num.do", "den.do", "w2", "w3"), with=F])) #these also match the SAS output.
+with(df.split.dt, summary(df.split.dt[, c("num.do", "den.do", "w2", "w3"), with=F])) #these also match the SAS output.
 
 var.list.2 = c("id", "in.t", "out.t", "delta", "drop", "num.do", "den.do", "w2", "w3")
 df.split.dt[1:10, var.list.2, with=F]
