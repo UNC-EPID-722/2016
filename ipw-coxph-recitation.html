@@ -121,8 +121,8 @@ proc export data=mle.b outfile=&quot;c:\temp\hividu15dec15.csv&quot; dbms=csv re
 
 <p>Read the data (created in the SAS program above).</p>
 
-<pre class = 'prettyprint lang-r'>#getwd() # get the working directory
-b = read.csv(&quot;c:/temp/hividu15dec15.csv&quot;, header=T) # read in data.</pre>
+<pre class = 'prettyprint lang-r'># getwd() # get the working directory
+b = read.csv(&quot;c:/temp/hividu15dec15.csv&quot;, header = T)  # read in data.</pre>
 
 </article></slide><slide class='segue dark nobackground'><hgroup class = 'auto-fadein'><h2>Look at data</h2></hgroup><article  id="look-at-data">
 
@@ -158,8 +158,8 @@ cd4         1164     393.5515464       458094.00               0         1933.00
 
 <pre class = 'prettyprint lang-r'>var.list = c(&quot;delta&quot;, &quot;t&quot;, &quot;drop&quot;, &quot;idu&quot;, &quot;white&quot;, &quot;age&quot;, &quot;cd4&quot;)
 
-t.1 = CreateTableOne(data=b[,var.list]) # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html
-print(t.1, nonnormal=var.list)</pre>
+t.1 = CreateTableOne(data = b[, var.list])  # see https://cran.r-project.org/web/packages/tableone/vignettes/introduction.html
+print(t.1, nonnormal = var.list)</pre>
 
 <pre >                      
                        Overall                
@@ -279,7 +279,7 @@ idu             1.719       1.460       2.025</pre>
 
 </article></slide><slide class=''><hgroup><h2>Crude Cox model </h2><h3> R</h3></hgroup><article  id="crude-cox-model-r">
 
-<pre class = 'prettyprint lang-r'>s.1 = coxph(Surv(t, delta) ~ idu, data=b, ties = &quot;efron&quot;)
+<pre class = 'prettyprint lang-r'>s.1 = coxph(Surv(t, delta) ~ idu, data = b, ties = &quot;efron&quot;)
 coef(summary(s.1))</pre>
 
 <pre >         coef exp(coef)   se(coef)        z     Pr(&gt;|z|)
@@ -327,7 +327,8 @@ cd4             0.998       0.998       0.999</pre>
 
 </article></slide><slide class=''><hgroup><h2>Adjusted Cox model </h2><h3> R</h3></hgroup><article  id="adjusted-cox-model-r">
 
-<pre class = 'prettyprint lang-r'>s.2 = update(s.1, formula = Surv(t, delta) ~ idu + age + white + cd4) # add confounder to crude model in s.1
+<pre class = 'prettyprint lang-r'>s.2 = update(s.1, formula = Surv(t, delta) ~ idu + age + white + 
+    cd4)  # add confounder to crude model in s.1
 coef(summary(s.2))</pre>
 
 <pre >              coef exp(coef)     se(coef)         z     Pr(&gt;|z|)
@@ -338,7 +339,7 @@ cd4   -0.001584309 0.9984169 0.0002043882 -7.751471 9.103829e-15</pre>
 
 </article></slide><slide class='segue dark nobackground'><hgroup class = 'auto-fadein'><h2>Check proportional hazards assumption</h2></hgroup><article  id="check-proportional-hazards-assumption">
 
-<p>See slide 36 of &quot;L3 Cox.pdf&quot; document for more details. Also, you can look at <a href='https://vonholleunc.shinyapps.io/survival/' title=''>an R shiny app</a> that allows you to modify parameters in a Cox model to see different types of proportional hazards assumptions violations.</p>
+<p>See slide 36 of &quot;L3 Cox.pdf&quot; document for more details.</p>
 
 </article></slide><slide class=''><hgroup><h2>Check proportional hazards assumption, SAS, 1</h2></hgroup><article  id="check-proportional-hazards-assumption-sas-1" class="codefont2">
 
@@ -406,9 +407,10 @@ idut            0.975       0.917       1.035</pre>
 
 <p>NOTE: all code in this section for time dependent covariates copied from <a href='https://www.jstatsoft.org/index.php/jss/article/view/v061c01/v61c01.pdf' title=''>this paper</a>, titled &quot;Tutorial: Survival Estimation for Cox Regression Models with Time-Varying Coefficients Using SAS and R&quot;</p>
 
-<pre class = 'prettyprint lang-r'>cut.points &lt;- unique(b$t[b$delta == 1]) # get unique time points for event
+<pre class = 'prettyprint lang-r'>cut.points &lt;- unique(b$t[b$delta == 1])  # get unique time points for event
 
-SURV2 &lt;- survSplit(data = b, cut = cut.points, end = &quot;t&quot;, start = &quot;time0&quot;, event = &quot;delta&quot;) # make counting process data</pre>
+SURV2 &lt;- survSplit(data = b, cut = cut.points, end = &quot;t&quot;, start = &quot;time0&quot;, 
+    event = &quot;delta&quot;)  # make counting process data</pre>
 
 </article></slide><slide class=''><hgroup><h2>Check proportional hazards assumption, R, 2</h2></hgroup><article  id="check-proportional-hazards-assumption-r-2">
 
@@ -420,15 +422,16 @@ names(SURV2)</pre>
 <pre > [1] &quot;id&quot;    &quot;idu&quot;   &quot;white&quot; &quot;age&quot;   &quot;cd4&quot;   &quot;drop&quot;  &quot;delta&quot; &quot;art&quot;  
  [9] &quot;t&quot;     &quot;time0&quot;</pre>
 
-<pre class = 'prettyprint lang-r'>SURV2 &lt;- SURV2[, c(&quot;id&quot;, &quot;idu&quot;, &quot;white&quot;, &quot;age&quot;, &quot;cd4&quot;, &quot;time0&quot;, &quot;t&quot;, &quot;delta&quot;)]
-names(SURV2)[7]=&quot;time1&quot;</pre>
+<pre class = 'prettyprint lang-r'>SURV2 &lt;- SURV2[, c(&quot;id&quot;, &quot;idu&quot;, &quot;white&quot;, &quot;age&quot;, &quot;cd4&quot;, &quot;time0&quot;, 
+    &quot;t&quot;, &quot;delta&quot;)]
+names(SURV2)[7] = &quot;time1&quot;</pre>
 
 </article></slide><slide class=''><hgroup><h2>Check proportional hazards assumption, R, 3</h2></hgroup><article  id="check-proportional-hazards-assumption-r-3">
 
 <p>Add a time dependent covariate associated with <strong>idu</strong>.</p>
 
-<pre class = 'prettyprint lang-r'>SURV2$lt.idu = with(SURV2, idu*time1)
-s.5 = coxph(Surv(time0, time1, delta) ~ idu + lt.idu, data=SURV2)
+<pre class = 'prettyprint lang-r'>SURV2$lt.idu = with(SURV2, idu * time1)
+s.5 = coxph(Surv(time0, time1, delta) ~ idu + lt.idu, data = SURV2)
 coef(summary(s.5))</pre>
 
 <pre >             coef exp(coef)   se(coef)          z     Pr(&gt;|z|)
@@ -437,7 +440,7 @@ lt.idu -0.0258296 0.9745011 0.03089455 -0.8360567 4.031230e-01</pre>
 
 </article></slide><slide class=''><hgroup><h2>Check proportional hazards assumption, R, 2 (extra)</h2></hgroup><article  id="check-proportional-hazards-assumption-r-2-extra">
 
-<p>The following link is to an R shiny app where you can view simulations of time interaction with a covariate in a Cox model.</p>
+<p>Also, you can look at <a href='https://vonholleunc.shinyapps.io/survival/' title=''>an R shiny app</a> that allows you to modify parameters in a Cox model to see different types of proportional hazards assumptions violations.</p>
 
 <p><a href='https://vonholleunc.shinyapps.io/survival/' title=''><a href='https://vonholleunc.shinyapps.io/survival/' title=''>https://vonholleunc.shinyapps.io/survival/</a></a></p>
 
@@ -626,47 +629,39 @@ run;</pre>
 
 </article></slide><slide class=''><hgroup><h2>Calculate crude Cox model by hand (R)</h2></hgroup><article  id="calculate-crude-cox-model-by-hand-r" class="codefont2">
 
-<pre class = 'prettyprint lang-r'>est.1 = survfit(Surv(t, delta) ~ 1 + strata(idu), data=b)
+<pre class = 'prettyprint lang-r'>est.1 = survfit(Surv(t, delta) ~ 1 + strata(idu), data = b)
 sum.surv = summary(est.1)
 
 d = with(sum.surv, {
-  data.frame( t=time,
-              n=n.risk,
-              r = 1-surv,
-              s=surv,
-              n.event = n.event,
-              n.censor = n.censor,
-              se = std.err,
-              se2 = surv*sqrt((1-surv)/n.risk),
-              idu = strata)
+    data.frame(t = time, n = n.risk, r = 1 - surv, s = surv, 
+        n.event = n.event, n.censor = n.censor, se = std.err, 
+        se2 = surv * sqrt((1 - surv)/n.risk), idu = strata)
 })
-d$idu = ifelse(d$idu==&quot;strata(idu)=idu=0&quot;, 0, 1)
+d$idu = ifelse(d$idu == &quot;strata(idu)=idu=0&quot;, 0, 1)
 head(d)
-table(d$idu) # check
+table(d$idu)  # check
 
-d.rev = rbind(
-  c(t=0, n=d$n[1], r=NA, s=NA, n.event=0, n.censor=NA, se=NA, se2=NA, idu=0),
-  c(t=0, n=d$n[1], r=NA, s=NA, n.event=0, n.censor=NA, se=NA, se2=NA, idu=1),
-  d)# add a time origin point here for each strata.
+d.rev = rbind(c(t = 0, n = d$n[1], r = NA, s = NA, n.event = 0, 
+    n.censor = NA, se = NA, se2 = NA, idu = 0), c(t = 0, n = d$n[1], 
+    r = NA, s = NA, n.event = 0, n.censor = NA, se = NA, se2 = NA, 
+    idu = 1), d)  # add a time origin point here for each strata.
 
-# use data.table package to get time diff by strata. see http://bit.ly/1PV1wPn
+# use data.table package to get time diff by strata. see
+# http://bit.ly/1PV1wPn
 d.rev.dt = data.table(d.rev)
 setkey(d.rev.dt, idu)
-d.rev.dt[, delta.t:= c(0,diff(as.matrix(t))), by=idu][,h:= n.event / (n*delta.t)]
+d.rev.dt[, `:=`(delta.t, c(0, diff(as.matrix(t)))), by = idu][, 
+    `:=`(h, n.event/(n * delta.t))]
 
 some.vars = c(&quot;t&quot;, &quot;n.event&quot;, &quot;n&quot;, &quot;delta.t&quot;, &quot;h&quot;, &quot;idu&quot;)
-head(d.rev.dt[,some.vars, with=F]) # check with SAS numbers
+head(d.rev.dt[, some.vars, with = F])  # check with SAS numbers
 
-p.haz = ggplot(data = d.rev.dt, aes(x=t, y=log(h), group=factor(idu), colour=factor(idu))) + 
-  geom_point() +
-  stat_smooth(method=&quot;loess&quot;, se=F) +
-  scale_x_continuous(breaks = c(0,2,4,6,8,10)) +
-  theme_bw() + 
-  scale_colour_manual(values=c(&quot;blue&quot;, &quot;red&quot;), 
-                      name=&quot;IDU&quot;, 
-                      breaks=c(0,1), labels=c(&quot;non-user&quot;, &quot;user&quot;)) +
-  ggtitle(&quot;log hazard functions&quot;) +
-  theme(text = element_text(size=20))</pre>
+p.haz = ggplot(data = d.rev.dt, aes(x = t, y = log(h), group = factor(idu), 
+    colour = factor(idu))) + geom_point() + stat_smooth(method = &quot;loess&quot;, 
+    se = F) + scale_x_continuous(breaks = c(0, 2, 4, 6, 8, 10)) + 
+    theme_bw() + scale_colour_manual(values = c(&quot;blue&quot;, &quot;red&quot;), 
+    name = &quot;IDU&quot;, breaks = c(0, 1), labels = c(&quot;non-user&quot;, &quot;user&quot;)) + 
+    ggtitle(&quot;log hazard functions&quot;) + theme(text = element_text(size = 20))</pre>
 
 </article></slide><slide class=''><hgroup><h2></h2></hgroup><article >
 
@@ -995,11 +990,12 @@ den         4030       0.9261747       0.0591954       0.4960065       0.9940851
 <h3>Quantiles in R</h3>
 
 <pre class = 'prettyprint lang-r'># Set up the data frame with counting process style data
-b$replicate=0
+b$replicate = 0
 b.dt = data.table(b)
 # try to get quantiles as close to SAS as possible
 # documentation for quantile function in R says type 3
-quantile(b.dt[b.dt$drop==1, with=T]$t, probs=c(0.20, 0.40, 0.60, 0.80), type=3) # check these quantiles with SAS. Close.</pre>
+quantile(b.dt[b.dt$drop == 1, with = T]$t, probs = c(0.2, 0.4, 
+    0.6, 0.8), type = 3)  # check these quantiles with SAS. Close.</pre>
 
 <pre >  20%   40%   60%   80% 
 1.604 3.455 5.730 7.414 </pre>
@@ -1059,7 +1055,7 @@ wts$wt3 = with(wts, wt1*wt2)</pre>
 
 </article></slide><slide class=''><hgroup><h2>IP-censoring weights (R), 2</h2></hgroup><article  id="ip-censoring-weights-r-2">
 
-<pre class = 'prettyprint lang-r'>summary(wts[,c(&quot;wt1&quot;, &quot;wt2&quot;, &quot;wt3&quot;)])</pre>
+<pre class = 'prettyprint lang-r'>summary(wts[, c(&quot;wt1&quot;, &quot;wt2&quot;, &quot;wt3&quot;)])</pre>
 
 <pre >      wt1              wt2              wt3        
  Min.   :0.4208   Min.   :0.3837   Min.   :0.3204  
@@ -1104,7 +1100,7 @@ idu             1.719       1.460       2.025</pre>
 
 </article></slide><slide class=''><hgroup><h2>Check crude model is same with counting process data input (i.e. entry and exit times) (R)</h2></hgroup><article  id="check-crude-model-is-same-with-counting-process-data-input-i.e.-entry-and-exit-times-r">
 
-<pre class = 'prettyprint lang-r'>s.3 = coxph(Surv(time0, t, delta) ~ idu, data=split.dat, ties = &quot;efron&quot;)
+<pre class = 'prettyprint lang-r'>s.3 = coxph(Surv(time0, t, delta) ~ idu, data = split.dat, ties = &quot;efron&quot;)
 coef(summary(s.3))</pre>
 
 <pre >         coef exp(coef)   se(coef)        z     Pr(&gt;|z|)
@@ -1140,7 +1136,7 @@ run; quit;
 *proc print data=mle.f(obs=10);* run;
 </pre>
 
-</article></slide><slide class=''><hgroup><h2>IP-weighted Cox model, with counting process data input. Use robust variance (SAS), 2 {.codefont2 smaller}</h2></hgroup><article  id="ip-weighted-cox-model-with-counting-process-data-input.-use-robust-variance-sas-2-.codefont2-smaller">
+</article></slide><slide class=''><hgroup><h2>IP-weighted Cox model, with counting process data input. Use robust variance (SAS), 2</h2></hgroup><article  id="ip-weighted-cox-model-with-counting-process-data-input.-use-robust-variance-sas-2" class="codefont2 smaller">
 
 <pre >The MEANS Procedure
 
@@ -1175,10 +1171,8 @@ idu            1.638       1.371       1.956</pre>
 
 </article></slide><slide class=''><hgroup><h2>IP-weighted Cox model, with counting process data input. Use robust variance (R)</h2></hgroup><article  id="ip-weighted-cox-model-with-counting-process-data-input.-use-robust-variance-r">
 
-<pre class = 'prettyprint lang-r'>s.4 = coxph(Surv(time0, t, delta) ~ idu + cluster(id),
-                data = split.dat, 
-                weights = wts$wt3,
-                ties=&quot;efron&quot;)
+<pre class = 'prettyprint lang-r'>s.4 = coxph(Surv(time0, t, delta) ~ idu + cluster(id), data = split.dat, 
+    weights = wts$wt3, ties = &quot;efron&quot;)
 coef(summary(s.4))</pre>
 
 <pre >         coef exp(coef)   se(coef)  robust se       z     Pr(&gt;|z|)
