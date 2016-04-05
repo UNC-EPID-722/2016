@@ -18,7 +18,7 @@ bibliography: ../bib1.bib
   library(knitr)
   opts_knit$set(root.dir=normalizePath('../'))
   #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
-  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=T, warning=FALSE, message=FALSE, comment=NA, results="hide")
+  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=T, warning=FALSE, message=FALSE, comment=NA, results="hide", tidy=TRUE, tidy.opts=list(width.cutoff=60))
 ```
 
 ```{r, echo=FALSE}
@@ -236,7 +236,7 @@ coef(summary(s.2))
 
 # Check proportional hazards assumption
 
-See slide 36 of "L3 Cox.pdf" document for more details. Also, you can look at [an R shiny app](https://vonholleunc.shinyapps.io/survival/) that allows you to modify parameters in a Cox model to see different types of proportional hazards assumptions violations.
+See slide 36 of "L3 Cox.pdf" document for more details. 
 
 
 ## Check proportional hazards assumption, SAS, 1 {.codefont2}
@@ -320,7 +320,7 @@ coef(summary(s.5))
 
 ## Check proportional hazards assumption, R, 2 (extra)
 
-The following link is to an R shiny app where you can view simulations of time interaction with a covariate in a Cox model.
+Also, you can look at [an R shiny app](https://vonholleunc.shinyapps.io/survival/) that allows you to modify parameters in a Cox model to see different types of proportional hazards assumptions violations.
 
 [https://vonholleunc.shinyapps.io/survival/](https://vonholleunc.shinyapps.io/survival/)
 
@@ -842,7 +842,7 @@ run; quit;
 
 ```
 
-## IP-weighted Cox model, with counting process data input. Use robust variance (SAS), 2 {.codefont2 smaller}
+## IP-weighted Cox model, with counting process data input. Use robust variance (SAS), 2 {.codefont2 .smaller}
 
 ```{r s-part7, engine='sas', engine.path=saspath, engine.opts=sasopts, results='markup', echo=FALSE}
 ```
