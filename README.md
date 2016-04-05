@@ -29,11 +29,11 @@
 
 [Lecture 9: IP-weighted survival](http://unc-epid-722.github.io/2016/iptw-survival.html) -- [.Rmd file](lectures/L09-iptw-survival/iptw-survival.Rmd) -- [.sas program 6](lectures/L09-iptw-survival/program6.25jan16.sas)
 
-[Lecture 10: IP-weighted Cox models](http://unc-epid-722.github.io/2016/ipw-cox.html) -- [.Rmd file](lectures/L10-ipt-cox/ipw-cox.Rmd) -- [.sas program 7](lectures/L10-iptw-cox/program7.17feb16.sas)
+[Lecture 10: IP-weighted Cox models](http://unc-epid-722.github.io/2016/ipw-cox.html) -- [.Rmd file](lectures/L10-ipt-cox/ipw-cox.Rmd) -- [.sas program 7](lectures/L10-ipt-cox/program7.17feb16.sas)
 
 [Lecture 11: Generalizability](http://unc-epid-722.github.io/2016/generalizability.html) -- [.Rmd file](lectures/L11-generalizability/generalizability.Rmd) -- [.sas program 8](lectures/L11-generalizability/program8.1feb16.sas)
 
-[Lecture 12: Missing](http://unc-epid-722.github.io/2016/missing.html) -- [.Rmd file](lectures/L12-missing/missing.Rmd) -- [.sas program 8](lectures/L12-missing/program9.1feb16.sas)
+[Lecture 12: Missing](http://unc-epid-722.github.io/2016/missing.html) -- [.Rmd file](lectures/L12-missing/missing.Rmd) -- [.sas program 9](lectures/L12-missing/program9.1feb16.sas)
 
 ---
 
