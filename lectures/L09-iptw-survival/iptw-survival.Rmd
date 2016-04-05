@@ -437,6 +437,7 @@ proc print data=mle.f(obs=25) noobs;
 #  head(df.split.dt)
   
   # 2) drop out numerator model................
+  # see documentation for pbcseq in coxph survival package documentation for code below
   first <- with(df.split.dt, c(TRUE, diff(id) !=0)) #first id for each subject
   last <- c(first[-1], TRUE) #last id
   df.split.dt$drop = ifelse(last & df.split.dt$drop==1, 1, 0)

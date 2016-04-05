@@ -19,7 +19,7 @@ output:
   library(knitr)
   opts_knit$set(root.dir=normalizePath('../'))
   #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
-  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=T, warning=FALSE, message=FALSE)
+  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=T, warning=FALSE, message=FALSE, comment=NA)
 ```
 
 ## Preliminaries
@@ -386,7 +386,8 @@ split.dat = survSplit(data=b.dt,
               event="delta") #survSplit function from the survival package will create a counting process style data frame for you.
 
 # IMPORTANT: Fix the drop variable. Only want the drop status (if =1) to show at last record
-split.dat = split.dat[order(split.dat$id),] # order so I can check in SAS
+# see documentation for pbcseq in coxph survival package documentation for code below
+split.dat = split.dat[order(split.dat$id, split.dat$time0),] # order so I can check in SAS
 first <- c(TRUE, diff(split.dat$id) !=0) #first id for each subject
 last <- c(first[-1], TRUE) #last id
 split.dat$drop.rev = ifelse(last & split.dat$drop==1, 1, 0) 
