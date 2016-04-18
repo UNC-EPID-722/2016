@@ -166,8 +166,8 @@ proc sgplot data=mle.d noautolegend;
 ```{r r-part2}
 s.1 = survfit(Surv(t, delta) ~ 1, data=b)
 
-#names(summary(s.1))
 sum.surv = summary(s.1)
+names(sum.surv)
 
 d = data.frame(
   t = sum.surv$time,
@@ -191,6 +191,34 @@ plot(s.1, lwd=1.5,
      main="Time from 12/6/95 to AIDS or death in WIHS",
      cex.lab=1, cex.axis=1, cex.main=1, cex.sub=1.5, 
      mark.time=F)
+```
+
+
+#### R, extract out strata information from survival estimates
+
+```{r r-part2a}
+# way to extract out strata (of IDU variable)
+
+s.strata = survfit(Surv(t, delta) ~ 1 + strata(idu), data=b)
+
+sum.surv.strata = summary(s.strata)
+names(sum.surv.strata)
+sum.surv$strata
+
+d.strata = data.frame(
+  strata = sum.surv.strata$strata,
+  t = sum.surv.strata$time,
+  n = sum.surv.strata$n.risk,
+  r = 1-sum.surv.strata$surv,
+  s = sum.surv.strata$surv,
+  n.event = sum.surv.strata$n.event,
+  n.censor = sum.surv.strata$n.censor, 
+  se = sum.surv.strata$std.err,
+  se2 = sum.surv.strata$surv*sqrt((1-sum.surv.strata$surv)/sum.surv.strata$n.risk) # Peto se
+)
+
+head(d.strata)
+
 ```
 
 ### Hazard
