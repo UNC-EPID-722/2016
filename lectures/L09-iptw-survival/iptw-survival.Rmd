@@ -37,6 +37,7 @@ output:
   library(muhaz)
   library(tableone)
   library(ipw)
+  require(survminer)
   set.seed(123) # set seed so you get same results each time you run.
 ```
 
@@ -326,6 +327,28 @@ plot(s.3, lwd=1.5,
      mark.time=F,
      lty=c(1,3), col=col1)
 legend(6, 0.2, c("IDU - No", "IDU - Yes") , lty=c(1,3), bty="n", col=col1 )
+```
+
+
+#### R, alternate way to plot survival function with confidence intervals
+
+```{r r-part5b}
+
+b.df$idu.f = factor(b.df$idu, labels=c("No", "Yes"))
+s.3b = survfit(Surv(t, delta) ~ idu.f, data=b.df, type="kaplan-meier", weight=w1)
+
+# see https://github.com/kassambara/survminer
+res = ggsurvplot(s.3b, linetype = "strata", 
+           conf.int = TRUE,
+           palette = "grey",
+           legend = c(7,0.2), risk.table = TRUE, 
+           risk.table.col = "strata",
+           fun = "event")
+
+# Customize the output and then print
+#res$table <- res$table + theme(axis.line = element_blank())
+res$plot <- res$plot + labs(title = "Weighted for baseline confounding")
+print(res)
 ```
 
 ## IP-Censoring Weights
