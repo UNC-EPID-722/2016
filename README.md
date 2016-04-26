@@ -35,6 +35,8 @@
 
 [Lecture 12: Missing](http://unc-epid-722.github.io/2016/missing.html) -- [.Rmd file](lectures/L12-missing/missing.Rmd) -- [.sas program 9](lectures/L12-missing/program9.1feb16.sas)
 
+[Project Summary slides (html)](http://unc-epid-722.github.io/2016/epid722-2016-project-summary.html) -- [Project Summary slides (pdf)](lectures/L99-project/epid722-2016-project-summary.pdf) -- [.Rmd file for slides](lectures/L99-project/epid722-2016-project-summary.Rmd) -- [.Rmd file for analyses in slides]((lectures/L99-project/run-analyses-rev.Rmd)
+
 ---
 
 **Recitation**
