@@ -1,0 +1,803 @@
+---
+title: "Project Summary"
+author: "UNC EPID 722 -- Sydney Allison Jones & Ann Von Holle"
+date: "April 26, 2016"
+highlighter : highlight.js
+hitheme     : tomorrow 
+output: slidy_presentation
+csl: ../american-journal-of-epidemiology.csl
+bibliography: ../bib1.bib
+---
+
+```{r setup, echo=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  library(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+  opts_chunk$set(fig.width=11, fig.height=5,
+                 fig.align="left", 
+                 echo=F, warning=FALSE, message=FALSE, comment=NA, 
+                 results="markup")
+```
+
+```{r, echo=FALSE}
+### Specify packages for R
+
+    #install.packages(c("knitr", "foreign", "tableone", "MCMCpack", "ipw")) # Note: you only need to do this once. then only if you want updates.
+#  install.packages("data.table", "rms") # Watch out, rms loads a lot of other packages. skipping for now.
+  require(ztable)
+  require(plyr)
+  library(reshape2)
+  require(ggplot2)
+  require(survival)
+  require(fitdistrplus)
+
+  library(gridExtra)
+  library(grid)
+  require(survminer)
+  require(Rmisc)
+options(ztable.type="html")
+  set.seed(123) # set seed so you get same results each time you run.
+```
+
+```{r load-data}
+
+#source("run-analyses-rev.Rmd") # program to get df2 data frame with all regression coefficients
+load("c:/temp/df2.Rda") # contains df2 object
+load("c:/temp/df3.Rda") # contains df3 object
+
+
+# read in data frames from run-analyses-rev.Rmd (formatted class and full data)
+load("c:/temp/dat1.Rda") # class data, dat.1
+load("c:/temp/dat2.Rda") # full data, dat.2
+
+complete.1 = complete.cases(dat.1) # get list of complete cases
+complete.2 = complete.cases(dat.2)
+```
+
+```{r true-est, results='hide'}
+
+nrow(dat.2)
+nrow(dat.1)
+
+# Full data
+dat.2$age.rev = (dat.2$age-53)/10; mean(dat.2$age); sd(dat.2$age)
+e.full = coef(summary(coxph(Surv(t, event) ~ newuser + age.rev + hyplipid + htn + diabetes, data=dat.2)))
+e.full
+
+# Class data
+dat.1$age.rev = (dat.1$age-53)/10
+e.class = coef(summary(coxph(Surv(t, event) ~ newuser + age.rev + hyplipid + htn + diabetes, data=dat.1)))
+e.class
+
+# class crude, just to check
+exp(coef(coxph(Surv(t, event) ~ newuser , data=dat.1)))
+
+```
+
+```{r make-table, results='hide'}
+# make tables to put in slides
+
+cgroup = c( "", "Method for missing")
+n.cgroup = c(1,3)
+
+rgroup = c("Class data", "HTN=0 subset", "Source data")
+n.rgroup=c(3,3,3)
+
+# make table with exp(coef) and cl
+t3 = dcast(df2, class + weight ~ miss, value.var="hr.ci",
+           fun.aggregate=function(x) paste(x, collapse = ", "))
+t3
+
+# Take full table with all three subsets of data and make into separate tables here
+
+t.class = t3[t3$class==0,]
+t.htn0 = t3[t3$class==1,]
+t.full = t3[t3$class==2,]
+
+colnames1 = c("", "Confounding + Selection bias handling",
+                 rep(c("Omit BP", "Impute", "Missing weight"),1))
+
+colnames(t3) = colnames1
+colnames(t.class) = colnames1
+colnames(t.htn0) = colnames1
+colnames(t.full) = colnames1
+
+# format the z table with appropriate headers for columns and rows
+z3 = ztable(t3[,-1])
+z3 = addcgroup(z3, cgroup=cgroup, n.cgroup=n.cgroup)
+z3 = addrgroup(z3, rgroup=rgroup, n.rgroup=n.rgroup, cspan.rgroup=1)
+
+z.class = ztable(t.class[,-1])
+z.class = addcgroup(z.class, cgroup=cgroup, n.cgroup=n.cgroup)
+
+z.htn0 = ztable(t.htn0[,-1])
+z.htn0 = addcgroup(z.htn0, cgroup=cgroup, n.cgroup=n.cgroup)
+
+z.full = ztable(t.full[,-1])
+z.full = addcgroup(z.full, cgroup=cgroup, n.cgroup=n.cgroup)
+```
+
+## Topics
+
+* Data generation
+* Data analysis
+* Data analysis follow-up
+
+---
+
+## Data generation
+
+
+* Generate time to event using National Ambulatory Medical Care Survey [NAMCS](http://www.cdc.gov.libproxy.lib.unc.edu/nchs/ahcd/about_ahcd.htm) data:
+
+* Introduce
+
+    * Non-positivity
+
+        - Exclude persons with hypertension who were not treated
+
+    * Confounding
+
+    * Treatment effect heterogeneity 
+  
+        - Low-potency statins had no effect
+
+* Subset to a 10% random sample of the non-users
+
+      - To make data set a more manageable size.
+
+---
+
+## Generate time to event for CVD hospitalization and all-cause mortality
+
+
+* Time to event will follow a Weibull distribution
+
+* T $\sim$ Weibull($\lambda, k$)
+
+    * scale = $\lambda$
+    
+    * shape = $k$
+    
+    
+        * Weibull density function: $f(t;\lambda, k) = k \lambda t^{k-1} e^{-\lambda t^k}$
+      
+        * Exponential density function: $f(x; \lambda) = \lambda e^{-\lambda t}$
+            
+            * Equivalent to Weibull using shape = 1.
+    
+* Censoring follows an exponential distribution with $\lambda$ = `r round(1/200, 3)`
+
+<!-- ## Sample Weibull distribution using specified model parameters -->
+
+```{r, echo=F, eval=F}
+
+#### Plot of Weibull distribution for one set of linear predictor values
+
+# see http://stats.stackexchange.com/questions/16037/how-to-fit-a-continuous-empirical-variable-to-a-theoretical-distribution
+
+# make a linear predictor to add to weibull and exponential distributions
+
+# highdose
+highdose=1; lowdose=0; age=0; hyplipid=0; htn=1; diabetes=1;
+lp.1 = log(0.5)*highdose + 0*lowdose + log(1.5)*age + log(1.5)*hyplipid + log(1.5)*htn + log(1.5)*diabetes
+
+# no dose
+highdose=0; lowdose=0; age=0; hyplipid=0; htn=1; diabetes=1; obese=1; smoke=1;
+lp.2 = log(1.05)*age + log(1.5)*smoke + log(1.4)*obese
+
+scale.1 = exp(lp.1); #scale.1
+shape.1 = 1
+
+scale.2 = exp(lp.2); #scale.2
+shape.1 = 1
+
+N=1000
+#t1 = rweibull(N, shape = 1, scale = scale.1) # all cause mortality
+#t2 = rexp(N, rate = 1/scale.1)
+  
+# other way used in generating times
+    v <- runif(N)
+    t1 <- (- log(v) / (0.011 * exp(lp.1)))^(1 / shape.1)
+
+# ESTIMATE WEIBULL DISTRIBUTION
+f1 = fitdist(t1, 'weibull', method = 'mle')
+f2 = fitdist(t1, 'exp', method='mle')
+
+  t2 <- (- log(v) / (0.011 * exp(lp.2)))^(1 / shape.1)
+
+# ESTIMATE WEIBULL DISTRIBUTION
+f1.2 = fitdist(t2, 'weibull', method = 'mle')
+f2.2 = fitdist(t2, 'exp', method='mle')
+
+# PLOT HISTOGRAM AND DENSITIES
+
+# plot for high dose
+p1 = qplot(t1, geom = 'blank',
+           xlab="Time (years)") +
+  geom_histogram(aes(y = ..density..), fill = 'gray90', colour = 'gray40', bins = 1000) +
+#  geom_line(aes(y = ..density.., colour = 'Empirical'), stat = 'density') +  
+  geom_line(stat = 'function', fun = dweibull, 
+     args = as.list(f1$estimate), aes(colour = 'Weibull')) +
+  geom_line(stat = 'function', fun = dexp, 
+     args = as.list(f2$estimate), aes(colour = 'Exponential')) +
+  scale_colour_manual(name = 'Density', values = c('red', 'blue', 'green')) + 
+  theme(legend.position = "bottom") +
+  coord_cartesian(xlim = c(0, 10)) +
+  ylim(c(0,0.03)) +
+  theme_bw() +
+  scale_x_continuous(breaks = c(seq(from=0, to=10, by=2))) +
+  theme(legend.position="bottom") +
+  ggtitle("High Dose")
+
+
+# plot for no dose
+p2 = qplot(t2, geom = 'blank',
+           xlab="Time (years)") +
+  geom_histogram(aes(y = ..density..), fill = 'gray90', colour = 'gray40', bins = 500) +
+#  geom_line(aes(y = ..density.., colour = 'Empirical'), stat = 'density') +  
+  geom_line(stat = 'function', fun = dweibull, 
+     args = as.list(f1.2$estimate), aes(colour = 'Weibull')) +
+  geom_line(stat = 'function', fun = dexp, 
+     args = as.list(f2.2$estimate), aes(colour = 'Exponential')) +
+  scale_colour_manual(name = 'Density', values = c('red', 'blue', 'green')) + 
+  theme(legend.position = "bottom") +
+  coord_cartesian(xlim = c(0, 10)) +
+  ylim(c(0,0.03)) +
+  theme_bw() +
+  scale_x_continuous(breaks = c(seq(from=0, to=10, by=2))) +
+  theme(legend.position="bottom") +
+  ggtitle("No treatment")
+
+# see http://stackoverflow.com/questions/13649473/add-a-common-legend-for-combined-ggplots
+# for info on adding a legend to bottom of plot (and code below that I copied)
+# see http://www.sthda.com/english/wiki/ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page-r-software-and-data-visualization
+
+get_legend<-function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+legend <- get_legend(p1)
+
+main = textGrob("Probability distribution function for time to CVD hospitalization events \n by dosage groups: sample with hypertension and diabetes at age 53 \n (1000 randomly generated points)", gp=gpar(fontsize=12,font=3))
+
+grid.arrange(main,
+             p1 + theme(legend.position="none"),
+             p2 + theme(legend.position="none"),
+             legend, 
+             ncol=2, nrow=3, 
+             layout_matrix = rbind(c(1,1), c(2,3), c(4,4)),
+             widths = c(2.7, 2.7), 
+             heights = c(0.5, 3, 0.2))
+
+
+# png(filename="C:/Users/vonholle/Dropbox/unc.grad.school.2016.spring/epid.722/misc/EPID722-2016-private/project-slides/sampdist.png", width=1000, height=500, units="px", res=100)
+# dev.off()
+
+```
+
+
+## CVD hospitalization
+
+* Time to hospitalization, T $\sim$ Weibull($\lambda, k$):
+
+    * $\eta_1 = \beta_1 \cdot \textrm{high dose} + \beta_2 \cdot \textrm{low dose} + \beta_3 \cdot \textrm{age} + \beta_4 \cdot \textrm{hyplipid} + \beta_5 \cdot \textrm{htn} + \beta_6 \cdot \textrm{diabetes}$
+
+    * scale = $\lambda$ = 0.011
+
+    * shape = k = 1
+    
+    * Survival time corresponding to Cox-Weibull model: $T = \left(- \frac{log(U)}{\lambda exp(\eta_1)} \right)^{1/k}$ [@bender_generating_2005]
+
+* Parameter values
+
+    * $\beta_1$ = log(0.5) = `r round(log(0.5),2)` 
+    
+    * $\beta_2$ = 0
+
+    * $\beta_3 = \beta_4 = \beta_5 = \beta_6$ = log(1.5) = `r round(log(1.5),2)`
+
+## All-cause mortality
+
+* Time to death
+
+    * $\eta_2 = \beta_1 \cdot \textrm{age} + \beta_2 \cdot \textrm{smoke} + \beta_3 \cdot \textrm{obese}$
+
+    * scale for the Weibull distribution = 0.012
+
+    * shape = k = 1
+    
+    * Survival time corresponding to Cox-Weibull model: $T = \left(- \frac{log(U)}{\lambda exp(\eta_2)} \right)^{1/k}$ [@bender_generating_2005]
+
+* Parameter Values
+
+    * $\beta_1$ = log(1.1) = `r round(log(1.1),2)`
+      
+        * Age = ((years-53)/10)
+  
+    * $\beta_2$ = log(1.5) = `r round(log(1.5),2)`
+  
+    * $\beta_3$ = log(1.4) = `r round(log(1.4),2)`
+  
+
+## Data generation key points
+
+
+<!-- See http://avonholle.github.io/EPID722-2016-private/gen-data.html, section 0.0.2.6 -->
+
+* *True* hazard ratio = 0.801
+    * log(HR) = `r round(log(0.8011445),3)`; standard error = `r round(0.09293129,3)`.
+
+* **No** variables associated with drop out
+
+* **No** variables associated with missing data in effect model
+
+* **No** product term between any variable and time to event
+
+    * proportional hazards assumption should hold
+
+<!--* Factors associated with time to hospitalization (besides treatment): age, hyperlipidemia, hypertension and diabetes
+
+* Factors associated with time to all cause mortality: age, smoke, obese -->
+
+
+```{r true-effect, echo=FALSE, results='hide'}
+
+dat.2 = read.csv("c:/temp/namcs-full-2016.csv", header=T)
+
+clean.dat = function(x) {
+colnames(x) = tolower(colnames(x))
+
+levels(factor(x$newuser)) # check order of levels for coding below
+levels(factor(x$newusercat))
+
+# Function to make variables
+x = within(x, {
+  newuser.f = factor(newuser, labels=c("No", "Yes"))
+  newusercat.f = factor(newusercat, labels = c('not a new user', 
+                                               'low potency statin',
+                                               'high potency statin'))
+  event = ifelse(delta %in% c(1,2), 1, 0)
+  delta.f = factor(delta, labels = c('0=Administratively censored at 10 years',
+                                     '1=Hospitalization for CVD',
+                                     '2=All-cause mortality',
+                                     '3=Loss to follow-up'))
+  drop = ifelse(delta %in% c(3), 1, 0)
+  miss = ifelse(is.na(sbp) | is.na(dbp), 1, 0)
+})
+
+x = x[x$age>=35 & x$age<76,]
+return(x)
+}
+
+dat.2 = clean.dat(dat.2)
+names(dat.2)
+
+coef.true = coef(summary(coxph(Surv(t, event) ~ newuser + age + hyplipid + htn + smoke + obese,
+       data=dat.2)))
+
+```
+
+
+<!--    * In the generated full data set the hazard ratio is `r round(coef.true[1,2],3)` and log(hr) = `r round(coef.true[1,1],3)` (se =  `r round(coef.true[1,3],3)`)-->
+
+---
+
+## Data analysis
+
+
+## Our analyses on entire class data set
+
+```{r show-table1, results='asis'}
+z.0 = z.class
+
+# z.0 = addCellColor(z.0,rows=1,cols=c(3:5),"carolinablue")
+# z.0 = addCellColor(z.0,rows=2,cols=c(3:5),"carolinablue")
+# z.0 = addCellColor(z.0,rows=3,cols=c(3:5),"carolinablue")
+
+print(z.0, include.rownames=F, caption="HR and 95% CI (treated vs not treated)", size=7)
+```
+
+* Covariates for:
+    * IPTW model: age, male, diabetes, white, obese, smoke, hyplipid [sbp and dbp when using MI or missing weights]
+    * Censoring weight model: age, male, diabetes, white, obese, smoke, hyplipid [sbp and dbp when using MI or missing weights]
+    * Missing weight model: newuser, age, male, diabetes, white, obese, smoke, hyplipid, htn, event
+    
+
+## Our survival curves by treatment status and data set type
+
+```{r splots, fig.width=9, fig.height=7}
+
+# Function to make weights (IPTW and missing) (adapted from run-analyses-rev.Rmd)
+
+make.dats = function(complete.set, dat.miss, rhs.miss, rhs.iptw) {
+
+  # dat: the data frame to use to create the weights
+  # rhs.miss: the right hand side (rhs) formulas for use in creating the missing weights
+  # rhs.iptw: the right hand side (rhs) formulas for use in creating the iptw
+  
+  # A) create analysis data set based on index given in complete.set
+  # -----------------------------------------
+  dt = dat.miss[complete.set,]
+
+  # A.1) missing weights
+  # ---------------------------------------------
+             
+  prob.cc = 1-plogis(predict(glm(as.formula(paste("miss ~", rhs.miss)),
+                                       family=binomial(link=logit),
+                                    data=dat.miss)))
+  miss.wt = ifelse(dat.miss$miss==0, 1/prob.cc, 0)
+  
+  dt$miss.wt = miss.wt[complete.set]
+ 
+  # A.2) IPTW -- confounding weights
+  # ----------------------------------------------
+  dt$nm = plogis(predict(glm(newuser ~ 1, family="binomial"(link="logit"), 
+                             data=dt)))
+  dt$dn = plogis(predict(glm(as.formula(paste("newuser ~", rhs.iptw)),
+                                    family="binomial"(link="logit"),
+                             data=dt)))
+  dt$iptw = with(dt, ifelse(newuser==1, nm/dn, (1-nm)/(1-dn)))
+  
+  dt = within(dt, {
+        w.0 = 1
+        w.1 = iptw
+        w.2 = iptw*miss.wt
+      }) # create weights for different analyses that occur in the table
+  
+  return(dt)
+}
+
+# Get class and full data sets
+# --------------------------------------------------------------------
+
+# =====================================================
+#  class data: the complete cases, bp in weights
+# =====================================================
+
+dat.class.cc = make.dats(complete.set=complete.1, dat.miss=dat.1,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + htn + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid + sbp + dbp")
+
+
+# =====================================================
+# original: the full data set, no bp in weights
+# =====================================================
+
+dat.full = make.dats(complete.set=rep(1:nrow(dat.2),T), dat.miss=dat.2,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid")
+
+# check weights
+#sapply(dat.full[,colnames(dat.full) %in% c("iptw", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+
+# -----------------------------------
+# Fit crude models using KM estimator
+# ----------------------------------
+
+fit.crude.class = survfit(Surv(t, event) ~ 1 + strata(newuser.f), 
+                        data = dat.class.cc, 
+                        weights=miss.wt)
+
+fit.crude.full = survfit(Surv(t, event) ~ 1 + strata(newuser.f), 
+                        data = dat.full)
+
+
+# ------------------------------------
+# Fit IPTW models using KM estimator
+# -------------------------------
+
+fit.iptw.class = survfit(Surv(t, event) ~ 1 + strata(newuser.f), 
+                        data = dat.class.cc, 
+                        weights=miss.wt*iptw)
+
+fit.iptw.full = survfit(Surv(t, event) ~ 1 + strata(newuser.f), 
+                        data = dat.full,
+                        weights=iptw)
+
+
+# Drawing survival curves
+# ----------------------------------
+# Plot cumulative events
+
+g1 = ggsurvplot(fit.crude.class, conf.int = TRUE,
+#           linetype = "strata", # change line type by groups
+           palette = "Dark2",
+           risk.table = F, risk.table.col = "strata",
+           fun = "event")[[1]]
+g1 = g1 + labs(x="Time (years)", y="Risk") + 
+  theme(axis.text=element_text(size=12), text = element_text(size=20)) +
+  ylim(0,0.25)
+
+g2 = ggsurvplot(fit.crude.full, conf.int = TRUE,
+#           linetype = "strata", # change line type by groups
+           palette = "Dark2",
+           risk.table = F, risk.table.col = "strata",
+           fun = "event")[[1]]
+g2 = g2 + labs( x="Time (years)", y="Risk") +
+  ylim(0,0.25)
+
+
+g3 = ggsurvplot(fit.iptw.class, conf.int = TRUE,
+#           linetype = "strata", # change line type by groups
+           palette = "Dark2",
+           risk.table = F, risk.table.col = "strata",
+           fun = "event")[[1]]
+g3 = g3 + labs( x="Time (years)", y="Risk") +
+  ylim(0,0.25)
+
+
+g4 = ggsurvplot(fit.iptw.full, conf.int = TRUE,
+#           linetype = "strata", # change line type by groups
+           palette = "Dark2",
+           risk.table = F, risk.table.col = "strata",
+           fun = "event",
+           legend="bottom",
+           font.legend=16, legend.title="New user status",
+           legend.labs=c("No", "Yes"))[[1]]
+
+g4 = g4 + labs(x="Time (years)", y="Risk") +
+  ylim(0,0.25) 
+
+
+#class(g4) # check which part is a ggplot object -- 1st in the list
+
+
+get_legend<-function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+legend <- get_legend(g4)
+
+main1 = textGrob("Risk of hospitalization or all-cause mortality", gp=gpar(fontsize=22, font=1))
+main2 = textGrob("Class Data", gp=gpar(fontsize=18, font=1))
+main3 = textGrob("Source Data", gp=gpar(fontsize=18, font=1))
+
+main4 = textGrob("Crude", gp=gpar(fontsize=18, font=1), rot=90)
+main5 = textGrob("Adjusted", gp=gpar(fontsize=18, font=1), rot=90)
+
+empty = textGrob("", gp=gpar(fontsize=18, font=1))
+
+grid.arrange(main1,
+             main2, main3,
+             g1 + theme(legend.position="none"),
+             g2 + theme(legend.position="none"),
+             g3 + theme(legend.position="none"),
+             g4 + theme(legend.position="none"),
+             legend, 
+             main4, main5, empty,
+             ncol=3, nrow=5, 
+             layout_matrix = rbind(c(11, 1,1), c(11, 2,3), c(9,4,5), c(10,6,7), c(11,8,8)),
+             widths = c(0.2, 2.7, 2.7), 
+             heights = c(0.6, 0.3, 4, 4, 0.5))
+
+```
+
+## Summary of group analyses
+
+* Approaches used
+
+    * Missing data: inverse probability weighting (5 groups) or multiple imputation (2 groups)
+    * Censoring: time-varying inverse probability weighting (7 groups)
+    * Wide range of variables included in censoring weights
+    * Confounding: inverse probability weighting (7 groups)
+    * Most groups included: age, diabetes, DBP, SBP, obese, race, sex, and smoking
+    * No groups included HTN in the confounding weight model
+
+* Results presented:
+    * Hazard ratio (5 groups)
+    * Risk difference (2 groups)
+
+
+## Class group results
+
+<img src="c:\temp\class-proj-results.png" width="1000">
+
+## Class group example: Table 2
+
+<img src="c:\temp\table2-example.png" width="800">
+
+## Class group example: Figure
+
+<img src="c:\temp\figure-example.png" width="500">
+
+
+## A few points given the model generating the data
+
+## Censoring weights don't (shouldn't) matter
+
+```{r show-table4, results='asis'}
+z.3 = z.class
+
+z.3 = addCellColor(z.3,rows=3:4,cols=c(3),"capri")
+z.3 = addCellColor(z.3,rows=3:4,cols=c(4),"carolinablue")
+z.3 = addCellColor(z.3,rows=3:4,cols=c(5),"cambridgeblue")
+
+print(z.3, include.rownames=F,
+      caption="HR and 95% CI (treated vs not treated)", size=7)
+```
+
+## Accounting for missing data shouldn't matter
+
+```{r show-table5, results='asis'}
+z.4 = z.class
+
+z.4 = addCellColor(z.4,rows=3,cols=c(3:4),"capri")
+z.4 = addCellColor(z.4,rows=4,cols=c(3:4),"cambridgeblue")
+
+print(z.4, include.rownames=F,
+      caption="HR and 95% CI (treated vs not treated)", size=7)
+```
+
+## Why are there differences in treatment effect when using missing weights?
+
+```{r show-table6, results='asis'}
+z.5 = z.class
+
+z.5 = addCellColor(z.5,rows=3,cols=c(3,5),"capri")
+z.5 = addCellColor(z.5,rows=4,cols=c(3,5),"cambridgeblue")
+
+print(z.5, include.rownames=F,
+      caption="HR and 95% CI (treated vs not treated)", size=7)
+```
+
+
+## What's happening with the missing weights?
+
+<!-- What is the distribution of estimated probabilities of being a complete case categorized by binary confounders values-->
+
+
+```{r read, echo=FALSE, results='hide'}
+#Read the data 
+
+dat.1 = read.csv("c:/temp/namcs-class-2016.csv", header=T) # read in data.
+colnames(dat.1) = tolower(colnames(dat.1))
+
+dat.1 = within(dat.1, {
+  age.rev = (age-mean(age))/sd(age)
+  miss = ifelse(is.na(sbp),1,0)
+  newuser.f = factor(newuser, labels=c("No", "Yes"))
+  htn.f = factor(htn, labels=c("No", "Yes"))
+  newusercat.f = factor(newusercat, labels = c('not a new user', 
+                                               'low potency statin',
+                                               'high potency statin'))
+  event = ifelse(delta %in% c(1,2), 1, 0)
+   delta.f = factor(delta, labels = c('0=Administratively censored at 10 years',
+                                     '1=Hospitalization for CVD',
+                                     '2=All-cause mortality',
+                                     '3=Loss to follow-up'))
+  drop = ifelse(delta %in% c(3), 1, 0)
+})
+
+dat.class = dat.1[dat.1$age>=35 & dat.1$age<76,]
+complete.class = complete.cases(dat.class)
+
+
+# Step 1: Assume m.1 has all good predictors of missingness
+miss.1 = glm(miss ~ newuser + age.rev + hyplipid + diabetes + event, 
+                 data=dat.class, 
+                 family=binomial(link = "logit")) # note: took out htn to make mean of the weight close to 1
+
+# miss weight based on miss.1 model
+dat.class$prob.cc = 1-plogis(predict(miss.1))
+dat.class$miss.wt = ifelse(dat.class$miss==1, 0,
+                           (dat.class$prob.cc)^(-1))
+summary(dat.class$miss.wt)
+```
+
+```{r miss3, results='hide', echo=FALSE}
+# function to return a plot of estimated probability of missing distribution by groups of binary predictors
+make.plot.miss = function(df) {
+  
+  #df = dat.class[complete.class,]
+  df$age.cat = with(df, ifelse(age<median(age),1,0))
+  
+  cat.vars =  c('newuser', 'male', 'diabetes', 'white', 
+                'obese', 'smoke', 'hyplipid', 'htn', 'age.cat', "event" )
+  
+#  cat.vars =  c('newuser', 'male', 'diabetes', 'white', 'htn')
+                
+  long.plot = melt(df[,c("patcode", "prob.cc", cat.vars)], 
+                   id.vars=c("patcode", "prob.cc"))
+  head(long.plot)
+  long.plot$value.f = factor(long.plot$value, 
+                             labels=c("No", "Yes"))
+  
+  p1 = ggplot(data=long.plot, 
+           aes(x=prob.cc, group=value.f, fill=value.f)) +
+    facet_grid(.~variable) +
+      geom_histogram(aes(y=..density..), alpha = 0.75, binwidth=0.1, 
+                   position = position_dodge(width=0.05)) + 
+      ggtitle("Distribution of complete case probability by binary covariate value groups") +
+    xlab("Probability of being complete case") +
+    theme_bw() + 
+    scale_fill_discrete(name="Covariate value") +
+    scale_x_continuous(breaks=c(0, 0.5, 1)) +
+    theme(axis.text=element_text(size=12),
+          text = element_text(size=20),
+          legend.position="bottom")
+
+  return(p1)
+}
+```
+
+  * People with adverse conditions (hypertension, etc..) are more likely to be a complete case.
+
+<!--* If you are weighting based on blood pressure outcomes (missing weights) then this group will be downweighted in the survival model. 
+
+* This group also shows a stronger favorable effect of higher survival with treatment compared to non-treatment.->
+
+<!-- Note: this group also has better chances of survival with treatment compared to other groups -- statins seem to have a stronger beneficial effect with this group compared to others. This group is also downweighted so the favorable effect of reduced mortality with treatment moves towards the null.
+-->
+
+```{r}
+make.plot.miss(dat.class[complete.class,])
+```
+
+```{r just-htn1, echo=FALSE, results='hide'}
+# make table with exp(coef) and cl
+t4 = dcast(df3, class + weight ~ miss, value.var="hr.ci",
+           fun.aggregate=function(x) paste(x, collapse = ", "))
+t4
+
+colnames.t4 = c("", "Confounding + Selection bias handling",
+                 rep(c("Omit BP"),1))
+colnames(t4) = colnames.t4
+
+z4 = ztable(t4[,-1])
+z4 = addcgroup(z4, cgroup=cgroup, n.cgroup=c(1,1))
+
+rgroup.t4 = c("HTN=1 subset (Source data)")
+
+z4 = addrgroup(z4, rgroup=rgroup.t4, n.rgroup=n.rgroup, cspan.rgroup=1)
+```
+
+## What's happening with the missing weights?
+
+* People with hypertension more likely to benefit from treatment than people with no hypertension.
+
+```{r table-htn, results='asis'}
+
+print(z4, include.rownames=F,
+      caption="HR and 95% CI (treated vs not treated)", size=7,
+      position="c")
+```
+
+<!--* This context can lead to a migration towards a null effect when using missing weights.-->
+
+
+## Non-Positivity
+
+* Several of you noticed the non-positivity
+
+* What can you do about it?
+
+## Non-Positivity
+
+**What is the impact on our inferences?**
+
+```{r show-table3, results='asis'}
+z.2 = z3
+
+z.2 = addCellColor(z.2,rows=5,cols=c(3:5),"carolinablue")
+z.2 = addCellColor(z.2,rows=6,cols=c(3:5),"carolinablue")
+z.2 = addCellColor(z.2,rows=7,cols=c(3:5),"carolinablue")
+
+print(z.2, include.rownames=F,
+      caption="HR and 95% CI (treated vs not treated)", size=7)
+```
+
+## References
+
+---
+nocite: | 
+  @bender_generating_2005, @seaman_inverse_2014, @seaman_combining_2012, @seaman_review_2013
+...

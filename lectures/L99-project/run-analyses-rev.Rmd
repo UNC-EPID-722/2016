@@ -1,0 +1,684 @@
+---
+title: "Sample Analyses -- EPID 722 class project"
+author: "Ann Von Holle"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
+output:
+  html_document:
+   toc: true
+   toc_depth: 2 
+   theme: united
+   number_sections: true
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+# see http://stackoverflow.com/questions/24585254/working-with-knitr-using-subdirectories
+  require(knitr)
+  opts_knit$set(root.dir=normalizePath('../'))
+  #opts_chunk$set(fig.path = "../figures/", dev='pdf') # corrected path and added dev
+  opts_chunk$set(fig.width=12, fig.height=8, fig.align="left", echo=F, results="hide", warning=FALSE, message=FALSE, comment=NA)
+```
+
+
+```{r pack}
+  require(knitr)
+  library(data.table)
+  library(reshape2)
+  library(survival)
+  library(ggplot2)
+#  library(rms)
+  library(muhaz)
+  library(tableone)
+  require(ipw)
+  require(mice)
+  library(gridExtra)
+  library(grid)
+  require(ztable)
+  require(plyr)
+options(ztable.type="html")
+  set.seed(123) # set seed so you get same results each time you run.
+```
+
+```{r sasopts}
+saspath <- 'C:/Program Files/SASHome/SASFoundation/9.4/sas.exe'
+sasopts <- "-nosplash -log 'c:\\temp' -ls 80 -ps 60  -nocenter -nodate" # see http://bit.ly/1QB4ZTb
+```
+
+```{r read}
+#Read the data (created in the SAS program above). 
+#getwd() # get the working directory
+dat.1 = read.csv("c:/temp/namcs-class-2016.csv", header=T) # read in data.
+dat.2 = read.csv("c:/temp/namcs-full-2016.csv", header=T)
+
+clean.dat = function(x) {
+colnames(x) = tolower(colnames(x))
+
+levels(factor(x$newuser)) # check order of levels for coding below
+levels(factor(x$newusercat))
+
+# Function to make variables
+x = within(x, {
+  newuser.f = factor(newuser, labels=c("No", "Yes"))
+  newusercat.f = factor(newusercat, labels = c('not a new user', 
+                                               'low potency statin',
+                                               'high potency statin'))
+  event = ifelse(delta %in% c(1,2), 1, 0)
+  delta.f = factor(delta, labels = c('0=Administratively censored at 10 years',
+                                     '1=Hospitalization for CVD',
+                                     '2=All-cause mortality',
+                                     '3=Loss to follow-up'))
+  drop = ifelse(delta %in% c(3), 1, 0)
+  miss = ifelse(is.na(sbp) | is.na(dbp), 1, 0)
+})
+
+x = x[x$age>=35 & x$age<76,]
+return(x)
+}
+
+dat.1 = clean.dat(dat.1)
+dat.2 = clean.dat(dat.2)
+dat.3 = dat.2[dat.2$htn==0,] # restrict data to people without hypertension
+dat.4 = dat.2[dat.2$htn==1,] # restrict data to people with hypertension
+
+save(dat.1, file = "c:/temp/dat1.Rda") # save class data
+save(dat.2, file = "c:/temp/dat2.Rda") # save full data
+
+complete.1 = complete.cases(dat.1)
+complete.2 = complete.cases(dat.2)
+complete.3 = complete.cases(dat.3)
+complete.4 = complete.cases(dat.4)
+```
+
+
+
+```{r functions-1}
+
+# SET up functions to create weights for censoring and confounding
+# Make iptw, missing and censoring weights.
+
+# FIRST, here is a function to create a counting process data frame with censoring weights, cens.wt
+# ---------------------------------------------------------------------
+
+# Make function for censoring and missing weights so I can apply it to complete case data frame below
+cens.wt = function(dt1) {
+  
+  # dt1: the data frame/data table
+  # bp: an indicator variable if blood pressure is to be included in censoring weights. 1=yes, 0=no.
+  #dt1 = dt.cc
+  dt = dt1 # Note: survSplit function won't work with a data table. Convert to data frame.
+
+    # CENSORING weights
+    # ------------------------------------------------------------------
+  quint = c(0, max(dt$t), 
+          as.numeric(quantile(dt[dt$drop==1,]$t,
+                                   probs=c(0.20, 0.40, 0.60, 0.80), type=7)))
+
+# Use the quintiles to make a counting process data frame. up to five rows per person.
+  split.dat = survSplit(data=dt,
+              cut=as.numeric(quint), 
+              end="t", 
+              start="time0", 
+              event="event") #survSplit function from the survival package will create a counting process style data frame for you.
+  
+  # IMPORTANT: Fix the drop variable. Only want the drop status (if =1) to show at last record
+  split.dat = split.dat[order(split.dat$patcode),] # order so I can check in SAS
+  first <- c(TRUE, diff(split.dat$patcode) !=0) #first id for each subject
+  last <- c(first[-1], TRUE) #last id
+  split.dat$drop.rev = ifelse(last & split.dat$drop==1, 1, 0) 
+
+    split.dat$cens.wt = ipwtm(
+    exposure = drop.rev,
+    family = "binomial",
+    link = "logit",
+    numerator = ~ factor(time0),
+    denominator = ~ factor(time0) + age + male + diabetes + white + obese + smoke +  hyplipid ,
+    id = patcode,
+    tstart = time0,
+    timevar = t,
+    type = "first",
+    data=split.dat)$ipw.weights
+  
+  return(split.dat)
+}
+
+# SECOND, here is a function that creates the three weights (confounding, censoring and missing) for the data frame
+# ----------------------------====================-------------
+
+make.dat = function(complete.set, dat.miss, rhs.miss, rhs.iptw) {
+
+  # dat: the data frame to use to create the weights
+  # rhs.miss: the right hand side (rhs) formulas for use in creating the missing weights
+  # rhs.iptw: the right hand side (rhs) formulas for use in creating the iptw
+  
+  # A) create analysis data set based on index given in complete.set
+  # -----------------------------------------
+  dt = dat.miss[complete.set,]
+
+  # A.1) missing weights
+  # ---------------------------------------------
+             
+  prob.cc = 1-plogis(predict(glm(as.formula(paste("miss ~", rhs.miss)),
+                                       family=binomial(link=logit),
+                                    data=dat.miss)))
+  miss.wt = ifelse(dat.miss$miss==0, 1/prob.cc, 0)
+  
+  dt$miss.wt = miss.wt[complete.set]
+ 
+  # A.2) IPTW -- confounding weights
+  # ----------------------------------------------
+  dt$nm = plogis(predict(glm(newuser ~ 1, family="binomial"(link="logit"), 
+                             data=dt)))
+  dt$dn = plogis(predict(glm(as.formula(paste("newuser ~", rhs.iptw)),
+                                    family="binomial"(link="logit"),
+                             data=dt)))
+  dt$iptw = with(dt, ifelse(newuser==1, nm/dn, (1-nm)/(1-dn)))
+  
+  # A.3) censoring weights
+  # ----------------------------------------------------------
+  dt.long = cens.wt(dt) # apply censoring weight function here to create counting process style data
+  
+  dt.long = within(dt.long, {
+        w.0 = 1
+        w.1 = iptw
+        w.2 = iptw*cens.wt
+      }) # create weights for different analyses that occur in the table
+  
+  return(dt.long)
+}
+
+# END of function that creates the three weights for the data frame
+# ----------------------------====================-------------
+
+```
+
+```{r data-set-1}
+
+# THIRD, get weights for the data sets using the make.dat function above,
+# after specifying input data frame and covariates for missing and iptw weights.
+# -------------------------------------------------------------
+
+# =====================================================
+# class: The full data set, no bp
+# =====================================================
+
+dat.full.long = make.dat(complete.set=rep(1:nrow(dat.1),T), dat.miss=dat.1,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid")
+
+# check weights
+sapply(dat.full.long[,colnames(dat.full.long) %in% c("iptw", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+# Output data to use in plots for project summary slides, epid722-2016-project-summary.Rmd
+save(dat.full.long, file="c:/temp/dat.full.long.Rda")
+
+
+# =================================================================
+# class: The complete case data set, with bp in iptw and censoring weights
+# =================================================================
+
+dat.cc.long = make.dat(complete.set=complete.1, dat.miss=dat.1,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + htn + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid + sbp + dbp")
+
+sapply(dat.cc.long[,colnames(dat.cc.long) %in% c("iptw.cc", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+dat.cc.long = within(dat.cc.long, {
+      w.0 = w.0*miss.wt
+      w.1 = w.1*miss.wt
+      w.2 = w.2*miss.wt
+    }) # add the missing weights to these data (complete case)
+
+sapply(dat.cc.long[,colnames(dat.cc.long) %in% c("iptw.cc", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+# =====================================================
+# original: the full data set, no bp
+# =====================================================
+
+dat.f.full.long = make.dat(complete.set=rep(1:nrow(dat.2),T), dat.miss=dat.2,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid")
+
+# check weights
+sapply(dat.f.full.long[,colnames(dat.f.full.long) %in% c("iptw", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+
+# Output data to use in plots for project summary slides, epid722-2016-project-summary.Rmd
+save(dat.full.long, file="c:/temp/dat.f.full.long.Rda")
+
+# =================================================================
+# original: the complete case data set, with bp in iptw and censoring weights
+# =================================================================
+
+dat.f.cc.long = make.dat(complete.set=complete.2, dat.miss=dat.2,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + htn + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid + sbp + dbp")
+
+sapply(dat.f.cc.long[,colnames(dat.f.cc.long) %in% c("iptw.cc", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+dat.f.cc.long = within(dat.f.cc.long, {
+      w.0 = w.0*miss.wt
+      w.1 = w.1*miss.wt
+      w.2 = w.2*miss.wt
+    }) # add the missing weights to these data (complete case)
+
+sapply(dat.f.cc.long[,colnames(dat.f.cc.long) %in% c("iptw.cc", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+
+# =====================================================
+# subset: no people with hypertension, no bp
+# =====================================================
+
+dat.s.full.long = make.dat(complete.set=rep(1:nrow(dat.3),T), dat.miss=dat.3,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid")
+
+# check weights
+sapply(dat.s.full.long[,colnames(dat.s.full.long) %in% c("iptw", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+# =================================================================
+# subset: no people with hypertension: the complete case data set, with bp in iptw and censoring weights
+# =================================================================
+
+dat.s.cc.long = make.dat(complete.set=complete.3, dat.miss=dat.3,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid + sbp + dbp")
+
+sapply(dat.s.cc.long[,colnames(dat.s.cc.long) %in% c("iptw.cc", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+dat.s.cc.long = within(dat.s.cc.long, {
+      w.0 = w.0*miss.wt
+      w.1 = w.1*miss.wt
+      w.2 = w.2*miss.wt
+    }) # add the missing weights to these data (complete case)
+
+sapply(dat.s.cc.long[,colnames(dat.s.cc.long) %in% c("iptw.cc", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+# =====================================================
+# subset: only people with hypertension, no bp
+# =====================================================
+
+dat.s2.full.long = make.dat(complete.set=rep(1:nrow(dat.4),T), dat.miss=dat.4,
+                         rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event",
+                         rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid")
+
+# check weights
+sapply(dat.s2.full.long[,colnames(dat.s2.full.long) %in% c("iptw", "cens.wt", "miss.wt", "w.0", "w.1", "w.2")], mean) # check mean weights
+
+```
+
+
+```{r make-impute, cache=TRUE}
+# IMPUTE
+# Get imputed data sets from entire data set with missing values (only bp in this case)
+
+#small = dat.1[sample(nrow(dat.1),500),] # start with very small subset to make sure it works
+#table(small$newuser)
+
+imp.dat = mice(data=dat.1, m=2,
+                 diagnostics=T, print=F, seed=50) 
+
+imp.dat.f = mice(data=dat.2, m=2,
+                 diagnostics=T, print=F, seed=50) 
+
+imp.dat.s = mice(data=dat.3, m=2,
+                 diagnostics=T, print=F, seed=50) 
+```
+
+
+```{r function-process-impute}
+
+# Process the imputed data object (class data). 
+# Extract out the object into a data frame and run the imputed data frames through the make.dat function (do not use data frames in this function. impute won't work) to get weights for each imputed data frame
+
+# Make a function to do the processing. Repeat on the 3 different imputed data frames.
+
+impute.handle = function(x, source.dat) {
+  # x: the imputed data object from the mice function
+  # source.dat: the data frame used to make the x object
+        
+      # Transform imputed data from mids object to data frame in long format
+      # extract the data in long format
+      X <- complete(x, action = "long", include = TRUE)
+
+      split.1 = split(X, f=X$.imp) # split the imputed long data frame by imputation number
+      
+      # subset the list so make.dat function works
+      split.2 = split.1[2:length(split.1)] # subset list leaving out observed -- make.dat won't work w/ bp vars b/c of missing
+      split.0 = split.1[1]
+      
+      # Get weights for each iteration using the make.dat function
+      imp = lapply(split.2, make.dat, 
+                   rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event + htn",
+                   rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid + sbp + dbp",
+                   complete.set=rep(1:nrow(source.dat),T)) 
+      
+      observed = lapply(split.0, make.dat, # get weights for each iteration using the make.dat function
+                   rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event + htn",
+                   rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid ",
+                   complete.set=rep(1:nrow(source.dat),T)) 
+      
+      imp.d = as.data.frame(data.table::rbindlist(imp))
+      
+      # check means of weights by imputation
+      imp.d.dt = data.table(imp.d) # make a data frame to get means by .imp below
+#       imp.d.dt[, mean(w.1), by=list(.imp)]
+#       imp.d.dt[, mean(w.2), by=list(.imp)] # check means of weights by imputation
+      
+      imp.0 = as.data.frame(data.table::rbindlist(observed))
+      #head(imp.0)
+      
+      imp.df = rbind(imp.0, imp.d)
+      #head(imp.df)
+      
+      # Now convert back to a mids object (now in long format with an ip weight (w1) and a  censoring weight (w2))
+      # ---------------------------------------------------------------------------------------
+      # Note: the .id is no longer unique in the long form data frame so need to fix here before running the as.mids function in the mice package.
+      imp.df$.id = paste(imp.df$.id, ".", rownames(imp.df), sep="")
+      head(imp.df$.id)
+      table(duplicated(imp.df$.id))  # check that it works.
+      
+      class(imp.df$.imp)
+      names(imp.df)
+      imp.long = as.mids(imp.df) # not sure if the analysis will be correct with reconfigured ids
+      
+            
+      # Test out here: Seems to check out with the pooled values below
+      # ----------------------------------------------------------------
+      # coef(summary(coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+      #                 weights = w.1,
+      #       data=imp.df)))
+      # 
+      # levels(imp.df$.imp)
+      # 
+      # coef(summary(coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+      #                 weights = w.1,
+      #       data=imp.df[imp.df$.imp==1,])))
+      
+
+      # NOTE: be careful... a bug in the as.mids function
+# see http://stats.stackexchange.com/questions/138769/something-wrong-with-as-mids-from-mice-package-in-r
+
+      return(imp.long)
+}
+```
+
+```{r process-impute-1}
+# Get imputed values on class data frame
+imp.long = impute.handle(imp.dat, dat.1)
+
+```
+
+```{r process-impute-2}
+# Get imputed values on full data frame
+imp.long.f = impute.handle(imp.dat.f, dat.2)
+
+```
+
+
+```{r process-impute-3}
+# Get imputed values on subsetted data frame -- only htn=0
+imp.long.s = impute.handle(imp.dat.s, dat.3)
+
+```
+
+
+```{r impute-est-function}
+# Take imputed estimate and run Cox PH to get imputed parameter estimates
+# NOTE: need to follow up on this
+
+# first, make a function to output estimates from the model run on the imputed data frame object
+
+output.imp.est = function(x) {
+  pool.sum = summary(pool(x))
+  mod = data.frame(pool.sum)[,1:2]
+  mod$model=paste("impute",  deparse(substitute(x)), sep=".") # add name of object to the character string describing model
+  names = c("coef", "se.coef.", "models") # make names match the other (non-imputed) estimates
+  colnames(mod) = names
+  return(mod)
+}
+```
+
+```{r impute-est-1}
+# Run models for class data frame
+# Take imputed estimate and run Cox PH to get imputed parameter estimates
+# FOR FULL data frame
+# NOTE: need to follow up on this
+
+m0 = with(imp.long,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                ties="efron")) # with blood pressure
+mod0 = output.imp.est(m0); mod0
+
+# ---------------------------------
+
+m1 = with(imp.long,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                weights = w.1,
+                ties="efron")) # with blood pressure
+mod1 = output.imp.est(m1); mod1
+
+# ---------------------------------
+
+m2 = with(imp.long,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                weights = w.2,
+                ties="efron")) # with blood pressure
+mod2 = output.imp.est(m2); mod2
+
+```
+
+
+```{r impute-est-2}
+# Run models for full data frame
+
+
+m0f = with(imp.long.f,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                ties="efron")) # with blood pressure
+mod0f = output.imp.est(m0f); mod0f
+
+# ---------------------------------
+
+m1f = with(imp.long.f,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                weights = w.1,
+                ties="efron")) # with blood pressure
+mod1f = output.imp.est(m1f); mod1f
+
+# ---------------------------------
+
+m2f = with(imp.long.f,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                weights = w.2,
+                ties="efron")) # with blood pressure
+mod2f = output.imp.est(m2f); mod2f
+
+```
+
+
+
+```{r impute-est-3}
+# Run models for subsetted data frame
+
+m0s = with(imp.long.s,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                ties="efron")) # with blood pressure
+mod0s = output.imp.est(m0s); mod0s
+
+# ---------------------------------
+
+m1s = with(imp.long.s,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                weights = w.1,
+                ties="efron")) # with blood pressure
+mod1s = output.imp.est(m1s); mod1s
+
+# ---------------------------------
+
+m2s = with(imp.long.s,
+           coxph(Surv(time0, t, event) ~ newuser + cluster(patcode),
+                weights = w.2,
+                ties="efron")) # with blood pressure
+mod2s = output.imp.est(m2s); mod2s
+
+```
+
+
+
+```{r data-set}
+# set up lists for apply loops below
+
+rhs.effect = c("newuser", "cluster(patcode)")
+rhs.nobp = c("newuser", "age","male", "diabetes", "white", "obese", "smoke",
+             "hyplipid", "cluster(patcode)")
+rhs.bp = c("newuser", "age","male", "diabetes", "white", "obese", "smoke",
+             "hyplipid", "dbp", "sbp", "cluster(patcode)")
+
+#rhs = list(nobp = paste(rhs.nobp, collapse = " + "), 
+#            bp = paste(rhs.bp, collapse = " + "),
+#            crude = rhs.crude) # list of models for cox ph regression
+rhs = list(effect =  paste(rhs.effect, collapse = " + ")) # list of models for cox ph regression
+wt.list = list(w0 = "w.0", w1 = "w.1", w2 = "w.2") # list of weights
+
+ds = list(full = dat.full.long, cc= dat.cc.long, 
+          tot = dat.f.full.long, cct = dat.f.cc.long,
+          sub = dat.s.full.long, ccs = dat.s.cc.long,
+          sub2 = dat.s2.full.long) # list of data sets to use
+#ds = list(full = dt.full.long) # list of data sets to use
+
+#coxph( Surv(time0, t, event) ~ newuser + cluster(patcode), data=dt.full.long)
+
+```
+
+```{r model-spec}
+
+# Create a series of loops to produce different models according to:
+# a) different data sets: 1) full, 2) complete case, 3) imputed
+# b) different types of weights: 1) no weight, 2) iptw (confounding wt), 3) missing wt, 4) iptw and missing weight
+# c)  different rhs equations: 1) with bp 2) without bp, 3) crude
+
+ models = lapply(ds, function(dat){
+   lapply(wt.list, function(w) {
+                        lapply(rhs, function(x, d, wtname){
+                         return(
+                           coef(summary(coxph( as.formula(paste("Surv(time0, t, event) ~", x)), 
+                                data=d,
+                                weights=eval(as.name(paste(wtname))),
+                                ties = "efron"))))
+                            },
+                        d=dat, wtname=w)
+                        })
+ })
+ 
+# Convert the list of models into a data frame with parameter estimates
+renquote <- function(l) if (is.list(l)) lapply(l, renquote) else enquote(data.frame(l)[1,]) # see http://stackoverflow.com/questions/19734412/flatten-nested-list-into-1-deep-list
+coefs = lapply(unlist(renquote(models)), eval)
+
+# convert list of trt effect coefficient info into a matrix
+# The 'coef' column is your estimated treatment efffect from your models above.
+# this is helpful if you have very large data frames
+df0 = as.data.frame(data.table::rbindlist(coefs, fill=TRUE))
+
+df0$models = names(coefs)
+df0
+
+df = df0[!(grepl("sub2.", df0$models)==T),] # take out estimate of subset with htn=1
+
+# add the imputed data
+df2 = rbind.fill(df, mod0, mod1, mod2, mod0f, mod1f, mod2f, mod0s, mod1s, mod2s)
+df2
+
+df3 = df0[grepl("sub2.", df0$models)==T,] # take out estimate of subset with htn=1
+
+```
+
+```{r create-table}
+
+# Now take all the models and process the results to put in a table
+# -------------------------------------------------------------------
+
+# Function to make variables in data frame of regression coefficients to describe models and pass onto table
+
+handle.2 = function(df) {
+  df = within(df, {
+    # Make variables in data frame of regression coefficients to describe models and pass onto table
+    miss = ifelse(grepl(c("full|tot|sub"), models), "Full",
+                     ifelse(grepl(c("cc"), models), "Missing weight", "Impute"))
+    
+    class = ifelse(grepl("cct|tot|m0f|m1f|m2f", models)==T, 2,
+                       ifelse(grepl("ccs|sub|m0s|m1s|m2s", models)==T, 1, 0)) # assign values of 'full' data frame, 'subsetted' data frame and 'class' data frame (ordering in table is reverse of order given here)
+    
+    weight = ifelse(grepl("w1|m1", models), "IPTW", 
+                       ifelse(grepl("w2|m2", models), "IPTW + censor weight", "Crude"))
+    weight = factor(weight, levels=c("Crude", "IPTW",  "IPTW + censor weight")) # change ordering
+    
+    # make est (se) term to put in table
+    se = ifelse(is.na(robust.se), round(se.coef.,3), round(robust.se,3))
+    lcl = ifelse(is.na(robust.se), round(exp(coef-1.96*se.coef.),3), round(exp(coef-1.96*robust.se),3))
+    ucl = ifelse(is.na(robust.se), round(exp(coef+1.96*se.coef.),3), round(exp(coef+1.96*robust.se),3))
+    
+    coef.se = paste0(formatC(round(coef,3), digit=3, format="f"),
+                                   " (", se, ")")
+    hr.ci = paste0(formatC(round(exp(coef),2), digit=2, format="f"),
+                                 " (", round(lcl,2), ", ", round(ucl,2), ")")
+    
+  })
+  return(df)
+}
+
+df2 = handle.2(df2); df2
+df3 = handle.2(df3);df3
+
+# save df2 and df3 for slides
+save(df2, file="c:/temp/df2.Rda")
+save(df3, file="c:/temp/df3.Rda")
+```
+
+```{r create-table-2}
+# Re-shape table of regression coefficients with coef and se/ hr ci
+
+t2 = dcast(df2, class + weight ~ miss, value.var="coef.se",
+           fun.aggregate=function(x) paste(x, collapse = ", "))
+t2
+
+colnames1 = c("", "Confounding + Selection bias handling",
+                 rep(c("Full", "Impute", "Missing weight"),1))
+
+colnames(t2) = colnames1
+
+# make table with exp(coef) and cl
+t3 = dcast(df2, class + weight ~ miss, value.var="hr.ci",
+           fun.aggregate=function(x) paste(x, collapse = ", "))
+t3
+
+colnames(t3) = colnames1
+```
+
+
+```{r create-table-3, results='asis', echo=FALSE}
+# Prep table for printing in html, use ztable package
+z1 = ztable(t2[,-1])
+cgroup = c( "", "Method for missing")
+n.cgroup = c(1,3)
+
+rgroup = c("Class data", "HTN=0 subset", "Full data")
+n.rgroup=c(3,3,3)
+
+z1=addcgroup(z1, cgroup=cgroup, n.cgroup=n.cgroup)
+z1=addrgroup(z1,rgroup=rgroup, n.rgroup=n.rgroup, cspan.rgroup=1)
+
+update_ztable(z1, include.rownames=F,
+              caption="log(HR) and SE (treated vs not treated)")
+```
+
+
+```{r create-table-4, results='asis', echo=FALSE}
+z3 = ztable(t3[,-1])
+
+z3 = addcgroup(z3, cgroup=cgroup, n.cgroup=n.cgroup)
+z3 = addrgroup(z3, rgroup=rgroup, n.rgroup=n.rgroup, cspan.rgroup=1)
+
+update_ztable(z3, include.rownames=F, 
+              caption="HR and 95% CI (treated vs not treated)")
+```
