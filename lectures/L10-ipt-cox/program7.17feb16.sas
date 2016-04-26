@@ -7,8 +7,10 @@ options nocenter pagesize=60 linesize=80 nodate pageno=1;
 dm log "clear;" continue; dm out "clear;" continue;
 
 *Set a directory pointer;
-%let dir = D:\dropbox\Cole\Teaching\EPID722\2016;
+*%let dir = D:\dropbox\Cole\Teaching\EPID722\2016;
 *%let dir = Y:\Cole\Teaching\EPID722\2016;
+
+%let dir=c:\temp;
 
 *Read ASCII file;
 data a;

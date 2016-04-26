@@ -34,6 +34,7 @@ bibliography: ../bib1.bib
   library(muhaz)
   library(tableone)
   require(ipw)
+  require(survminer) 
   set.seed(123) # set seed so you get same results each time you run.
 ```
 
