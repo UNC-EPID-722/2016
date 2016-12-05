@@ -4,9 +4,11 @@ author: "UNC EPID 722 -- Sydney Allison Jones & Ann Von Holle"
 date: "April 26, 2016"
 highlighter : highlight.js
 hitheme     : tomorrow 
-output: slidy_presentation
-csl: ../american-journal-of-epidemiology.csl
-bibliography: ../bib1.bib
+output: 
+  slidy_presentation:
+    noindex: true
+csl: ../../american-journal-of-epidemiology.csl
+bibliography: ../../bib1.bib
 ---
 
 ```{r setup, echo=FALSE}
@@ -25,6 +27,7 @@ bibliography: ../bib1.bib
 
     #install.packages(c("knitr", "foreign", "tableone", "MCMCpack", "ipw")) # Note: you only need to do this once. then only if you want updates.
 #  install.packages("data.table", "rms") # Watch out, rms loads a lot of other packages. skipping for now.
+
   require(ztable)
   require(plyr)
   library(reshape2)

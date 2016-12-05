@@ -37,7 +37,10 @@ output:
   require(ztable)
   require(plyr)
 options(ztable.type="html")
+
+#install.packages(c("ipw"))
   set.seed(123) # set seed so you get same results each time you run.
+  
 ```
 
 ```{r sasopts}
@@ -102,11 +105,11 @@ complete.4 = complete.cases(dat.4)
 
 # Make function for censoring and missing weights so I can apply it to complete case data frame below
 cens.wt = function(dt1) {
-  
+  #dt1=dt
   # dt1: the data frame/data table
   # bp: an indicator variable if blood pressure is to be included in censoring weights. 1=yes, 0=no.
   #dt1 = dt.cc
-  dt = dt1 # Note: survSplit function won't work with a data table. Convert to data frame.
+  dt = data.frame(dt1) # Note: survSplit function won't work with a data table. Convert to data frame.
 
     # CENSORING weights
     # ------------------------------------------------------------------
@@ -115,11 +118,12 @@ cens.wt = function(dt1) {
                                    probs=c(0.20, 0.40, 0.60, 0.80), type=7)))
 
 # Use the quintiles to make a counting process data frame. up to five rows per person.
-  split.dat = survSplit(data=dt,
-              cut=as.numeric(quint), 
-              end="t", 
-              start="time0", 
-              event="event") #survSplit function from the survival package will create a counting process style data frame for you.
+  split.dat = survSplit(Surv(t, event) ~ .,
+                        data=dt,
+                        cut=as.numeric(quint), 
+                        end="t", 
+                        start="time0", 
+                        event="event") #survSplit function from the survival package will create a counting process style data frame for you.
   
   # IMPORTANT: Fix the drop variable. Only want the drop status (if =1) to show at last record
   split.dat = split.dat[order(split.dat$patcode),] # order so I can check in SAS
@@ -138,7 +142,8 @@ cens.wt = function(dt1) {
     timevar = t,
     type = "first",
     data=split.dat)$ipw.weights
-  
+  #head(split.dat)
+    
   return(split.dat)
 }
 
@@ -146,6 +151,11 @@ cens.wt = function(dt1) {
 # ----------------------------====================-------------
 
 make.dat = function(complete.set, dat.miss, rhs.miss, rhs.iptw) {
+  
+#  complete.set=rep(1:nrow(dat.1),T)
+#  dat.miss=dat.1
+#  rhs.miss = "newuser + age + male + diabetes + white + obese + smoke + hyplipid + event"
+#  rhs.iptw="age + male + diabetes + white + obese + smoke + hyplipid"
 
   # dat: the data frame to use to create the weights
   # rhs.miss: the right hand side (rhs) formulas for use in creating the missing weights
