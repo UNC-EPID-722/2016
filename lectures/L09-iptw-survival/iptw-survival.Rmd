@@ -10,6 +10,7 @@ output:
    toc_depth: 4 
    theme: united
    number_sections: true
+   noindex: true
 ---
 
 ***NOTE: ALL SAS code below copied from 2016 EPID 722 lecture material. SAS code based on Steve Cole's programs titled, "program6.25jan16.sas". R code below is an  adaptation to the SAS code written by Ann Von Holle.***
